@@ -13,3 +13,13 @@ Todo List - Webserv
 - understand how to listen on all clients and ports with select(), poll(0 or epoll() (Victoire)
 - understand how CGI works and is used (Victoire)
 - how to parse the http request (Alisa)
+
+
+We can have someone working on :
+- socket's class creation (cf video)
+- understanding the request and define the response
+- creating the response
+
+1 - client and server info
+2 - response and request
+3 - configuration file and parsing
