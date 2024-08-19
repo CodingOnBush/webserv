@@ -13,6 +13,7 @@ Todo List - Webserv
 - understand how to listen on all clients and ports with select(), poll(0 or epoll() (Victoire)
 - understand how CGI works and is used (Victoire)
 - how to parse the http request (Alisa)
+- *edit Makefile(Mostafa)*
 
 
 We can have someone working on :
