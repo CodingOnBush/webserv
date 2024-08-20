@@ -14,6 +14,7 @@ Todo List - Webserv
 - understand how CGI works and is used (Victoire)
 - how to parse the http request (Alisa)
 - *edit Makefile(Mostafa)*
+- *choose and set default code formatter*
 
 
 We can have someone working on :
