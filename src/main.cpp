@@ -1,5 +1,3 @@
-#include <iostream>
-
 // int main(int argc, char **argv)
 // {
 // 	(void)argv;
@@ -43,7 +41,8 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <cerrno> 
+#include <cerrno>
+#include "../include/Request.hpp"
 
 int main(int ac, char **av)
 {
@@ -125,18 +124,18 @@ int main(int ac, char **av)
 				std::cerr << "error: accept()" << std::endl;
 				exit(1);
 			}
-			// std::cerr << "error: accept()" << std::endl;
-			// exit(1);
 		}
 		else {
 			char buffer[1024];
-
 			if((len = recv(new_socket, buffer, sizeof buffer - 1, 0)) < 0){
 				std::cerr << "error: recv()" << std::endl;
 				exit(1);
 			}
 			buffer[len] = '\0';
-			std::cout << buffer << std::endl;
+			Request req(buffer);
+    		req.getBuffer() = buffer;
+			req.parseRequest();
+    		req.printRequest(req);
 
 			if(send(new_socket, response.c_str(), response.size(), 0) < 0) {
 				std::cerr << "error: send()" << std::endl;

@@ -1,35 +1,27 @@
-SRC_FILES = main.cpp Webserv.cpp
-SRC		=	$(addprefix src/, $(SRC_FILES))
+CXX = g++
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+INCLUDES = -I./include
 
-HEADERS_FILES = Webserv.hpp
-HEADERS	=	$(addprefix include/, $(HEADERS_FILES))
+# Source files
+SRCS = src/main.cpp src/Webserv.cpp src/Request.cpp
+OBJS = $(SRCS:.cpp=.o)
 
-NAME	=	webserv
+# Target executable
+TARGET = webserv
 
-CC		= c++
+# Build target
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET)
 
-CFLAGS	= -Wall -Wextra -Werror -std=c++98 -MMD
-
-OBJ		= $(SRC:.cpp=.o)
-
-
--include $(wildcard *.d)
-
-all: $(NAME)
-
-$(NAME): $(OBJ) $(HEADERS)
-	$(CC) $(CFLAGS) $(OBJ) -o $@
-
-
+# Compile source files into object files
 %.o: %.cpp
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
+# Clean up build files
 clean:
-	rm -f *.o *.d
+	rm -f $(OBJS) $(TARGET) *.d
 
-fclean: clean
-	rm -f $(NAME)
+re: clean $(TARGET)
 
-re: fclean all
-
-.PHONY: all re clean fclean
+# Include dependency files
+-include $(OBJS:.o=.d)
