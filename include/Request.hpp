@@ -13,6 +13,17 @@
 // CRLF
 // [ message-body ]          ; Section 4.3
 
+
+// PEST Grammar (src: https://pest.rs/)
+// file = { SOI ~ (delimiter | request)* ~ EOI}
+
+// request = {	
+// 	request_line ~
+//     headers? ~
+//     NEWLINE ~
+//     body?
+// }
+
 // request_line = _{ method ~ " "+ ~ uri ~ " "+ ~ "HTTP/" ~ version ~ NEWLINE }
 // uri = { (!whitespace ~ ANY)+ }
 // method = { ("GET" | "DELETE" | "POST" | "PUT") }

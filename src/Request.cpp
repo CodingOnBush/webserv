@@ -67,17 +67,19 @@ bool Request::parseMethod(const std::string &str, std::string &method) {
 }
 
 bool Request::parseVersion(const std::string &str, std::string &version) {
-    for (size_t i = 0; i < str.size(); ++i) {
-        if (!isdigit(str[i]) && str[i] != '.') return false;
-        version += str[i];
+    if (str.find("HTTP/") == 0) {
+		//remove "HTTP/"
+        version = str;
+        return true;
     }
-    return !version.empty();
+    return false;
 }
 
 bool Request::parseWhitespace(char c) {
     return c == ' ' || c == '\t';
 }
 
+//segfault somewhere here
 bool Request::parseHeaders(const std::vector<std::string> &lines) {
     for (size_t i = 0; i < lines.size(); ++i) {
         std::string name, value;
