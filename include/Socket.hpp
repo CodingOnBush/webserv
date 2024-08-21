@@ -1,36 +1,39 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   Socket.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/21 13:08:26 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/21 13:22:06 by vvaudain         ###   ########.fr       */
+/*   Created: 2024/08/21 11:52:49 by vvaudain          #+#    #+#             */
+/*   Updated: 2024/08/21 13:39:06 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server.hpp"
+#ifndef SOCKET_HPP
+# define SOCKET_HPP
+
 #include "Webserv.hpp"
+ #include <sys/socket.h>
 
-#define MAX_EV 4096
+class Socket {
+
+	private:
+		int fd;
+		int domain;
+		int type;
+		int protocol;
+		struct sockaddr_in sockAddr;
+		int sockAddrLen;
+
+	public:
+		Socket();
+		~Socket();
+		Socket(const Socket &copy);
+		Socket &operator=(const Socket &rhs);
+
+		int getFd(void) const;
+};
 
 
-int main()
-{
-	Server server;
-	server.StartServer();
-
-	server.SetResponse("HTTP/1.1 200 OK\n");
-	server.SetResponse("Content-Type: text/html\r\n");
-	server.SetResponse("Content-Length: 13\n\n");
-	server.SetResponse("Hello World !\r\n\r\n");
-	
-	
-	signal(SIGINT, SIG_DFL);
-
-	
-	
-	server.CloseServer();
-	return (0);
-}
+#endif

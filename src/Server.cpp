@@ -6,13 +6,14 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 15:17:48 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/20 15:55:43 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/21 14:48:50 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
 Server::Server(){
+	this->server_socket = new Socket();
 }
 
 //We need a initialization constructor to set the server ports
@@ -21,6 +22,24 @@ Server::Server(){
 //we need to create multiple server sockets in a vector or a map
 
 Server::~Server(){
+}
+
+int Server::StartServer(void){
+	
+	int opt = 1;
+
+	setsockopt(server_socket->getFd(), SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+	servaddr.domain = AF_INET;
+	servaddr.server_addr = INADDR_ANY;
+	servaddr.sin_port = htons(server_port);
+	
+	bind(server_socket->getFd(), (struct sockaddr *)&servaddr, sizeof(servaddr));
+	listen(server_socket->getFd(), 3); //3 is the maximum size of the queue of pending connections
+	epoll_fd = epoll_create1(0);
+	if (epoll_fd == -1)
+		ExitWithError("epoll_create1");
+	struct epoll_event ev;
+	ev.events[MAX_EVENTS];
 }
 
 Server::Server(const Server &copy){

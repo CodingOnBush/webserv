@@ -6,23 +6,17 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 12:06:19 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/20 15:59:49 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/21 14:49:10 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
+#include "Webserv.hpp"
 #include "Socket.hpp"
 
-struct sockaddr_in
-{
-	short			domain; // e.g. AF_INET
-	unsigned short	sin_port; // e.g. htons(3490) - We will need to call htons() to ensure that the port is stored in network byte order.
-	unsigned long	server_addr;
-	int				addr_len;
-};
-
+#define MAX_EVENTS 4096
 
 // typedef std::vector<int> fd_vector;
 //perhaps we can create a map to map ports with their sockets fds
@@ -30,8 +24,8 @@ struct sockaddr_in
 class Server{
 
 	private:
-		Socket				server_socket;
-		Socket				new_socket;
+		Socket				*server_socket;
+		Socket				*new_socket;
 		int					server_port;
 		// fd_vector			servers_fd;
 		struct sockaddr_in	servaddr;
@@ -53,6 +47,5 @@ class Server{
 		void	SetServerFd(int fd);
 
 };
-
 
 #endif
