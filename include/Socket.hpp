@@ -6,7 +6,7 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 11:52:49 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/21 13:39:06 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/21 15:12:41 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,6 @@ class Socket {
 	public:
 		Socket();
 		~Socket();
-		Socket(const Socket &copy);
-		Socket &operator=(const Socket &rhs);
 
 		int getFd(void) const;
 };

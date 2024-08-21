@@ -6,13 +6,13 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 15:17:48 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/21 14:48:50 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/21 14:58:04 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server(){
+Server::Server() : server_port(8080){
 	this->server_socket = new Socket();
 }
 

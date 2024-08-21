@@ -6,7 +6,7 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:08:26 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/21 13:22:06 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/21 15:03:04 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int main()
 	server.SetResponse("Hello World !\r\n\r\n");
 	
 	
-	signal(SIGINT, SIG_DFL);
+	// signal(SIGINT, SIG_DFL);
 
 	
 	
