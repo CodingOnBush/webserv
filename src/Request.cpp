@@ -6,68 +6,79 @@ Request::~Request() {};
 
 std::string Request::getBuffer() const
 {
-	return buffer;
+    return buffer;
 }
 
 std::string Request::getMethod() const
 {
-	return method;
+    return method;
 }
 
 std::string Request::getUri() const
 {
-	return uri;
+    return uri;
 }
 
 std::string Request::getVersion() const
 {
-	return version;
+    return version;
 }
 
 std::map<std::string, std::string> Request::getHeaders() const
 {
-	return headers;
+    return headers;
 }
 
 std::vector<char> Request::getBody() const
 {
-	return body;
+    return body;
 }
 
-bool Request::parseRequestLine(const std::string &line) {
+bool Request::parseRequestLine(const std::string &line)
+{
     std::istringstream stream(line);
     std::string method, uri, version;
 
     stream >> method;
-    if (!parseMethod(method, this->method)) return false;
+    if (!parseMethod(method, this->method))
+        return false;
 
     stream >> uri;
-    if (!parseUri(uri, this->uri)) return false;
+    if (!parseUri(uri, this->uri))
+        return false;
 
     stream >> version;
-    if (!parseVersion(version, this->version)) return false;
+    if (!parseVersion(version, this->version))
+        return false;
 
     return true;
 }
 
-bool Request::parseUri(const std::string &str, std::string &uri) {
-    for (size_t i = 0; i < str.size(); ++i) {
-        if (parseWhitespace(str[i])) return false;
+bool Request::parseUri(const std::string &str, std::string &uri)
+{
+    for (size_t i = 0; i < str.size(); ++i)
+    {
+        if (parseWhitespace(str[i]))
+            return false;
         uri += str[i];
     }
     return !uri.empty();
 }
 
-bool Request::parseMethod(const std::string &str, std::string &method) {
-    if (str == "GET" || str == "DELETE" || str == "POST") {
+bool Request::parseMethod(const std::string &str, std::string &method)
+{
+    if (str == "GET" || str == "DELETE" || str == "POST")
+    {
         method = str;
         return true;
     }
     return false;
 }
 
-bool Request::parseVersion(const std::string &str, std::string &version) {
-    if (str.find("HTTP/") == 0) {
+bool Request::parseVersion(const std::string &str, std::string &version)
+{
+    if (str.find("HTTP/") == 0)
+    {
         version = str;
         version.erase(0, 5);
         return true;
@@ -75,102 +86,122 @@ bool Request::parseVersion(const std::string &str, std::string &version) {
     return false;
 }
 
-bool Request::parseWhitespace(char c) {
+bool Request::parseWhitespace(char c)
+{
     return c == ' ' || c == '\t';
 }
 
-bool Request::parseHeaders(const std::vector<std::string> &lines) {
-    for (size_t i = 0; i < lines.size() - 1; ++i) {
+bool Request::parseHeaders(const std::vector<std::string> &lines)
+{
+    for (size_t i = 0; i < lines.size() - 1; ++i)
+    {
         std::string name, value;
-        if (!parseHeader(lines[i], name, value)) return false;
+        if (!parseHeader(lines[i], name, value))
+            return false;
         headers[name] = value;
     }
     return true;
 }
 
-bool Request::parseHeader(const std::string &line, std::string &name, std::string &value) {
+bool Request::parseHeader(const std::string &line, std::string &name, std::string &value)
+{
     size_t pos = line.find(':');
-    if (pos == std::string::npos) return false;
+    if (pos == std::string::npos)
+        return false;
 
     std::string header_name = line.substr(0, pos);
     std::string header_value = line.substr(pos + 1);
 
-    if (!parseHeaderName(header_name, name)) return false;
-    if (!parseHeaderValue(header_value, value)) return false;
+    if (!parseHeaderName(header_name, name))
+        return false;
+    if (!parseHeaderValue(header_value, value))
+        return false;
 
     return true;
 }
 
-bool Request::parseHeaderName(const std::string &str, std::string &name) {
-    for (size_t i = 0; i < str.size(); ++i) {
-        if (str[i] == '\n' || str[i] == ':') return false;
+bool Request::parseHeaderName(const std::string &str, std::string &name)
+{
+    for (size_t i = 0; i < str.size(); ++i)
+    {
+        if (str[i] == '\n' || str[i] == ':')
+            return false;
         name += str[i];
     }
     return !name.empty();
 }
 
-bool Request::parseHeaderValue(const std::string &str, std::string &value) {
-    for (size_t i = 0; i < str.size(); ++i) {
-        if (str[i] == '\n') return false;
+bool Request::parseHeaderValue(const std::string &str, std::string &value)
+{
+    for (size_t i = 0; i < str.size(); ++i)
+    {
+        if (str[i] == '\n')
+            return false;
         value += str[i];
     }
     return !value.empty();
 }
 
-bool Request::parseBody(const std::string &str, std::vector<char> &body) {
-    for (size_t i = 0; i < str.size(); ++i) {
-        if (parseDelimiter(str.substr(i))) return false;
+bool Request::parseBody(const std::string &str, std::vector<char> &body)
+{
+    for (size_t i = 0; i < str.size(); ++i)
+    {
+        if (parseDelimiter(str.substr(i)))
+            return false;
         body.push_back(str[i]);
     }
     return true;
 }
-bool Request::parseDelimiter(const std::string &str) {
+bool Request::parseDelimiter(const std::string &str)
+{
     return str.substr(0, 3) == "###" && str.find('\n') != std::string::npos;
 }
 
 bool Request::parseRequest()
 {
-	std::vector<std::string> lines;
-	std::string line;
-	std::istringstream stream(buffer);
+    std::vector<std::string> lines;
+    std::string line;
+    std::istringstream stream(buffer);
 
-	while (std::getline(stream, line))
-	{
-		if (line.empty())
-			break;
-		lines.push_back(line);
-	}
+    while (std::getline(stream, line))
+    {
+        if (line.empty())
+            break;
+        lines.push_back(line);
+    }
 
-	if (lines.empty())
-		return false;
+    if (lines.empty())
+        return false;
 
-	if (!parseRequestLine(lines[0]))
-		return false;
+    if (!parseRequestLine(lines[0]))
+        return false;
 
-	if (!parseHeaders(std::vector<std::string>(lines.begin() + 1, lines.end())))
-		return false;
+    if (!parseHeaders(std::vector<std::string>(lines.begin() + 1, lines.end())))
+        return false;
 
-	return true;
+    return true;
 }
 
 void Request::printRequest(Request &req)
 {
-	std::cout << "Request buffer:" << std::endl;
-	std::cout << req.getBuffer() << std::endl;
-	std::cout << std::string(21, '*') << std::endl;
-	std::cout << "Method: " << req.getMethod() << std::endl;
-	std::cout << "URI: " << req.getUri() << std::endl;
-	std::cout << "Version: " << req.getVersion() << std::endl;
-	std::cout << "Headers: " << std::endl;
-	std::map<std::string, std::string> headers = req.getHeaders();
+    std::cout << "Request buffer:" << std::endl;
+    std::cout << req.getBuffer() << std::endl;
+    std::cout << std::string(21, '*') << std::endl;
+    std::cout << "Method: " << req.getMethod() << std::endl;
+    std::cout << "URI: " << req.getUri() << std::endl;
+    std::cout << "Version: " << req.getVersion() << std::endl;
+    std::cout << "Headers: " << std::endl;
+    std::map<std::string, std::string> headers = req.getHeaders();
     for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it)
     {
         std::cout << it->first << ":" << it->second << std::endl;
     }
-	std::cout << "Body: " << std::endl;
+    std::cout << "Body: " << std::endl;
     std::vector<char> body = req.getBody();
     for (size_t i = 0; i < body.size(); ++i)
     {
         std::cout << body[i];
     }
+    std::cout << std::endl;
+    std::cout << std::string(21, '*') << std::endl;
 }
