@@ -1,35 +1,33 @@
-SRC_FILES = main.cpp Webserv.cpp
-SRC		=	$(addprefix src/, $(SRC_FILES))
+NAME	:=	webserv
 
-HEADERS_FILES = Webserv.hpp
-HEADERS	=	$(addprefix include/, $(HEADERS_FILES))
+CPP		:=	c++
+CFLAGS	:=	-Wall -Wextra -Werror -std=c++98 -g3 -MMD
 
-NAME	=	webserv
+INC_DIR	:=	./include
+SRC_DIR	:=	./src
+BIN_DIR	:=	./bin
 
-CC		= c++
+SRC		:=	$(wildcard $(SRC_DIR)/*.cpp)
 
-CFLAGS	= -Wall -Wextra -Werror -std=c++98 -MMD
-
-OBJ		= $(SRC:.cpp=.o)
-
+OBJ		:=	$(SRC:$(SRC_DIR)/%.cpp=$(BIN_DIR)/%.o)
 
 -include $(wildcard *.d)
 
 all: $(NAME)
 
-$(NAME): $(OBJ) $(HEADERS)
-	$(CC) $(CFLAGS) $(OBJ) -o $@
+$(NAME): $(OBJ)
+	$(CPP) $(CFLAGS) $(OBJ) -I $(INC_DIR) -o $(NAME)
 
-
-%.o: %.cpp
-	$(CC) $(CFLAGS) -c $< -o $@
+$(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	$(CPP) $(CFLAGS) -I $(INC_DIR) -c $< -o $@
 
 clean:
-	rm -f *.o *.d
+	rm -rf $(BIN_DIR) 
 
 fclean: clean
 	rm -f $(NAME)
 
 re: fclean all
 
-.PHONY: all re clean fclean
+.PHONY: all clean fclean re
