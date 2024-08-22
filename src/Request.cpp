@@ -59,7 +59,7 @@ bool Request::parseUri(const std::string &str, std::string &uri) {
 }
 
 bool Request::parseMethod(const std::string &str, std::string &method) {
-    if (str == "GET" || str == "DELETE" || str == "POST" || str == "PUT") {
+    if (str == "GET" || str == "DELETE" || str == "POST") {
         method = str;
         return true;
     }
@@ -68,8 +68,8 @@ bool Request::parseMethod(const std::string &str, std::string &method) {
 
 bool Request::parseVersion(const std::string &str, std::string &version) {
     if (str.find("HTTP/") == 0) {
-		//remove "HTTP/"
         version = str;
+        version.erase(0, 5);
         return true;
     }
     return false;
@@ -79,9 +79,8 @@ bool Request::parseWhitespace(char c) {
     return c == ' ' || c == '\t';
 }
 
-//segfault somewhere here
 bool Request::parseHeaders(const std::vector<std::string> &lines) {
-    for (size_t i = 0; i < lines.size(); ++i) {
+    for (size_t i = 0; i < lines.size() - 1; ++i) {
         std::string name, value;
         if (!parseHeader(lines[i], name, value)) return false;
         headers[name] = value;
@@ -163,10 +162,15 @@ void Request::printRequest(Request &req)
 	std::cout << "URI: " << req.getUri() << std::endl;
 	std::cout << "Version: " << req.getVersion() << std::endl;
 	std::cout << "Headers: " << std::endl;
-	// for (std::map<std::string, std::string>::iterator it = req.getHeaders().begin(); it != req.getHeaders().end(); ++it)
-	// {
-	// 	std::cout << it->first << ":" << it->second << std::endl;
-	// }
-	//overload operator<< for std::vector<char> required
-	// std::cout << "Body: " << req.getBody() << std::endl;
+	std::map<std::string, std::string> headers = req.getHeaders();
+    for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it)
+    {
+        std::cout << it->first << ":" << it->second << std::endl;
+    }
+	std::cout << "Body: " << std::endl;
+    std::vector<char> body = req.getBody();
+    for (size_t i = 0; i < body.size(); ++i)
+    {
+        std::cout << body[i];
+    }
 }
