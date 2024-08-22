@@ -69,8 +69,7 @@ public:
     bool parseHeader(const std::string &line, std::string &name, std::string &value);
     bool parseHeaderName(const std::string &str, std::string &name);
     bool parseHeaderValue(const std::string &str, std::string &value);
-	bool parseBody(const std::string &str, std::vector<char> &body);
-    bool parseDelimiter(const std::string &str);
+	bool parseBody(const std::vector<std::string> &lines, size_t index, std::vector<char> &body);
 	//debug
 	void printRequest(Request &req);
 };

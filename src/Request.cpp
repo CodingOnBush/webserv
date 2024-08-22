@@ -93,11 +93,14 @@ bool Request::parseWhitespace(char c)
 
 bool Request::parseHeaders(const std::vector<std::string> &lines)
 {
-    for (size_t i = 0; i < lines.size() - 1; ++i)
+    for (size_t i = 0; i < lines.size(); ++i)
     {
         std::string name, value;
         if (!parseHeader(lines[i], name, value))
-            return false;
+        {
+            parseBody(lines, i + 1, body);
+            return true;
+        }
         headers[name] = value;
     }
     return true;
@@ -116,7 +119,6 @@ bool Request::parseHeader(const std::string &line, std::string &name, std::strin
         return false;
     if (!parseHeaderValue(header_value, value))
         return false;
-
     return true;
 }
 
@@ -142,19 +144,15 @@ bool Request::parseHeaderValue(const std::string &str, std::string &value)
     return !value.empty();
 }
 
-bool Request::parseBody(const std::string &str, std::vector<char> &body)
+bool Request::parseBody(const std::vector<std::string> &lines, size_t index, std::vector<char> &body)
 {
-    for (size_t i = 0; i < str.size(); ++i)
+    for (size_t i = index; i < lines.size(); ++i)
     {
-        if (parseDelimiter(str.substr(i)))
-            return false;
-        body.push_back(str[i]);
+        for (size_t j = 0; j < lines[i].size(); ++j)
+            body.push_back(lines[i][j]);
+        body.push_back('\n');
     }
     return true;
-}
-bool Request::parseDelimiter(const std::string &str)
-{
-    return str.substr(0, 3) == "###" && str.find('\n') != std::string::npos;
 }
 
 bool Request::parseRequest()
@@ -164,11 +162,7 @@ bool Request::parseRequest()
     std::istringstream stream(buffer);
 
     while (std::getline(stream, line))
-    {
-        if (line.empty())
-            break;
         lines.push_back(line);
-    }
 
     if (lines.empty())
         return false;
@@ -178,7 +172,6 @@ bool Request::parseRequest()
 
     if (!parseHeaders(std::vector<std::string>(lines.begin() + 1, lines.end())))
         return false;
-
     return true;
 }
 
