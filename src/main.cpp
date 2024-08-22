@@ -6,7 +6,7 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:08:26 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/21 15:03:04 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/22 11:57:03 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,13 @@
 int main()
 {
 	Server server;
-	server.StartServer();
+
+	//parse the config file and set the server ports through the vector
+	std::vector<int> ports;
+	ports.push_back(8080);
+	ports.push_back(8081);
+	
+	server.StartServer(ports);
 
 	server.SetResponse("HTTP/1.1 200 OK\n");
 	server.SetResponse("Content-Type: text/html\r\n");
