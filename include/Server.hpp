@@ -6,7 +6,7 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 12:06:19 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/22 14:27:19 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/22 15:12:46 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,10 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
 
+#define EXIT_FAILURE 1
 #define MAX_EVENTS 4096
 
 class Server

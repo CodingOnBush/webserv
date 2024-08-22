@@ -6,7 +6,7 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 15:17:48 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/22 14:30:45 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/22 15:13:32 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,13 @@ void Server::SetUpSockets(std::vector<int> ports)
 		socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 		this->portToSocketMap[ports[i]] = socket_fd;
 		setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+		if (fcntl(socket_fd, F_SETFL, O_NONBLOCK) < 0) //setting the socket to non-blocking
+		{
+			perror("fcntl");
+			exit(EXIT_FAILURE);
+		}
 		servaddr.sin_family = AF_INET;
-		// servaddr.sin_addr = INADDR_ANY;
+		servaddr.sin_addr.s_addr = INADDR_ANY;
 		servaddr.sin_port = htons(this->portToSocketMap[ports[i]]);
 		bind(socket_fd, (struct sockaddr *)&servaddr, sizeof(servaddr));
 		listen(socket_fd, 32); //32 is the maximum size of the queue of pending connections
@@ -51,7 +56,7 @@ void Server::StartServer(std::vector<int> ports)
 	if (epoll_fd == -1)
 	{
 		perror("epoll_create1");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	struct epoll_event ev;
 	(void)ev;
