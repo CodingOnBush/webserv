@@ -1,27 +1,33 @@
-CXX = g++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98
-INCLUDES = -I./include
+NAME	:=	webserv
 
-# Source files
-SRCS = src/main.cpp src/Webserv.cpp src/Request.cpp
-OBJS = $(SRCS:.cpp=.o)
+CPP		:=	c++
+CFLAGS	:=	-Wall -Wextra -Werror -std=c++98 -g3 -MMD
 
-# Target executable
-TARGET = webserv
+INC_DIR	:=	./include
+SRC_DIR	:=	./src
+BIN_DIR	:=	./bin
 
-# Build target
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET)
+SRC		:=	$(wildcard $(SRC_DIR)/*.cpp)
 
-# Compile source files into object files
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+OBJ		:=	$(SRC:$(SRC_DIR)/%.cpp=$(BIN_DIR)/%.o)
+
+-include $(wildcard *.d)
+
+all: $(NAME)
+
+$(NAME): $(OBJ)
+	$(CPP) $(CFLAGS) $(OBJ) -I $(INC_DIR) -o $(NAME)
+
+$(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	$(CPP) $(CFLAGS) -I $(INC_DIR) -c $< -o $@
 
 # Clean up build files
 clean:
-	rm -f $(OBJS) $(TARGET) *.d
+	rm -rf $(BIN_DIR) 
 
 re: clean $(TARGET)
 
-# Include dependency files
--include $(OBJS:.o=.d)
+re: fclean all
+
+.PHONY: all clean fclean re
