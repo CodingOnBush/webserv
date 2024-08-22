@@ -163,10 +163,10 @@ void Request::printRequest(Request &req)
 	std::cout << "URI: " << req.getUri() << std::endl;
 	std::cout << "Version: " << req.getVersion() << std::endl;
 	std::cout << "Headers: " << std::endl;
-	for (std::map<std::string, std::string>::iterator it = req.getHeaders().begin(); it != req.getHeaders().end(); ++it)
-	{
-		std::cout << it->first << ":" << it->second << std::endl;
-	}
+	// for (std::map<std::string, std::string>::iterator it = req.getHeaders().begin(); it != req.getHeaders().end(); ++it)
+	// {
+	// 	std::cout << it->first << ":" << it->second << std::endl;
+	// }
 	//overload operator<< for std::vector<char> required
 	// std::cout << "Body: " << req.getBody() << std::endl;
 }
