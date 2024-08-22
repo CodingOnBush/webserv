@@ -6,7 +6,7 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 15:17:48 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/22 15:13:32 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/22 15:37:27 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void Server::SetUpSockets(std::vector<int> ports)
 		servaddr.sin_addr.s_addr = INADDR_ANY;
 		servaddr.sin_port = htons(this->portToSocketMap[ports[i]]);
 		bind(socket_fd, (struct sockaddr *)&servaddr, sizeof(servaddr));
-		listen(socket_fd, 32); //32 is the maximum size of the queue of pending connections
+		listen(socket_fd, MAX_CLIENTS); //32 is the maximum size of the queue of pending connections
 	}
 }
 
@@ -51,6 +51,8 @@ Server::~Server()
 
 void Server::StartServer(std::vector<int> ports)
 {
+	int nb_ports = static_cast<int>(ports.size());
+
 	this->SetUpSockets(ports);
 	epoll_fd = epoll_create1(0);
 	if (epoll_fd == -1)
@@ -58,9 +60,17 @@ void Server::StartServer(std::vector<int> ports)
 		perror("epoll_create1");
 		exit(EXIT_FAILURE);
 	}
-	struct epoll_event ev;
-	(void)ev;
-	// ev.events[MAX_EVENTS];
+	epoll_event ev;
+	ev.events = EPOLLIN;
+	for (int i = 0; i < nb_ports; i++)
+	{
+		ev.data.fd = this->portToSocketMap[ports[i]];
+		if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, this->portToSocketMap[ports[i]], &ev) == -1)
+		{
+			perror("epoll_ctl: listen_sock");
+			exit(EXIT_FAILURE);
+		}
+	}
 }
 
 void Server::SetResponse(std::string response)
