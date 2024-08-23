@@ -1,10 +1,14 @@
 #pragma once
 #include <string>
 #include <iostream>
-#include <map>
 #include <vector>
 #include <cctype>
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <map>
 #include <sstream>
+#include <utility>
 
 // Request       = Request-Line              ; Section 5.1
 // *(( general-header        ; Section 4.5
@@ -46,10 +50,11 @@ private:
 	std::string uri;
 	std::string version;
 	std::map<std::string, std::string> headers;
-	std::vector<char> body;
+	std::map<std::string, std::string> queries;
+	std::string body;
 
 public:
-	Request(std::string buffer);
+	Request(const std::string &buffer);
 	~Request();
 	//getters
 	std::string getBuffer() const;
@@ -57,7 +62,7 @@ public:
 	std::string getUri() const;
 	std::string getVersion() const;
 	std::map<std::string, std::string> getHeaders() const;
-	std::vector<char> getBody() const;
+	std::string getBody() const;
 	//parsing
 	bool parseRequest();
 	bool parseRequestLine(const std::string &line);
@@ -65,11 +70,11 @@ public:
     bool parseMethod(const std::string &str, std::string &method);
     bool parseVersion(const std::string &str, std::string &version);
     bool parseWhitespace(char c);
-    bool parseHeaders(const std::vector<std::string> &lines);
+   	bool parseHeaders(std::istringstream &stream);
     bool parseHeader(const std::string &line, std::string &name, std::string &value);
     bool parseHeaderName(const std::string &str, std::string &name);
     bool parseHeaderValue(const std::string &str, std::string &value);
-	bool parseBody(const std::vector<std::string> &lines, size_t index, std::vector<char> &body);
+	bool parseBody(std::string &body);
 	//debug
 	void printRequest(Request &req);
 };

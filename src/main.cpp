@@ -120,7 +120,7 @@ int main(int ac, char **av)
 		}
 		else
 		{
-			char buffer[1024];
+			char buffer[2048];
 			if ((len = recv(new_socket, buffer, sizeof buffer - 1, 0)) < 0)
 			{
 				std::cerr << "error: recv()" << std::endl;
@@ -128,8 +128,6 @@ int main(int ac, char **av)
 			}
 			buffer[len] = '\0';
 			Request req(buffer);
-			req.getBuffer() = buffer;
-			req.parseRequest();
 			req.printRequest(req);
 
 			if (send(new_socket, response.c_str(), response.size(), 0) < 0)

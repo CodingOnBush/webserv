@@ -1,6 +1,9 @@
 #include "Request.hpp"
 
-Request::Request(std::string buffer) : buffer(buffer) {};
+Request::Request(const std::string &buffer) : buffer(buffer)
+{
+    parseRequest();
+};
 
 Request::~Request() {};
 
@@ -29,29 +32,9 @@ std::map<std::string, std::string> Request::getHeaders() const
     return headers;
 }
 
-std::vector<char> Request::getBody() const
+std::string Request::getBody() const
 {
     return body;
-}
-
-bool Request::parseRequestLine(const std::string &line)
-{
-    std::istringstream stream(line);
-    std::string method, uri, version;
-
-    stream >> method;
-    if (!parseMethod(method, this->method))
-        return false;
-
-    stream >> uri;
-    if (!parseUri(uri, this->uri))
-        return false;
-
-    stream >> version;
-    if (!parseVersion(version, this->version))
-        return false;
-
-    return true;
 }
 
 bool Request::parseUri(const std::string &str, std::string &uri)
@@ -91,16 +74,15 @@ bool Request::parseWhitespace(char c)
     return c == ' ' || c == '\t';
 }
 
-bool Request::parseHeaders(const std::vector<std::string> &lines)
+bool Request::parseHeaders(std::istringstream &stream)
 {
-    for (size_t i = 0; i < lines.size(); ++i)
+    std::string line;
+
+    while (std::getline(stream, line))
     {
         std::string name, value;
-        if (!parseHeader(lines[i], name, value))
-        {
-            parseBody(lines, i + 1, body);
-            return true;
-        }
+        if (!parseHeader(line, name, value) || line.empty())
+            break;
         headers[name] = value;
     }
     return true;
@@ -144,34 +126,54 @@ bool Request::parseHeaderValue(const std::string &str, std::string &value)
     return !value.empty();
 }
 
-bool Request::parseBody(const std::vector<std::string> &lines, size_t index, std::vector<char> &body)
+bool Request::parseBody(std::string &body)
 {
-    for (size_t i = index; i < lines.size(); ++i)
-    {
-        for (size_t j = 0; j < lines[i].size(); ++j)
-            body.push_back(lines[i][j]);
-        body.push_back('\n');
-    }
+    (void)body;
+    // if (body.empty())
+    //     return true;
+    // std::string newBody = "";
+    // size_t clen = atoi((*this)["Content-Length"].c_str());
+    // if (!((*this)["Transfer-Encoding"] == "chunked")) return;
+    // while (newBody.length() < clen) {
+    //   int position = body.find("\r\n");
+    //   int len = std::strtol(body.substr(0, position).c_str(), NULL, 16);
+    //   body = body.substr(position + 2, body.length());
+    //   newBody.append(this->body.substr(0, len));
+    //   body = body.substr(len + 1, body.length());
+    // }
+    // this->body = newBody;
+    return true;
+}
+bool Request::parseRequestLine(const std::string &line)
+{
+    std::istringstream stream(line);
+    std::string method, uri, version;
+
+    stream >> method;
+    if (!parseMethod(method, this->method))
+        return false;
+
+    stream >> uri;
+    if (!parseUri(uri, this->uri))
+        return false;
+
+    stream >> version;
+    if (!parseVersion(version, this->version))
+        return false;
+
     return true;
 }
 
 bool Request::parseRequest()
 {
-    std::vector<std::string> lines;
     std::string line;
     std::istringstream stream(buffer);
 
-    while (std::getline(stream, line))
-        lines.push_back(line);
-
-    if (lines.empty())
-        return false;
-
-    if (!parseRequestLine(lines[0]))
-        return false;
-
-    if (!parseHeaders(std::vector<std::string>(lines.begin() + 1, lines.end())))
-        return false;
+    std::getline(stream, line);
+    parseRequestLine(line);
+    parseHeaders(stream);
+    body = buffer.substr(buffer.find("\r\n\r\n") + 4, buffer.length());
+    // parseBody(body);
     return true;
 }
 
@@ -190,11 +192,7 @@ void Request::printRequest(Request &req)
         std::cout << it->first << ":" << it->second << std::endl;
     }
     std::cout << "Body: " << std::endl;
-    std::vector<char> body = req.getBody();
-    for (size_t i = 0; i < body.size(); ++i)
-    {
-        std::cout << body[i];
-    }
+    std::cout << req.getBody() << std::endl;
     std::cout << std::endl;
     std::cout << std::string(21, '*') << std::endl;
 }
