@@ -9,6 +9,7 @@
 #include <map>
 #include <sstream>
 #include <utility>
+#include <stdexcept>
 
 // Request       = Request-Line              ; Section 5.1
 // *(( general-header        ; Section 4.5
@@ -64,11 +65,11 @@ public:
 	std::map<std::string, std::string> getHeaders() const;
 	std::string getBody() const;
 	//parsing
-	bool parseRequest();
-	bool parseRequestLine(const std::string &line);
-    bool parseUri(const std::string &str, std::string &uri);
-    bool parseMethod(const std::string &str, std::string &method);
-    bool parseVersion(const std::string &str, std::string &version);
+	void parseRequest();
+	void parseRequestLine(const std::string &line);
+    void parseUri(const std::string &str, std::string &uri);
+    void parseMethod(const std::string &str, std::string &method);
+    void parseVersion(const std::string &str, std::string &version);
     bool parseWhitespace(char c);
    	bool parseHeaders(std::istringstream &stream);
     bool parseHeader(const std::string &line, std::string &name, std::string &value);

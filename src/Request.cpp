@@ -37,36 +37,39 @@ std::string Request::getBody() const
     return body;
 }
 
-bool Request::parseUri(const std::string &str, std::string &uri)
+void Request::parseUri(const std::string &str, std::string &uri)
 {
     for (size_t i = 0; i < str.size(); ++i)
     {
         if (parseWhitespace(str[i]))
-            return false;
+            throw std::logic_error("Invalid URI: " + str);
         uri += str[i];
     }
-    return !uri.empty();
 }
 
-bool Request::parseMethod(const std::string &str, std::string &method)
+void Request::parseMethod(const std::string &str, std::string &method)
 {
     if (str == "GET" || str == "DELETE" || str == "POST")
     {
         method = str;
-        return true;
     }
-    return false;
+    else
+    {
+        throw std::logic_error("Invalid method: " + str);
+    }
 }
 
-bool Request::parseVersion(const std::string &str, std::string &version)
+void Request::parseVersion(const std::string &str, std::string &version)
 {
     if (str.find("HTTP/") == 0)
     {
         version = str;
         version.erase(0, 5);
-        return true;
     }
-    return false;
+    else
+    {
+        throw std::logic_error("Invalid version: " + str);
+    }
 }
 
 bool Request::parseWhitespace(char c)
@@ -144,27 +147,41 @@ bool Request::parseBody(std::string &body)
     // this->body = newBody;
     return true;
 }
-bool Request::parseRequestLine(const std::string &line)
+void Request::parseRequestLine(const std::string &line)
 {
     std::istringstream stream(line);
     std::string method, uri, version;
 
     stream >> method;
-    if (!parseMethod(method, this->method))
-        return false;
+    try
+    {
+        parseMethod(method, this->method);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
 
     stream >> uri;
-    if (!parseUri(uri, this->uri))
-        return false;
+    try
+    {
+        parseUri(uri, this->uri);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
 
     stream >> version;
-    if (!parseVersion(version, this->version))
-        return false;
-
-    return true;
+    try {
+        parseVersion(version, this->version);
+    } catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }    
 }
 
-bool Request::parseRequest()
+void Request::parseRequest()
 {
     std::string line;
     std::istringstream stream(buffer);
@@ -174,7 +191,6 @@ bool Request::parseRequest()
     parseHeaders(stream);
     body = buffer.substr(buffer.find("\r\n\r\n") + 4, buffer.length());
     // parseBody(body);
-    return true;
 }
 
 void Request::printRequest(Request &req)
