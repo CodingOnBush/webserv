@@ -37,7 +37,7 @@ std::string Request::getBody() const
     return body;
 }
 
-void Request::getUri(const std::string &str)
+void Request::setUri(const std::string &str)
 {
     for (size_t i = 0; i < str.size(); ++i)
     {
@@ -47,7 +47,7 @@ void Request::getUri(const std::string &str)
     }
 }
 
-void Request::getMethod(const std::string &str)
+void Request::setMethod(const std::string &str)
 {
     if (str == "GET" || str == "DELETE" || str == "POST")
     {
@@ -59,7 +59,7 @@ void Request::getMethod(const std::string &str)
     }
 }
 
-void Request::getVersion(const std::string &str)
+void Request::setVersion(const std::string &str)
 {
     if (str.find("HTTP/") == 0)
     {
@@ -72,7 +72,7 @@ void Request::getVersion(const std::string &str)
     }
 }
 
-void Request::getHeaders(std::istringstream &stream)
+void Request::setHeaders(std::istringstream &stream)
 {
     std::string line;
 
@@ -159,7 +159,7 @@ void Request::parseRequestLine(const std::string &line)
     stream >> method;
     try
     {
-        getMethod(method);
+        setMethod(method);
     }
     catch (const std::exception &e)
     {
@@ -169,7 +169,7 @@ void Request::parseRequestLine(const std::string &line)
     stream >> uri;
     try
     {
-        getUri(uri);
+        setUri(uri);
     }
     catch (const std::exception &e)
     {
@@ -179,7 +179,7 @@ void Request::parseRequestLine(const std::string &line)
     stream >> version;
     try
     {
-        getVersion(version);
+        setVersion(version);
     }
     catch (const std::exception &e)
     {
@@ -194,7 +194,7 @@ void Request::parseRequest()
 
     std::getline(stream, line);
     parseRequestLine(line);
-    getHeaders(stream);
+    setHeaders(stream);
     body = buffer.substr(buffer.find("\r\n\r\n") + 4, buffer.length());
     // parseBody(body);
 }

@@ -56,10 +56,10 @@ private:
 	//parsing
 	void parseRequest();
 	void parseRequestLine(const std::string &line);
-    void getUri(const std::string &str);
-    void getMethod(const std::string &str);
-    void getVersion(const std::string &str);
-   	void getHeaders(std::istringstream &stream);
+    void setUri(const std::string &str);
+    void setMethod(const std::string &str);
+    void setVersion(const std::string &str);
+   	void setHeaders(std::istringstream &stream);
     bool isValidHeader(const std::string &line, std::string &name, std::string &value);
     void parseHeaderName(const std::string &str, std::string &name);
     void parseHeaderValue(const std::string &str, std::string &value);
