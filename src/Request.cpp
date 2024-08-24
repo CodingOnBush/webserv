@@ -41,7 +41,7 @@ void Request::parseUri(const std::string &str, std::string &uri)
 {
     for (size_t i = 0; i < str.size(); ++i)
     {
-        if (parseWhitespace(str[i]))
+        if (std::isspace(str[i]))
             throw std::logic_error("Invalid URI: " + str);
         uri += str[i];
     }
@@ -72,26 +72,20 @@ void Request::parseVersion(const std::string &str, std::string &version)
     }
 }
 
-bool Request::parseWhitespace(char c)
-{
-    return c == ' ' || c == '\t';
-}
-
-bool Request::parseHeaders(std::istringstream &stream)
+void Request::parseHeaders(std::istringstream &stream)
 {
     std::string line;
 
     while (std::getline(stream, line))
     {
         std::string name, value;
-        if (!parseHeader(line, name, value) || line.empty())
+        if (!isValidHeader(line, name, value) || line.empty())
             break;
         headers[name] = value;
     }
-    return true;
 }
 
-bool Request::parseHeader(const std::string &line, std::string &name, std::string &value)
+bool Request::isValidHeader(const std::string &line, std::string &name, std::string &value)
 {
     size_t pos = line.find(':');
     if (pos == std::string::npos)
@@ -100,33 +94,43 @@ bool Request::parseHeader(const std::string &line, std::string &name, std::strin
     std::string header_name = line.substr(0, pos);
     std::string header_value = line.substr(pos + 1);
 
-    if (!parseHeaderName(header_name, name))
-        return false;
-    if (!parseHeaderValue(header_value, value))
-        return false;
+    try
+    {
+        parseHeaderName(header_name, name);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+    try
+    {
+        parseHeaderValue(header_value, value);
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
     return true;
 }
 
-bool Request::parseHeaderName(const std::string &str, std::string &name)
+void Request::parseHeaderName(const std::string &str, std::string &name)
 {
     for (size_t i = 0; i < str.size(); ++i)
     {
         if (str[i] == '\n' || str[i] == ':')
-            return false;
+            throw std::logic_error("Invalid header: " + str);
         name += str[i];
     }
-    return !name.empty();
 }
 
-bool Request::parseHeaderValue(const std::string &str, std::string &value)
+void Request::parseHeaderValue(const std::string &str, std::string &value)
 {
     for (size_t i = 0; i < str.size(); ++i)
     {
         if (str[i] == '\n')
-            return false;
+            throw std::logic_error("Invalid header value: " + str);
         value += str[i];
     }
-    return !value.empty();
 }
 
 bool Request::parseBody(std::string &body)
@@ -173,12 +177,14 @@ void Request::parseRequestLine(const std::string &line)
     }
 
     stream >> version;
-    try {
+    try
+    {
         parseVersion(version, this->version);
-    } catch (const std::exception &e)
+    }
+    catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
-    }    
+    }
 }
 
 void Request::parseRequest()

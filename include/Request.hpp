@@ -70,11 +70,10 @@ public:
     void parseUri(const std::string &str, std::string &uri);
     void parseMethod(const std::string &str, std::string &method);
     void parseVersion(const std::string &str, std::string &version);
-    bool parseWhitespace(char c);
-   	bool parseHeaders(std::istringstream &stream);
-    bool parseHeader(const std::string &line, std::string &name, std::string &value);
-    bool parseHeaderName(const std::string &str, std::string &name);
-    bool parseHeaderValue(const std::string &str, std::string &value);
+   	void parseHeaders(std::istringstream &stream);
+    bool isValidHeader(const std::string &line, std::string &name, std::string &value);
+    void parseHeaderName(const std::string &str, std::string &name);
+    void parseHeaderValue(const std::string &str, std::string &value);
 	bool parseBody(std::string &body);
 	//debug
 	void printRequest(Request &req);
