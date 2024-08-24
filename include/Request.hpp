@@ -67,9 +67,9 @@ public:
 	//parsing
 	void parseRequest();
 	void parseRequestLine(const std::string &line);
-    void parseUri(const std::string &str, std::string &uri);
-    void parseMethod(const std::string &str, std::string &method);
-    void parseVersion(const std::string &str, std::string &version);
+    void parseUri(const std::string &str);
+    void parseMethod(const std::string &str);
+    void parseVersion(const std::string &str);
    	void parseHeaders(std::istringstream &stream);
     bool isValidHeader(const std::string &line, std::string &name, std::string &value);
     void parseHeaderName(const std::string &str, std::string &name);

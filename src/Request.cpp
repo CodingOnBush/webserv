@@ -37,21 +37,21 @@ std::string Request::getBody() const
     return body;
 }
 
-void Request::parseUri(const std::string &str, std::string &uri)
+void Request::parseUri(const std::string &str)
 {
     for (size_t i = 0; i < str.size(); ++i)
     {
         if (std::isspace(str[i]))
             throw std::logic_error("Invalid URI: " + str);
-        uri += str[i];
+        this->uri += str[i];
     }
 }
 
-void Request::parseMethod(const std::string &str, std::string &method)
+void Request::parseMethod(const std::string &str)
 {
     if (str == "GET" || str == "DELETE" || str == "POST")
     {
-        method = str;
+        this->method = str;
     }
     else
     {
@@ -59,12 +59,12 @@ void Request::parseMethod(const std::string &str, std::string &method)
     }
 }
 
-void Request::parseVersion(const std::string &str, std::string &version)
+void Request::parseVersion(const std::string &str)
 {
     if (str.find("HTTP/") == 0)
     {
-        version = str;
-        version.erase(0, 5);
+        this->version = str;
+        this->version.erase(0, 5);
     }
     else
     {
@@ -159,7 +159,7 @@ void Request::parseRequestLine(const std::string &line)
     stream >> method;
     try
     {
-        parseMethod(method, this->method);
+        parseMethod(method);
     }
     catch (const std::exception &e)
     {
@@ -169,7 +169,7 @@ void Request::parseRequestLine(const std::string &line)
     stream >> uri;
     try
     {
-        parseUri(uri, this->uri);
+        parseUri(uri);
     }
     catch (const std::exception &e)
     {
@@ -179,7 +179,7 @@ void Request::parseRequestLine(const std::string &line)
     stream >> version;
     try
     {
-        parseVersion(version, this->version);
+        parseVersion(version);
     }
     catch (const std::exception &e)
     {
