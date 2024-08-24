@@ -120,14 +120,21 @@ int main(int ac, char **av)
 		}
 		else
 		{
-			char buffer[2048];
-			if ((len = recv(new_socket, buffer, sizeof buffer - 1, 0)) < 0)
+			std::string fullRequest;
+			char buffer[5000];
+			for (int i = 0; i < 10; i++)
 			{
-				std::cerr << "error: recv()" << std::endl;
-				exit(1);
+				memset(buffer, 0, sizeof(buffer));
+				len = recv(new_socket, buffer, sizeof buffer - 1, 0);
+				if (len == 0)
+				{
+					break;
+				}
+				fullRequest.append(buffer, len);
+				// if (fullRequest.find("\r\n") != std::string::npos && i == 0)
+				// 	break;
 			}
-			buffer[len] = '\0';
-			Request req(buffer);
+			Request req(fullRequest);
 			req.printRequest(req);
 
 			if (send(new_socket, response.c_str(), response.size(), 0) < 0)
