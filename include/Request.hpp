@@ -53,7 +53,17 @@ private:
 	std::map<std::string, std::string> headers;
 	std::map<std::string, std::string> queries;
 	std::string body;
-
+	//parsing
+	void parseRequest();
+	void parseRequestLine(const std::string &line);
+    void getUri(const std::string &str);
+    void getMethod(const std::string &str);
+    void getVersion(const std::string &str);
+   	void getHeaders(std::istringstream &stream);
+    bool isValidHeader(const std::string &line, std::string &name, std::string &value);
+    void parseHeaderName(const std::string &str, std::string &name);
+    void parseHeaderValue(const std::string &str, std::string &value);
+	bool parseBody(std::string &body);
 public:
 	Request(const std::string &buffer);
 	~Request();
@@ -64,17 +74,6 @@ public:
 	std::string getVersion() const;
 	std::map<std::string, std::string> getHeaders() const;
 	std::string getBody() const;
-	//parsing
-	void parseRequest();
-	void parseRequestLine(const std::string &line);
-    void parseUri(const std::string &str);
-    void parseMethod(const std::string &str);
-    void parseVersion(const std::string &str);
-   	void parseHeaders(std::istringstream &stream);
-    bool isValidHeader(const std::string &line, std::string &name, std::string &value);
-    void parseHeaderName(const std::string &str, std::string &name);
-    void parseHeaderValue(const std::string &str, std::string &value);
-	bool parseBody(std::string &body);
 	//debug
 	void printRequest(Request &req);
 };
