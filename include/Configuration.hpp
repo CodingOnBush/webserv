@@ -21,28 +21,54 @@ The rest of a line after the # sign is considered a comment.
 #include <string>
 #include <vector>
 
-struct ServerStruct {
-	std::string server_name;
-	std::string host;
-	int 		port;
-	std::string root;
-	std::string index;
-	std::string error_page;
-	std::string location;
-	std::string autoindex;
-	std::string client_max_body_size;
-	std::string server_tokens;
-	std::string keepalive_timeout;
-	std::string keepalive_requests;
+enum http_method {
+	GET,
+	POST,
+	DELETE
+};
+
+struct BodySize {
+	std::string	value;
+	std::string	unit;
+};
+
+struct LocationBlock {
+	bool								exactMatch;
+	std::string							path;// file or directory
+	std::string							root;
+	std::string							alias;
+	BodySize							clientMaxBodySize;
+	bool								autoindex;
+	std::vector<std::string>			indexes;
+	std::map<std::string, std::string>	redirects;// {code, address}
+	bool								pathInfo;
+	std::map<std::string, std::string>	cgiParams;// {extension, file}
+	std::string							uploadLocation;
+	std::vector<http_method>			methods;// GET, POST and DELETE by default
+};
+
+struct ServerBlock {
+	int									port;// from listen directive
+	std::string							host;// from listen directive
+	std::vector<std::string>			serverNames;// maybe none or more
+	std::string							root;
+	std::map<std::string, std::string>	errorPages;// {error code, uri}
+	BodySize							clientMaxBodySize;
+	std::vector<LocationBlock>			locationBlocks;
 };
 
 class Configuration
 {
-private:
-	std::vector<ServerStruct> servers;
-public:
-	Configuration(std::string const &filename);
-	~Configuration();
+	private:
+		std::string					configFile;// maybe remove it later
+		std::vector<ServerBlock>	serverBlocks;
+		// std::vector<int>			_ports; // for vic's part
+		// and more
+	public:
+		Configuration(std::string const &filename);
+		~Configuration();
+
+		// std::vector<int>			getPorts() const;
 };
 
 #endif // CONFIGURATION_HPP

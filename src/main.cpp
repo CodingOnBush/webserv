@@ -6,7 +6,7 @@
 /*   By: momrane <momrane@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:08:26 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/22 17:29:57 by momrane          ###   ########.fr       */
+/*   Updated: 2024/08/26 11:30:34 by momrane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,10 @@ int	main(int ac, char **av)
 	std::cout << "Config file: " << av[1] << std::endl;
 	// What's inside the config file?
 	try {
+		/*
+		vic need this :
+		std::vector<int> ports;
+		*/
 		Configuration	config(av[1]);
 	}
 	catch (std::exception &e) {

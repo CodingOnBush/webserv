@@ -1,6 +1,6 @@
 #include "../include/Configuration.hpp"
 
-Configuration::Configuration(std::string const &filename)
+static void	parseConfigFile(std::string const &filename)
 {
 	std::ifstream	file;
 
@@ -11,8 +11,15 @@ Configuration::Configuration(std::string const &filename)
 	while (std::getline(file, line))
 	{
 		std::cout << line << std::endl;
+		//
 	}
 	file.close();
+}
+
+Configuration::Configuration(std::string const &filename) : configFile(filename)
+{
+	parseConfigFile(configFile);
+	// createPortList();
 }
 
 Configuration::~Configuration()
