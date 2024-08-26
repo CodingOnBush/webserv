@@ -136,6 +136,7 @@ void Request::parseHeaderValue(const std::string &str, std::string &value)
 bool Request::parseBody(std::string &body)
 {
     (void)body;
+    // unchunking body logic
     // if (body.empty())
     //     return true;
     // std::string newBody = "";
