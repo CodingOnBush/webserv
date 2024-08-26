@@ -121,22 +121,23 @@ int main(int ac, char **av)
 		else
 		{
 			std::string fullRequest;
-			char buffer[5000];
-			for (int i = 0; i < 10; i++)
-			{
-				memset(buffer, 0, sizeof(buffer));
-				len = recv(new_socket, buffer, sizeof buffer - 1, 0);
-				if (len == 0)
-				{
-					break;
-				}
+			char buffer[2000];
+			len = recv(new_socket, buffer, sizeof(buffer), 0);
+			if (len > 0)
 				fullRequest.append(buffer, len);
-				// if (fullRequest.find("\r\n") != std::string::npos && i == 0)
-				// 	break;
+			if (len == 0)
+			{
+				std::cout << "Connection closed by client" << std::endl;
+				close(new_socket);
+				return 0;
 			}
+			if (len < 0)
+			{
+				std::cerr << "recv error: " << strerror(errno) << std::endl;
+				break;
+				}
 			Request req(fullRequest);
 			req.printRequest(req);
-
 			if (send(new_socket, response.c_str(), response.size(), 0) < 0)
 			{
 				std::cerr << "error: send()" << std::endl;
