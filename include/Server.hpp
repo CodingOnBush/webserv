@@ -6,7 +6,7 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 12:06:19 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/22 15:14:48 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/26 14:32:24 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
 
 #define EXIT_FAILURE 1
 #define MAX_CLIENTS 32
 #define MAX_EVENTS 4096
+#define BUFFER_SIZE 1024
+#define yes 1
+#define no 0
 
 class Server
 {
@@ -46,6 +50,7 @@ public:
 	void SetUpSockets(std::vector<int> ports);
 	void StartServer(std::vector<int> ports);
 	void SetResponse(std::string response);
+	void ErrorAndExit(std::string error);
 };
 
 #endif
