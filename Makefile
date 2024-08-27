@@ -22,11 +22,11 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CPP) $(CFLAGS) -I $(INC_DIR) -c $< -o $@
 
+# Clean up build files
 clean:
 	rm -rf $(BIN_DIR) 
 
-fclean: clean
-	rm -f $(NAME)
+re: clean $(TARGET)
 
 re: fclean all
 
