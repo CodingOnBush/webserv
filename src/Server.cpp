@@ -170,11 +170,8 @@ void Server::receiveRequest(int fd, epoll_event ev, int epoll_fd)
 	memset(buffer, 0, BUFFER_SIZE);
 	while ((return_value = recv(fd, buffer, BUFFER_SIZE - 1, 0)) > 0)
 	{
-		std::cout << "Return value inside: " << return_value << std::endl;
-
 		fullRequest.append(buffer, return_value);
 	}
-	std::cout << "Return value outside:" << return_value << std::endl;
 	Request request(fullRequest);
 	request.printRequest(request);
 	ev.events = EPOLLOUT;

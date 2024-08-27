@@ -1,28 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: atonkopi <atonkopi@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/21 13:08:26 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/27 14:57:36 by atonkopi         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Server.hpp"
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <iostream>
-#include <cstring>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <cerrno>
-#include "../include/Request.hpp"
-
-#define MAX_EV 4096
-
 
 int main(int ac, char **av)
 {

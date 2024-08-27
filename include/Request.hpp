@@ -11,38 +11,6 @@
 #include <utility>
 #include <stdexcept>
 
-// Request       = Request-Line              ; Section 5.1
-// *(( general-header        ; Section 4.5
-//  | request-header         ; Section 5.3
-//  | entity-header ) CRLF)  ; Section 7.1
-// CRLF
-// [ message-body ]          ; Section 4.3
-
-
-// PEST Grammar (src: https://pest.rs/)
-// file = { SOI ~ (delimiter | request)* ~ EOI}
-
-// request = {	
-// 	request_line ~
-//     headers? ~
-//     NEWLINE ~
-//     body?
-// }
-
-// request_line = _{ method ~ " "+ ~ uri ~ " "+ ~ "HTTP/" ~ version ~ NEWLINE }
-// uri = { (!whitespace ~ ANY)+ }
-// method = { ("GET" | "DELETE" | "POST" | "PUT") }
-// version = { (ASCII_DIGIT | ".")+ }
-// whitespace = _{ " " | "\t" }
-
-// headers = { header+ }
-// header = { header_name ~ ":" ~ whitespace ~ header_value ~ NEWLINE }
-// header_name = { (!(NEWLINE | ":") ~ ANY)+ }
-// header_value = { (!NEWLINE ~ ANY)+ }
-
-// body = { (!delimiter ~ ANY)+ }
-// delimiter = { "#"{3} ~ NEWLINE+ }
-
 class Request
 {
 private:

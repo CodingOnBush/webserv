@@ -1,6 +1,4 @@
-#ifndef SERVER_HPP
-#define SERVER_HPP
-
+#pragma once
 #include <iostream>
 #include <string>
 #include <arpa/inet.h>
@@ -47,5 +45,3 @@ public:
 	void receiveRequest(int fd, epoll_event ev, int epoll_fd);
 	void errorAndExit(std::string error);
 };
-
-#endif

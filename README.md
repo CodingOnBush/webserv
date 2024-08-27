@@ -13,6 +13,8 @@ Todo List - Webserv
 - understand how CGI works and is used (Victoire)
 - how to parse the http request and create response (Alisa)
 - create a map / schema for all processes (all)
+- add exceptions instead of returning error and exiting
+- correctly rename all vars and functions
 
 Project parts:
 
