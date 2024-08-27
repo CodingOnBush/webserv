@@ -207,8 +207,5 @@ void Server::startServer(std::vector<int> ports)
 
 void Server::setResponse(std::string response)
 {
-	if (response.empty())
-		this->response = response;
-	else
-		this->response += response;
+	this->response = response;
 }
