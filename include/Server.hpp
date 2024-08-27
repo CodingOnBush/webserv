@@ -17,39 +17,35 @@
 #include <signal.h>
 #include "Request.hpp"
 
-#define EXIT_FAILURE 1
 #define MAX_CLIENTS 32
 #define MAX_EVENTS 4096
 #define BUFFER_SIZE 1024
-#define yes 1
-#define no 0
 
 class Server
 {
 
 private:
-	std::vector<int>	sockets_fd;
+	std::vector<int> sockets_fd;
 	struct sockaddr_in servaddr;
-	std::string			response;
-	// Request				request; //containing the buffer
+	std::string response; // temporary var
 
 public:
 	Server();
 	~Server();
 
-	std::vector<int> SetUpSockets(std::vector<int> ports);
-	int		CreateSocket(int socket_fd);
-	void	SetSocketNonBlocking(int socket_fd);
-	void	BindAndListen(int socket_fd);
-	int		CreateEpoll(std::vector<int> ports);
-	void	AddToInterestList(int epoll_fd, epoll_event ev, std::vector<int>::iterator it);
-	void	ReadingLoop(int epoll_fd, epoll_event ev, epoll_event *events);
-	void	StartServer(std::vector<int> ports);
-	void	AcceptConnection(int server, int epoll_fd, epoll_event ev);
-	void	SetResponse(std::string response);
-	void	SendResponse(int fd, epoll_event ev, int epoll_fd);
-	void	ReceiveRequest(int fd, epoll_event ev, int epoll_fd);
-	void	ErrorAndExit(std::string error);
+	std::vector<int> setUpSockets(std::vector<int> ports);
+	int createSocket(int socket_fd);
+	void setSocketNonBlocking(int socket_fd);
+	void bindAndListen(int socket_fd);
+	int createEpoll(std::vector<int> ports);
+	void addToInterestList(int epoll_fd, epoll_event ev, std::vector<int>::iterator it);
+	void readingLoop(int epoll_fd, epoll_event ev, epoll_event *events);
+	void startServer(std::vector<int> ports);
+	void acceptConnection(int server, int epoll_fd, epoll_event ev);
+	void setResponse(std::string response);
+	void sendResponse(int fd, epoll_event ev, int epoll_fd);
+	void receiveRequest(int fd, epoll_event ev, int epoll_fd);
+	void errorAndExit(std::string error);
 };
 
 #endif
