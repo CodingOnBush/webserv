@@ -6,7 +6,7 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/26 15:53:08 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/27 12:09:25 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/27 12:33:53 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ int fd_is_server(int fd, std::vector<int> sockets_fd)
 void Server::ReadingLoop(int epoll_fd, epoll_event ev, epoll_event *events)
 {
 	int nb_fds = 0;
-	int timeout = 200;
+	int timeout = 1000;
 	int j = 0;
 
 	while (1)
@@ -175,7 +175,8 @@ void Server::AcceptConnection(int server, int epoll_fd, epoll_event ev)
 
 void Server::ReceiveRequest(int fd, epoll_event ev, int epoll_fd)
 {
-	int return_value = 0;
+	int		return_value = 0;
+	char	buffer[BUFFER_SIZE];
 				
 	return_value = recv(fd, buffer, BUFFER_SIZE - 1, 0);
 	if (return_value < 0)

@@ -6,7 +6,7 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 12:06:19 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/27 12:06:43 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/27 12:25:19 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
 
 #define EXIT_FAILURE 1
 #define MAX_CLIENTS 32
@@ -41,7 +42,6 @@ private:
 	std::vector<int>	sockets_fd;
 	struct sockaddr_in servaddr;
 	std::string			response;
-	char				buffer[BUFFER_SIZE];
 	// Request				request; //containing the buffer
 
 public:
