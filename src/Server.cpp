@@ -47,14 +47,14 @@ Server::~Server()
 void Server::StartServer(std::vector<int> ports)
 {
 	this->SetUpSockets(ports);
-	epoll_fd = epoll_create1(0);
+	// epoll_fd = epoll_create1(0);
 	if (epoll_fd == -1)
 	{
 		perror("epoll_create1");
 		exit(1);
 	}
-	struct epoll_event ev;
-	(void)ev;
+	// struct epoll_event ev;
+	// (void)ev;
 	// ev.events[MAX_EVENTS];
 }
 

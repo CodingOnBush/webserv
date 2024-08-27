@@ -1,5 +1,5 @@
 # Instructions from the subject
-<ins>Tips : You can get some inspiration from the ’server’ part of NGINX configuration file.</ins>\
+Tips : You can get some inspiration from the ’server’ part of NGINX configuration file.\
 _I can search what are the rules in the nginx configuration file only for the server part._
 
 **In the configuration file, you should be able to :**
