@@ -6,7 +6,7 @@
 /*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/20 12:06:19 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/26 16:46:56 by vvaudain         ###   ########.fr       */
+/*   Updated: 2024/08/27 12:06:43 by vvaudain         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ private:
 	std::vector<int>	sockets_fd;
 	struct sockaddr_in servaddr;
 	std::string			response;
+	char				buffer[BUFFER_SIZE];
 	// Request				request; //containing the buffer
 
 public:
@@ -55,7 +56,10 @@ public:
 	void	AddToInterestList(int epoll_fd, epoll_event ev, std::vector<int>::iterator it);
 	void	ReadingLoop(int epoll_fd, epoll_event ev, epoll_event *events);
 	void	StartServer(std::vector<int> ports);
+	void	AcceptConnection(int server, int epoll_fd, epoll_event ev);
 	void	SetResponse(std::string response);
+	void	SendResponse(int fd, epoll_event ev, int epoll_fd);
+	void	ReceiveRequest(int fd, epoll_event ev, int epoll_fd);
 	void	ErrorAndExit(std::string error);
 };
 
