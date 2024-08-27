@@ -1,18 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/20 12:06:19 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/22 14:27:19 by vvaudain         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#ifndef SERVER_HPP
-#define SERVER_HPP
-
+#pragma once
 #include <iostream>
 #include <string>
 #include <arpa/inet.h>
@@ -22,26 +8,40 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
+#include <signal.h>
+#include "Request.hpp"
 
+#define MAX_CLIENTS 32
 #define MAX_EVENTS 4096
+#define BUFFER_SIZE 1024
 
 class Server
 {
 
 private:
-	std::map<int, int> portToSocketMap;
+	std::vector<int> sockets_fd;
 	struct sockaddr_in servaddr;
-	// Request				request; //containing the buffer
-	std::string response;
-	int epoll_fd;
+	std::string response; // temporary var
 
 public:
 	Server();
 	~Server();
 
-	void SetUpSockets(std::vector<int> ports);
-	void StartServer(std::vector<int> ports);
-	void SetResponse(std::string response);
+	std::vector<int> setUpSockets(std::vector<int> ports);
+	int createSocket(int socket_fd);
+	void setSocketNonBlocking(int socket_fd);
+	void bindAndListen(int socket_fd);
+	int createEpoll(std::vector<int> ports);
+	void addToInterestList(int epoll_fd, epoll_event ev, std::vector<int>::iterator it);
+	void readingLoop(int epoll_fd, epoll_event ev, epoll_event *events);
+	void startServer(std::vector<int> ports);
+	void acceptConnection(int server, int epoll_fd, epoll_event ev);
+	void setResponse(std::string response);
+	void sendResponse(int fd, epoll_event ev, int epoll_fd);
+	void receiveRequest(int fd, epoll_event ev, int epoll_fd);
+	void errorAndExit(std::string error);
 };
-
-#endif

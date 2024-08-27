@@ -9,6 +9,7 @@
 #include <cerrno>
 #include "../include/Request.hpp"
 
+<<<<<<< HEAD
 #define MAX_EV 4096
 
 // int main()
@@ -35,11 +36,20 @@
 int main(int ac, char **av)
 {
 	struct sockaddr_in servaddr;
+=======
+int main(int ac, char **av)
+{
+	(void)ac;
+	(void)av;
+	Server server;
+	
+>>>>>>> main
 	std::vector<int> ports;
 	std::string response;
 	ports.push_back(8080);
 	response += "HTTP/1.1 200 OK\n";
 	ports.push_back(8081);
+<<<<<<< HEAD
 	response += "Content-Length: 13\n\n";
 	response += "Hello World !\r\n\r\n";
 	int server_fd;
@@ -148,3 +158,16 @@ int main(int ac, char **av)
 	}
 	return (0);
 }
+=======
+	ports.push_back(8082);
+
+	server.setResponse("HTTP/1.1 200 OK\n");
+	server.setResponse("Content-Type: text/html\r\n");
+	server.setResponse("Content-Length: 13\n\n");
+	server.setResponse("Hello World !\r\n\r\n");
+	
+	server.startServer(ports);
+    return 0;
+}
+
+>>>>>>> main
