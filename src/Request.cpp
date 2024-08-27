@@ -193,6 +193,7 @@ void Request::parseRequest()
     std::string line;
     std::istringstream stream(buffer);
 
+    //check if buffer is empty and protect
     std::getline(stream, line);
     parseRequestLine(line);
     setHeaders(stream);

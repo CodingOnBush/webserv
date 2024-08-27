@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/26 15:53:08 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/27 12:33:53 by vvaudain         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Server.hpp"
 
 Server::Server()
@@ -177,22 +165,24 @@ void Server::ReceiveRequest(int fd, epoll_event ev, int epoll_fd)
 {
 	int		return_value = 0;
 	char	buffer[BUFFER_SIZE];
-				
-	return_value = recv(fd, buffer, BUFFER_SIZE - 1, 0);
-	if (return_value < 0)
+	std::string fullRequest;
+	
+	memset(buffer, 0, BUFFER_SIZE);		
+	while ((return_value = recv(fd, buffer, BUFFER_SIZE - 1, 0)) > 0)
 	{
-		std::cerr << "recv() failed" << std::endl;
+		fullRequest.append(buffer, return_value);
+	}
+	// proper error handling and closing fd
+	if (return_value <= 0)
+	{
+		// std::cerr << "recv() failed" << std::endl;
 		close(fd);
-		exit(EXIT_FAILURE);
 	}
-	else
-	{
-		buffer[return_value] = '\0';
-		std::cout << "Received request: " << buffer << std::endl;
-		ev.events = EPOLLOUT;
-		ev.data.fd = fd;
-		epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd, &ev);
-	}
+	Request request(fullRequest);
+	request.printRequest(request);
+	ev.events = EPOLLOUT;
+	ev.data.fd = fd;
+	epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd, &ev);
 }
 
 void Server::SendResponse(int fd, epoll_event ev, int epoll_fd)

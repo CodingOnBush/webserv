@@ -6,7 +6,7 @@
 /*   By: atonkopi <atonkopi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/21 13:08:26 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/27 13:36:06 by atonkopi         ###   ########.fr       */
+/*   Updated: 2024/08/27 13:38:43 by atonkopi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,11 +46,12 @@
 
 int main(int ac, char **av)
 {
-	struct sockaddr_in servaddr;
+	(void)ac;
+	(void)av;
+	Server server;
+	
 	std::vector<int> ports;
-	std::string response;
 	ports.push_back(8080);
-	response += "HTTP/1.1 200 OK\n";
 	ports.push_back(8081);
 	ports.push_back(8082);
 

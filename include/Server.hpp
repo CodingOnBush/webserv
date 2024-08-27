@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: vvaudain <vvaudain@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/20 12:06:19 by vvaudain          #+#    #+#             */
-/*   Updated: 2024/08/27 12:25:19 by vvaudain         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
@@ -27,6 +15,7 @@
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
+#include "Request.hpp"
 
 #define EXIT_FAILURE 1
 #define MAX_CLIENTS 32
