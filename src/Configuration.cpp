@@ -1,52 +1,99 @@
 #include "../include/Configuration.hpp"
-#include <sstream>
 
-static bool	isDirective(std::string const &word)
+// static int	parseLocationBlock(std::vector<std::string> lines, int i)
+// {
+// 	for(i++; i < (int)lines.size(); i++)
+// 	{
+// 		// std::cout << "line: " << lines[i] << std::endl;
+// 		if (lines[i].rfind("\t\t", 0) == 0)
+// 		{
+// 			std::cout << "directive : " << lines[i] << std::endl;
+// 		}
+// 		if (lines[i] == "\t}")
+// 			return i + 1;
+// 	}
+// 	return i;
+// }
+
+static int	parseServerBlock(std::vector<std::string> lines, int i)
 {
-	return word == "listen" || word == "server_name" || word == "root"
-		|| word == "error_page" || word == "client_max_body_size";
+	std::cout << "server block" << std::endl;
+	std::cout << "line: [" << lines[i] << "]" << std::endl;
+	while(i < (int)lines.size())
+	{
+		if (lines[i].empty())
+		{
+			i++;
+			continue;
+		}
+		if (lines[i] == "}")
+		{
+			std::cout << "end of server block : [" << lines[i] << "]" << std::endl;
+			return i;
+		}
+		if (lines[i].rfind("\tlocation", 0) == 0)
+		{
+			i += parseServerBlock(lines, i + 1);
+		}
+		
+		// std::cout << "line: " << lines[i] << std::endl;
+		// if (lines[i].rfind("\tlocation", 0) == 0)
+		// {
+		// 	// std::cout << "location block" << std::endl;
+		// 	i += parseLocationBlock(lines, i);
+		// 	// std::cout << "out of the location block : " << lines[i] << std::endl;
+		// }
+		// else if (lines[i].rfind("\t", 0) == 0)// create isDirectiveLine
+		// {
+		// 	std::cout << "directive : " << lines[i] << std::endl;
+		// }
+		// if (lines[i] == "}")
+		// {
+		// 	// std::cout << "end of server block : [" << lines[i] << "]" << std::endl;
+		// 	return i;
+		// }
+	}
+	return i;
 }
 
-static void	parseConfigFile(std::vector<std::string> words)
+static void	parseConfigFile(std::vector<std::string> lines)
 {
-	int	i = 0;
-	if (words.size() == 0)
+	if (lines.size() == 0)
 		throw std::runtime_error("Empty configuration file");
-	if (words[0] != "server")
-		throw std::runtime_error("Configuration file must start with 'server' directive");
-	if (words[1] != "{")
-		throw std::runtime_error("Missing '{' after 'server' directive");
-	i = 2;
-	while (i < words.size())
+	for (int i = 0; i < (int)lines.size(); i++)
 	{
-		if (isDirective(words[i]))
-			i += parseDirective(words, i);
-		else if (words[i] == "location")
-			i += parseLocation(words, i);
-		else if (words[i] == "}")
-			break;
+		if (lines[i] == "server {")
+			i += parseServerBlock(lines, i + 1);
+		else if (lines[i].empty())
+			i++;
 		else
-			throw std::runtime_error("Unknown directive '" + words[i] + "'");
+			throw std::runtime_error("Unknown directive '" + lines[i] + "'");
+		if (lines[i] != "}")
+			throw std::runtime_error("Missing '}'");
 	}
 }
 
-Configuration::Configuration(std::string const &filename) : configFile(filename)
+Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_configFile)
 {
+	std::vector<std::string>	lines;
 	std::stringstream			buffer;
-	std::ifstream				file(configFile);
-	std::vector<std::string>	words;
+	std::ifstream				file(m_configFile.c_str());
 
 	if (!file)
-		throw std::runtime_error("Cannot open file " + configFile);
+		throw std::runtime_error("Cannot open file " + m_configFile);
 	buffer << file.rdbuf();
 	file.close();
-	std::string	fileContent = buffer.str();
-	std::istringstream	iss(fileContent);
-	std::string	word;
-	while (iss >> word) {
-		words.push_back(word);
-    }
-	parseConfigFile(words);
+	std::string line;
+	while (std::getline(buffer, line))
+	{
+		std::stringstream lineStream(line);
+		// std::cout << "line: " << line << std::endl;
+		lines.push_back(line);
+	}
+	parseConfigFile(lines);
+	/*
+	I will remove parseConfigFile next time to improve code
+	*/
 	// createPortList();
 }
 

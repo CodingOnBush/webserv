@@ -21,6 +21,8 @@ The rest of a line after the # sign is considered a comment.
 #include <string>
 #include <vector>
 #include <map>
+#include <cstddef>
+#include <sstream>
 
 enum http_method {
 	GET,
@@ -61,12 +63,12 @@ struct ServerBlock {
 class Configuration
 {
 	private:
-		std::string					configFile;// maybe remove it later
-		std::vector<ServerBlock>	serverBlocks;
+		std::string					m_configFile;// maybe remove it later
+		std::vector<ServerBlock>	m_serverBlocks;
 		// std::vector<int>			_ports; // for vic's part
 		// and more
 	public:
-		Configuration(std::string const &filename);
+		Configuration(std::string const &t_configFile);
 		~Configuration();
 		// std::vector<int>			getPorts() const;
 };
