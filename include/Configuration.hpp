@@ -1,21 +1,6 @@
 #ifndef CONFIGURATION_HPP
 #define CONFIGURATION_HPP
 
-/*
-# Configuration File’s Structure
-nginx consists of modules which are controlled by directives specified
-in the configuration file. Directives are divided into simple directives
-and block directives. A simple directive consists of the name and
-parameters separated by spaces and ends with a semicolon (;).
-A block directive has the same structure as a simple directive,
-but instead of the semicolon it ends with a set of additional
-instructions surrounded by braces ({ and }). If a block directive can
-have other directives inside braces, it is called a
-context (examples: server or location).
-
-The rest of a line after the # sign is considered a comment.
-*/
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -65,12 +50,25 @@ class Configuration
 	private:
 		std::string					m_configFile;// maybe remove it later
 		std::vector<ServerBlock>	m_serverBlocks;
+
+		std::stringstream			m_content;
 		// std::vector<int>			_ports; // for vic's part
 		// and more
+
+		void	parseConfigFile();
+		void	parseServerBlock(std::stringstream &content);
+		void	parseLocationBlock(std::stringstream &content, ServerBlock &serverBlock);
+		void	parseLocationDirective(std::string const &line, LocationBlock &locationBlock);
+		void	parseServerDirective(std::string const &line, ServerBlock &serverBlock);
+
 	public:
 		Configuration(std::string const &t_configFile);
 		~Configuration();
 		// std::vector<int>			getPorts() const;
+		
+		void	printConfig() const;
+
+		// getters
 };
 
 #endif // CONFIGURATION_HPP

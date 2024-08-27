@@ -1,102 +1,178 @@
-#include "../include/Configuration.hpp"
+#include "Configuration.hpp"
 
-// static int	parseLocationBlock(std::vector<std::string> lines, int i)
-// {
-// 	for(i++; i < (int)lines.size(); i++)
-// 	{
-// 		// std::cout << "line: " << lines[i] << std::endl;
-// 		if (lines[i].rfind("\t\t", 0) == 0)
-// 		{
-// 			std::cout << "directive : " << lines[i] << std::endl;
-// 		}
-// 		if (lines[i] == "\t}")
-// 			return i + 1;
-// 	}
-// 	return i;
-// }
-
-static int	parseServerBlock(std::vector<std::string> lines, int i)
+static void	initLocationBlock(LocationBlock &locationBlock)
 {
-	std::cout << "server block" << std::endl;
-	std::cout << "line: [" << lines[i] << "]" << std::endl;
-	while(i < (int)lines.size())
-	{
-		if (lines[i].empty())
-		{
-			i++;
-			continue;
-		}
-		if (lines[i] == "}")
-		{
-			std::cout << "end of server block : [" << lines[i] << "]" << std::endl;
-			return i;
-		}
-		if (lines[i].rfind("\tlocation", 0) == 0)
-		{
-			i += parseServerBlock(lines, i + 1);
-		}
-		
-		// std::cout << "line: " << lines[i] << std::endl;
-		// if (lines[i].rfind("\tlocation", 0) == 0)
-		// {
-		// 	// std::cout << "location block" << std::endl;
-		// 	i += parseLocationBlock(lines, i);
-		// 	// std::cout << "out of the location block : " << lines[i] << std::endl;
-		// }
-		// else if (lines[i].rfind("\t", 0) == 0)// create isDirectiveLine
-		// {
-		// 	std::cout << "directive : " << lines[i] << std::endl;
-		// }
-		// if (lines[i] == "}")
-		// {
-		// 	// std::cout << "end of server block : [" << lines[i] << "]" << std::endl;
-		// 	return i;
-		// }
-	}
-	return i;
+	locationBlock.exactMatch = false;
+	locationBlock.path = "";
+	locationBlock.root = "";
+	locationBlock.alias = "";
+	locationBlock.clientMaxBodySize.value = "";
+	locationBlock.clientMaxBodySize.unit = "";
+	locationBlock.autoindex = false;
+	locationBlock.indexes.clear();
+	locationBlock.redirects.clear();
+	locationBlock.pathInfo = false;
+	locationBlock.cgiParams.clear();
+	locationBlock.uploadLocation = "";
+	locationBlock.methods.clear();
 }
 
-static void	parseConfigFile(std::vector<std::string> lines)
+static void	initServerBlock(ServerBlock &serverBlock)
 {
-	if (lines.size() == 0)
-		throw std::runtime_error("Empty configuration file");
-	for (int i = 0; i < (int)lines.size(); i++)
+	serverBlock.port = 8080;
+	serverBlock.host = "localhost";
+	serverBlock.serverNames.clear();
+	serverBlock.root = "/";
+	serverBlock.errorPages.clear();
+	serverBlock.clientMaxBodySize.value = "10";
+	serverBlock.clientMaxBodySize.unit = "M";
+	serverBlock.locationBlocks.clear();
+}
+
+void	Configuration::parseLocationDirective(std::string const &line, LocationBlock &locationBlock)
+{
+	std::string	directive;
+	std::string	value;
+	(void)locationBlock;
+	if (line[line.size() - 1] != ';')
+		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
+
+	std::istringstream	iss(line);
+	iss >> directive;
+	iss >> value;
+
+	std::cout << "[" << directive << "] [" << value << "]" << std::endl;
+}
+
+void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &serverBlock)
+{
+	LocationBlock	locationBlock;
+	std::string		line;
+
+	std::cout << "location block" << std::endl;
+	initLocationBlock(locationBlock);
+	while (std::getline(content, line))
 	{
-		if (lines[i] == "server {")
-			i += parseServerBlock(lines, i + 1);
-		else if (lines[i].empty())
-			i++;
+		if (line.empty())
+			continue;
+		if (line == "\t}")
+		{
+			break;
+		}
 		else
-			throw std::runtime_error("Unknown directive '" + lines[i] + "'");
-		if (lines[i] != "}")
-			throw std::runtime_error("Missing '}'");
+		{
+			std::cout << "directive: [" << line << "]" << std::endl;
+			parseLocationDirective(line, locationBlock);
+		}
+	}
+	serverBlock.locationBlocks.push_back(locationBlock);
+}
+
+void	Configuration::parseServerBlock(std::stringstream &content)
+{
+	ServerBlock	server;
+	std::string	line;
+
+	std::cout << "server block" << std::endl;
+	initServerBlock(server);
+	while (std::getline(content, line))
+	{
+		if (line.empty())
+			continue;
+		if (line.rfind("\tlocation", 0) == 0)
+		{
+			parseLocationBlock(content, server);
+		}
+		else if (line == "}")
+		{
+			break;
+		}
+		else
+		{
+			std::cout << "directive: [" << line << "]" << std::endl;
+		}
+	}
+	m_serverBlocks.push_back(server);
+}
+
+void	Configuration::parseConfigFile()
+{
+	std::string	line;
+
+	while (std::getline(m_content, line))
+	{
+		if (line.empty())
+			continue;
+		if (line == "server {")
+		{
+			parseServerBlock(m_content);
+		}
+		else
+			throw std::runtime_error("Unknown directive '" + line + "'");
 	}
 }
 
 Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_configFile)
 {
-	std::vector<std::string>	lines;
-	std::stringstream			buffer;
-	std::ifstream				file(m_configFile.c_str());
+	std::ifstream		file(m_configFile.c_str());
 
 	if (!file)
 		throw std::runtime_error("Cannot open file " + m_configFile);
-	buffer << file.rdbuf();
+	m_content << file.rdbuf();
 	file.close();
-	std::string line;
-	while (std::getline(buffer, line))
-	{
-		std::stringstream lineStream(line);
-		// std::cout << "line: " << line << std::endl;
-		lines.push_back(line);
-	}
-	parseConfigFile(lines);
-	/*
-	I will remove parseConfigFile next time to improve code
-	*/
-	// createPortList();
+	parseConfigFile();
 }
 
 Configuration::~Configuration()
 {
+}
+
+
+void	Configuration::printConfig() const
+{
+	for(std::vector<ServerBlock>::const_iterator it = m_serverBlocks.begin(); it != m_serverBlocks.end(); ++it)
+	{
+		std::cout << "\033[0;33;42m----- SERVER -----\033[0m" << std::endl;
+		std::cout << "port: " << it->port << std::endl;
+		std::cout << "host: " << it->host << std::endl;
+		std::cout << "serverNames: ";
+		for (std::vector<std::string>::const_iterator it2 = it->serverNames.begin(); it2 != it->serverNames.end(); ++it2)
+			std::cout << *it2 << " ";
+		std::cout << std::endl;
+		std::cout << "root: " << it->root << std::endl;
+		std::cout << "errorPages: ";
+		for (std::map<std::string, std::string>::const_iterator it2 = it->errorPages.begin(); it2 != it->errorPages.end(); ++it2)
+			std::cout << it2->first << " " << it2->second << " ";
+		std::cout << std::endl;
+		std::cout << "clientMaxBodySize: " << it->clientMaxBodySize.value << " " << it->clientMaxBodySize.unit << std::endl;
+		for (std::vector<LocationBlock>::const_iterator it2 = it->locationBlocks.begin(); it2 != it->locationBlocks.end(); ++it2)
+		{
+			std::cout << "  A location :" << std::endl;
+			std::cout << "  exactMatch: " << it2->exactMatch << std::endl;
+			std::cout << "  path: " << it2->path << std::endl;
+			std::cout << "  root: " << it2->root << std::endl;
+			std::cout << "  alias: " << it2->alias << std::endl;
+			std::cout << "  clientMaxBodySize: " << it2->clientMaxBodySize.value << " " << it2->clientMaxBodySize.unit << std::endl;
+			std::cout << "  autoindex: " << it2->autoindex << std::endl;
+			std::cout << "  indexes: ";
+			for (std::vector<std::string>::const_iterator it3 = it2->indexes.begin(); it3 != it2->indexes.end(); ++it3)
+				std::cout << *it3 << " ";
+			std::cout << std::endl;
+			std::cout << "  redirects: ";
+			for (std::map<std::string, std::string>::const_iterator it3 = it2->redirects.begin(); it3 != it2->redirects.end(); ++it3)
+				std::cout << it3->first << " " << it3->second << " ";
+			std::cout << std::endl;
+			std::cout << "  pathInfo: " << it2->pathInfo << std::endl;
+			std::cout << "  cgiParams: ";
+			for (std::map<std::string, std::string>::const_iterator it3 = it2->cgiParams.begin(); it3 != it2->cgiParams.end(); ++it3)
+				std::cout << it3->first << " " << it3->second << " ";
+			std::cout << std::endl;
+			std::cout << "  uploadLocation: " << it2->uploadLocation << std::endl;
+			std::cout << "  methods: ";
+			for (std::vector<http_method>::const_iterator it3 = it2->methods.begin(); it3 != it2-> methods.end(); ++it3)
+				std::cout << *it3 << " ";
+			std::cout << std::endl;
+		}
+		std::cout << "\033[0;33;42m------------------\033[0m" << std::endl;
+	}
 }

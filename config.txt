@@ -10,4 +10,7 @@ server {
 	location /images/ {
 		root /var/www/media;
 	}
+
+	server_name example.com;
+
 }
