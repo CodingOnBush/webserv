@@ -42,21 +42,21 @@ void Request::setUri(const std::string &str)
     for (size_t i = 0; i < str.size(); ++i)
     {
         if (std::isspace(str[i]))
-            throw std::logic_error("Invalid URI: " + str);
+            throw std::logic_error("Invalid URI");
         this->uri += str[i];
     }
 }
 
 void Request::setMethod(const std::string &str)
 {
-    if (str == "GET" || str == "DELETE" || str == "POST")
-    {
-        this->method = str;
-    }
+    if (str == "GET")
+        this->method = GET;
+    else if (str == "POST")
+        this->method = POST;
+    else if (str == "DELETE")
+        this->method = DELETE;
     else
-    {
-        throw std::logic_error("Invalid method: " + str);
-    }
+        throw std::logic_error("Invalid method");
 }
 
 void Request::setVersion(const std::string &str)
@@ -68,7 +68,7 @@ void Request::setVersion(const std::string &str)
     }
     else
     {
-        throw std::logic_error("Invalid version: " + str);
+        throw std::logic_error("Invalid HTTP version");
     }
 }
 
@@ -118,7 +118,7 @@ void Request::parseHeaderName(const std::string &str, std::string &name)
     for (size_t i = 0; i < str.size(); ++i)
     {
         if (str[i] == '\n' || str[i] == ':')
-            throw std::logic_error("Invalid header: " + str);
+            throw std::logic_error("Invalid header");
         name += str[i];
     }
 }
@@ -128,7 +128,7 @@ void Request::parseHeaderValue(const std::string &str, std::string &value)
     for (size_t i = 0; i < str.size(); ++i)
     {
         if (str[i] == '\n')
-            throw std::logic_error("Invalid header value: " + str);
+            throw std::logic_error("Invalid header value");
         value += str[i];
     }
 }

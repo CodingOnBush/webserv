@@ -10,6 +10,7 @@
 #include <sstream>
 #include <utility>
 #include <stdexcept>
+#include "Configuration.hpp"
 
 class Request
 {
