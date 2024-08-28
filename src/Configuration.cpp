@@ -29,6 +29,61 @@ static void	initServerBlock(ServerBlock &serverBlock)
 	serverBlock.locationBlocks.clear();
 }
 
+void	Configuration::initDirectiveMap()
+{
+	m_directives["listen"] = LISTEN;
+	m_directives["server_name"] = SERVER_NAME;
+	m_directives["root"] = ROOT;
+	m_directives["error_page"] = ERROR_PAGE;
+	m_directives["client_max_body_size"] = CLIENT_MAX_BODY_SIZE;
+	m_directives["location"] = LOCATION;
+	m_directives["autoindex"] = AUTOINDEX;
+	m_directives["index"] = INDEX;
+	m_directives["redirect"] = REDIRECT;
+	m_directives["path_info"] = PATH_INFO;
+	m_directives["cgi_param"] = CGI_PARAM;
+	m_directives["upload_location"] = UPLOAD_LOCATION;
+	m_directives["method"] = METHOD;
+}
+
+void	Configuration::setServerValues(std::string const &expression, std::string const &value, ServerBlock &serverBlock)
+{
+	if (value.rfind(";", 0) == 0)
+		throw std::runtime_error("Directive '" + expression + "' must have a value");
+	if (value[value.size() - 1] != ';')
+		throw std::runtime_error("Directive '" + expression + "' must end with a semicolon");
+	switch (m_directives[expression])
+	{
+	case ROOT:
+		serverBlock.root = value;
+		serverBlock.root[value.size() - 1] = '\0';
+		break;
+	
+	default:
+		throw std::runtime_error("[setServerValues]Unknown directive '" + expression + "'");
+		break;
+	}
+}
+
+void	Configuration::setLocationValues(std::string const &expression, std::string const &value, LocationBlock &locationBlock)
+{
+	if (value.rfind(";", 0) == 0)
+		throw std::runtime_error("Directive '" + expression + "' must have a value");
+	if (value[value.size() - 1] != ';')
+		throw std::runtime_error("Directive '" + expression + "' must end with a semicolon");
+	switch (m_directives[expression])
+	{
+	case ROOT:
+		locationBlock.root = value;
+		locationBlock.root[value.size() - 1] = '\0';
+		break;
+	
+	default:
+		throw std::runtime_error("[setLocationValues]Unknown directive '" + expression + "'");
+		break;
+	}
+}
+
 void	Configuration::parseServerDirective(std::string const &line, ServerBlock &serverBlock)
 {
 	std::string	directive;
@@ -36,12 +91,10 @@ void	Configuration::parseServerDirective(std::string const &line, ServerBlock &s
 	(void)serverBlock;
 	if (line[line.size() - 1] != ';')
 		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
-
 	std::istringstream	iss(line);
 	iss >> directive;
 	iss >> value;
-	std::cout << "directive: {" << directive << "}" << std::endl;
-	std::cout << "value: {" << value << "}" << std::endl;
+	setServerValues(directive, value, serverBlock);
 }
 
 void	Configuration::parseLocationDirective(std::string const &line, LocationBlock &locationBlock)
@@ -51,12 +104,12 @@ void	Configuration::parseLocationDirective(std::string const &line, LocationBloc
 	(void)locationBlock;
 	if (line[line.size() - 1] != ';')
 		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
-
 	std::istringstream	iss(line);
 	iss >> directive;
 	iss >> value;
-	std::cout << "directive: {" << directive << "}" << std::endl;
-	std::cout << "value: {" << value << "}" << std::endl;
+	// std::cout << "directive: {" << directive << "}";
+	// std::cout << " value: {" << value << "}" << std::endl;
+	setLocationValues(directive, value, locationBlock);
 }
 
 void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &serverBlock)
@@ -110,7 +163,7 @@ void	Configuration::parseConfigFile()
 		if (line == "server {")
 			parseServerBlock(m_content);
 		else
-			throw std::runtime_error("Unknown directive '" + line + "'");
+			throw std::runtime_error("[parseConfigFile]Unknown directive '" + line + "'");
 	}
 }
 

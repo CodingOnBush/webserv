@@ -15,6 +15,22 @@ enum http_method {
 	DELETE
 };
 
+enum directives {
+	LISTEN,
+	SERVER_NAME,
+	ROOT,
+	ERROR_PAGE,
+	CLIENT_MAX_BODY_SIZE,
+	LOCATION,
+	AUTOINDEX,
+	INDEX,
+	REDIRECT,
+	PATH_INFO,
+	CGI_PARAM,
+	UPLOAD_LOCATION,
+	METHOD
+};
+
 struct BodySize {
 	std::string	value;
 	std::string	unit;
@@ -48,10 +64,11 @@ struct ServerBlock {
 class Configuration
 {
 	private:
-		std::string					m_configFile;// maybe remove it later
-		std::vector<ServerBlock>	m_serverBlocks;
+		std::string							m_configFile;// maybe remove it later
+		std::vector<ServerBlock>			m_serverBlocks;
 
-		std::stringstream			m_content;
+		std::stringstream					m_content;
+		std::map<std::string, directives>	m_directives;
 		// std::vector<int>			_ports; // for vic's part
 		// and more
 
@@ -60,6 +77,9 @@ class Configuration
 		void	parseLocationBlock(std::stringstream &content, ServerBlock &serverBlock);
 		void	parseLocationDirective(std::string const &line, LocationBlock &locationBlock);
 		void	parseServerDirective(std::string const &line, ServerBlock &serverBlock);
+		void	setLocationValues(std::string const &expression, std::string const &value, LocationBlock &locationBlock);
+		void	setServerValues(std::string const &expression, std::string const &value, ServerBlock &serverBlock);
+		void	initDirectiveMap();
 
 	public:
 		Configuration(std::string const &t_configFile);
