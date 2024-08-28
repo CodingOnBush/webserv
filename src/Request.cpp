@@ -64,7 +64,7 @@ void Request::setVersion(const std::string &str)
     if (str.find("HTTP/") == 0)
     {
         this->version = str;
-        this->version.erase(0, 5);
+        // this->version.erase(0, 5);
     }
     else
     {
