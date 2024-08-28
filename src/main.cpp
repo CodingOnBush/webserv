@@ -1,22 +1,43 @@
+
 #include "Server.hpp"
+#include "Configuration.hpp"
+
+#define MAX_EV 4096
+
 
 int main(int ac, char **av)
 {
-	(void)ac;
-	(void)av;
-	Server server;
+	// signal(SIGINT, SIG_DFL);
+	// parse the config file and set the server ports through the vector
 	
+	if (ac != 2)
+	{
+		std::cerr << "Usage: ./webserv <config_file>" << std::endl;
+		return (1);
+	}
+	try {
+		/*
+		vic need this :
+		std::vector<int> ports;
+		*/
+		Configuration	config(av[1]);
+		config.printConfig();
+	}
+	catch (std::exception &e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+		return (1);
+	}
+	Server server;
 	std::vector<int> ports;
 	ports.push_back(8080);
 	ports.push_back(8081);
-	ports.push_back(8082);
 
-	server.setResponse("HTTP/1.1 200 OK\n");
-	server.setResponse("Content-Type: text/html\r\n");
-	server.setResponse("Content-Length: 13\n\n");
-	server.setResponse("Hello World !\r\n\r\n");
+	server.SetResponse("HTTP/1.1 200 OK\n");
+	server.SetResponse("Content-Type: text/html\r\n");
+	server.SetResponse("Content-Length: 13\n\n");
+	server.SetResponse("Hello World !\r\n\r\n");
 	
 	server.startServer(ports);
-    return 0;
+	// server.CloseServer();
+	return (0);
 }
-
