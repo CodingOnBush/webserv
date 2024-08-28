@@ -1,23 +1,11 @@
-
 #include "Server.hpp"
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <iostream>
-#include <cstring>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <cerrno>
-#include "../include/Request.hpp"
+#include "Request.hpp"
 #include "Configuration.hpp"
-
-#define MAX_EV 4096
-
 
 int main(int ac, char **av)
 {
 	// signal(SIGINT, SIG_DFL);
-	// parse the config file and set the server ports through the vector
+	// set up defaut config file if no argument is present
 	
 	if (ac != 2)
 	{
@@ -25,10 +13,6 @@ int main(int ac, char **av)
 		return (1);
 	}
 	try {
-		/*
-		vic need this :
-		std::vector<int> ports;
-		*/
 		Configuration	config(av[1]);
 		config.printConfig();
 	}
