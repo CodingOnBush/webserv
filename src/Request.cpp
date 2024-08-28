@@ -12,7 +12,7 @@ std::string Request::getBuffer() const
     return buffer;
 }
 
-std::string Request::getMethod() const
+int Request::getMethod() const
 {
     return method;
 }

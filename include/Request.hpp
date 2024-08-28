@@ -16,7 +16,7 @@ class Request
 {
 private:
 	std::string buffer;
-	std::string method;
+	int method;
 	std::string uri;
 	std::string version;
 	std::map<std::string, std::string> headers;
@@ -39,7 +39,7 @@ public:
 	~Request();
 	// getters
 	std::string getBuffer() const;
-	std::string getMethod() const;
+	int getMethod() const;
 	std::string getUri() const;
 	std::string getVersion() const;
 	std::map<std::string, std::string> getHeaders() const;

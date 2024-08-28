@@ -4,22 +4,24 @@
 
 int main(int ac, char **av)
 {
+	(void)ac;
+	(void)av;
 	// signal(SIGINT, SIG_DFL);
 	// set up defaut config file if no argument is present
 	
-	if (ac != 2)
-	{
-		std::cerr << "Usage: ./webserv <config_file>" << std::endl;
-		return (1);
-	}
-	try {
-		Configuration	config(av[1]);
-		config.printConfig();
-	}
-	catch (std::exception &e) {
-		std::cerr << "Error: " << e.what() << std::endl;
-		return (1);
-	}
+	// if (ac != 2)
+	// {
+	// 	std::cerr << "Usage: ./webserv <config_file>" << std::endl;
+	// 	return (1);
+	// }
+	// try {
+	// 	Configuration	config(av[1]);
+	// 	config.printConfig();
+	// }
+	// catch (std::exception &e) {
+	// 	std::cerr << "Error: " << e.what() << std::endl;
+	// 	return (1);
+	// }
 	Server server;
 	std::vector<int> ports;
 	ports.push_back(8080);
@@ -30,7 +32,7 @@ int main(int ac, char **av)
 	// server.setResponse("Content-Type: text/html\r\n");
 	// server.setResponse("Content-Length: 13\n\n");
 	// server.setResponse("Hello World !\r\n\r\n");
-	 server.setResponse(
+	server.setResponse(
         "HTTP/1.1 200 OK\nContent-Type: text/html\r\nContent-Length: 55743\r\n"
         "Connection: keep-alive\nCache-Control: s-maxage=300, public, max-age=0\n\n"
         "Content-Language: en-US\nDate: Thu, 06 Dec 2018 17:37:18 GMT\nServer: meinheld/0.6.1\n\n"
