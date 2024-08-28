@@ -12,25 +12,60 @@ int Server::createSocket(int socket_fd)
 {
 	int opt = 1;
 	socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (socket_fd < 0)
-		throw std::runtime_error("socket() failed");
-	if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) < 0)
-		throw std::runtime_error("setsockopt() failed");;
+	try
+	{
+		if (socket_fd < 0)
+			throw std::runtime_error("socket() failed");
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
+	try
+	{
+		if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) < 0)
+			throw std::runtime_error("setsockopt() failed");;
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
 	return socket_fd;
 }
 
 void Server::setSocketNonBlocking(int socket_fd)
 {
-	if (fcntl(socket_fd, F_SETFL, O_NONBLOCK) < 0)
-		throw std::runtime_error("fcntl() failed");
+	try
+	{
+		if (fcntl(socket_fd, F_SETFL, O_NONBLOCK) < 0)
+			throw std::runtime_error("fcntl() failed");
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
 }
 
 void Server::bindAndListen(int socket_fd)
 {
-	if (bind(socket_fd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
-		throw std::runtime_error("bind() failed");
-	if (listen(socket_fd, MAX_CLIENTS) < 0) // 32 is the maximum size of the queue of pending connections
-		throw std::runtime_error("listen() failed");
+	try
+	{
+		if (bind(socket_fd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
+			throw std::runtime_error("bind() failed");
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
+	try
+	{
+		if (listen(socket_fd, MAX_CLIENTS) < 0) // 32 is the maximum size of the queue of pending connections
+			throw std::runtime_error("listen() failed");
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
 }
 
 std::vector<int> Server::setUpSockets(std::vector<int> ports)
@@ -54,8 +89,15 @@ std::vector<int> Server::setUpSockets(std::vector<int> ports)
 int Server::createEpoll(std::vector<int> ports)
 {
 	int epoll_fd = epoll_create(MAX_EVENTS + ports.size());
-	if (epoll_fd < 0)
-		throw std::runtime_error("epoll_create() failed");
+	try
+	{
+		if (epoll_fd < 0)
+			throw std::runtime_error("epoll_create() failed");
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
 	return epoll_fd;
 }
 
@@ -63,8 +105,15 @@ void Server::addToInterestList(int epoll_fd, epoll_event ev, std::vector<int>::i
 {
 	ev.events = EPOLLIN;
 	ev.data.fd = *it;
-	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, *it, &ev) < 0)
-		throw std::runtime_error("epoll_ctl() failed");
+	try
+	{
+		if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, *it, &ev) < 0)
+			throw std::runtime_error("epoll_ctl() failed");
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
 }
 
 int fd_is_server(int fd, std::vector<int> sockets_fd)
@@ -94,10 +143,17 @@ void Server::readingLoop(int epoll_fd, epoll_event ev, epoll_event *events)
 		for (int i = 0; i < nb_fds; i++)
 		{
 			int server = 0;
-			if (events[i].events & EPOLLERR || events[i].events & EPOLLHUP)
+			try
 			{
-				close(events[i].data.fd);
-				throw std::runtime_error("epoll error");
+				if (events[i].events & EPOLLERR || events[i].events & EPOLLHUP)
+				{
+					close(events[i].data.fd);
+					throw std::runtime_error("epoll error");
+				}
+			}
+			catch  (std::exception &e)
+			{
+				std::cerr << "Error: " << e.what() << std::endl;
 			}
 			if ((server = fd_is_server(events[i].data.fd, this->sockets_fd)) > 0)
 			{
@@ -120,16 +176,30 @@ void Server::readingLoop(int epoll_fd, epoll_event ev, epoll_event *events)
 void Server::acceptConnection(int server, int epoll_fd, epoll_event ev)
 {
 	int new_connection = accept(server, NULL, NULL);
-	if (new_connection < 0)
-		throw std::runtime_error("accept() failed");
+	try 
+	{
+		if (new_connection < 0)
+			throw std::runtime_error("accept() failed");
+	}
+	catch (std::exception &e) 
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
 	std::cout << "New client connection to server accepted" << std::endl;
 	setSocketNonBlocking(new_connection);
 	ev.events = EPOLLIN | EPOLLET;
 	ev.data.fd = new_connection;
-	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, new_connection, &ev) < 0)
+	try
 	{
-		close(new_connection);
-		throw std::runtime_error("epoll_ctl() failed");
+		if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, new_connection, &ev) < 0)
+		{
+			close(new_connection);
+			throw std::runtime_error("epoll_ctl() failed");
+		}
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
 	}
 }
 
@@ -153,8 +223,13 @@ void Server::receiveRequest(int fd, epoll_event ev, int epoll_fd)
 
 void Server::sendResponse(int fd, epoll_event ev, int epoll_fd)
 {
-	if (send(fd, response.c_str(), response.size(), 0) < 0)
-		throw std::runtime_error("send() failed");
+	try {
+		if (send(fd, response.c_str(), response.size(), 0) < 0)
+			throw std::runtime_error("send() failed");
+	}
+	catch (std::exception &e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
 	std::cout << "Response sent" << response << std::endl;
 	ev.events = EPOLLIN;
 	ev.data.fd = fd;

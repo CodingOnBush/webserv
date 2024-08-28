@@ -38,13 +38,7 @@ int main(int ac, char **av)
 	server.setResponse("Content-Type: text/html\r\n");
 	server.setResponse("Content-Length: 13\n\n");
 	server.setResponse("Hello World !\r\n\r\n");
-	try {
-		server.startServer(ports);
-	}
-	catch (std::exception &e) {
-		std::cerr << "Error: " << e.what() << std::endl;
-		return (1);
-	}
+	server.startServer(ports);
 	
 	// server.CloseServer();
 	return (0);
