@@ -41,41 +41,123 @@ void	Configuration::initDirectiveMap()
 	m_directives["index"] = INDEX;
 	m_directives["redirect"] = REDIRECT;
 	m_directives["path_info"] = PATH_INFO;
-	m_directives["cgi_param"] = CGI_PARAM;
+	m_directives["cgi"] = CGI;
+	m_directives["alias"] = ALIAS;
 	m_directives["upload_location"] = UPLOAD_LOCATION;
-	m_directives["method"] = METHOD;
+	m_directives["set_method"] = SET_METHOD;
+}
+
+std::string	Configuration::extractValue(std::string const &line)
+{
+	std::istringstream	iss(line);
+	std::string			value;
+
+	std::getline(iss, value);
+	if (value[value.size() - 1] != ';')
+		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
+	value.erase(0, value.find_first_not_of(" \t"));
+	value[value.size() - 1] = '\0';
+	return (value);
+}
+
+std::string	Configuration::extractDirective(std::string const &line)
+{
+	std::istringstream	iss(line);
+	std::string			directive;
+
+	iss >> directive;
+	directive.erase(0, directive.find_first_not_of(" \t"));
+	return (directive);
 }
 
 void	Configuration::setServerValues(std::string const &expression, std::string const &value, ServerBlock &serverBlock)
 {
-	if (value.rfind(";", 0) == 0)
-		throw std::runtime_error("Directive '" + expression + "' must have a value");
-	if (value[value.size() - 1] != ';')
-		throw std::runtime_error("Directive '" + expression + "' must end with a semicolon");
 	switch (m_directives[expression])
 	{
+	case LISTEN:
+		std::cout << "listen: [" << value << "]" << std::endl;
+		break;
+	case SERVER_NAME:
+		std::cout << "server_name: [" << value << "]" << std::endl;
+		break;
 	case ROOT:
 		serverBlock.root = value;
-		serverBlock.root[value.size() - 1] = '\0';
 		break;
-	
+	case ERROR_PAGE:
+		// {
+		// 	std::istringstream	iss(value);
+		// 	std::string			errorCode;
+		// 	std::string			uri;
+
+		// 	iss >> errorCode;
+		// 	iss >> uri;
+		// 	serverBlock.errorPages[errorCode] = uri;
+		// }
+		std::cout << "error_page: [" << value << "]" << std::endl;
+		break;
+	case CLIENT_MAX_BODY_SIZE:
+		std::cout << "client_max_body_size: [" << value << "]" << std::endl;
+		break;
 	default:
-		throw std::runtime_error("[setServerValues]Unknown directive '" + expression + "'");
+		// throw std::runtime_error("[setServerValues]Unknown directive '" + expression + "'");
 		break;
 	}
 }
 
 void	Configuration::setLocationValues(std::string const &expression, std::string const &value, LocationBlock &locationBlock)
 {
-	if (value.rfind(";", 0) == 0)
-		throw std::runtime_error("Directive '" + expression + "' must have a value");
-	if (value[value.size() - 1] != ';')
-		throw std::runtime_error("Directive '" + expression + "' must end with a semicolon");
 	switch (m_directives[expression])
 	{
 	case ROOT:
 		locationBlock.root = value;
-		locationBlock.root[value.size() - 1] = '\0';
+		std::cout << "\troot: [" << value << "]" << std::endl;
+		break;
+
+	case ALIAS:
+		locationBlock.alias = value;
+		std::cout << "\talias: [" << value << "]" << std::endl;
+		break;
+
+	case CLIENT_MAX_BODY_SIZE:
+		// {
+		// 	std::istringstream	iss(value);
+		// 	std::string			unit;
+		// 	std::string			val;
+
+		// 	iss >> val;
+		// 	iss >> unit;
+		// 	locationBlock.clientMaxBodySize.value = val;
+		// 	locationBlock.clientMaxBodySize.unit = unit;
+		// }
+		std::cout << "\tclient_max_body_size: [" << value << "]" << std::endl;
+		break;
+	
+	case AUTOINDEX:
+		std::cout << "\tautoindex: [" << value << "]" << std::endl;
+		break;
+	
+	case INDEX:
+		std::cout << "\tindex: [" << value << "]" << std::endl;
+		break;
+
+	case REDIRECT:
+		std::cout << "\tredirect: [" << value << "]" << std::endl;
+		break;
+
+	case PATH_INFO:
+		std::cout << "\tpath_info: [" << value << "]" << std::endl;
+		break;
+	
+	case CGI:
+		std::cout << "\tcgi_param: [" << value << "]" << std::endl;
+		break;
+
+	case UPLOAD_LOCATION:
+		std::cout << "\tupload_location: [" << value << "]" << std::endl;
+		break;
+	
+	case SET_METHOD:
+		std::cout << "\tmethod: [" << value << "]" << std::endl;
 		break;
 	
 	default:
@@ -84,40 +166,13 @@ void	Configuration::setLocationValues(std::string const &expression, std::string
 	}
 }
 
-void	Configuration::parseServerDirective(std::string const &line, ServerBlock &serverBlock)
-{
-	std::string	directive;
-	std::string	value;
-	(void)serverBlock;
-	if (line[line.size() - 1] != ';')
-		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
-	std::istringstream	iss(line);
-	iss >> directive;
-	iss >> value;
-	setServerValues(directive, value, serverBlock);
-}
-
-void	Configuration::parseLocationDirective(std::string const &line, LocationBlock &locationBlock)
-{
-	std::string	directive;
-	std::string	value;
-	(void)locationBlock;
-	if (line[line.size() - 1] != ';')
-		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
-	std::istringstream	iss(line);
-	iss >> directive;
-	iss >> value;
-	// std::cout << "directive: {" << directive << "}";
-	// std::cout << " value: {" << value << "}" << std::endl;
-	setLocationValues(directive, value, locationBlock);
-}
-
 void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &serverBlock)
 {
 	LocationBlock	locationBlock;
 	std::string		line;
+	std::string		directive;
+	std::string		value;
 
-	std::cout << "location block" << std::endl;
 	initLocationBlock(locationBlock);
 	while (std::getline(content, line))
 	{
@@ -126,7 +181,12 @@ void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &
 		if (line == "\t}")
 			break;
 		else
-			parseLocationDirective(line, locationBlock);
+		{
+			directive = extractDirective(line);
+			value = extractValue(line);
+			value.erase(0, directive.size() + 1);
+			setLocationValues(directive, value, locationBlock);
+		}
 	}
 	serverBlock.locationBlocks.push_back(locationBlock);
 }
@@ -135,8 +195,10 @@ void	Configuration::parseServerBlock(std::stringstream &content)
 {
 	ServerBlock	server;
 	std::string	line;
+	std::string	directive;
+	std::string	value;
 
-	std::cout << "server block" << std::endl;
+	std::cout << std::endl << "server block" << std::endl;
 	initServerBlock(server);
 	while (std::getline(content, line))
 	{
@@ -147,14 +209,21 @@ void	Configuration::parseServerBlock(std::stringstream &content)
 		else if (line == "}")
 			break;
 		else
-			parseServerDirective(line, server);
+		{
+			directive = extractDirective(line);
+			value = extractValue(line);
+			value.erase(0, directive.size() + 1);
+			// std::cout << "directive extracted: [" << directive << "]" << std::endl;
+			// std::cout << "value extracted: [" << value << "]" << std::endl;
+			setServerValues(directive, value, server);
+		}
 	}
 	m_serverBlocks.push_back(server);
 }
 
 void	Configuration::parseConfigFile()
 {
-	std::string	line;
+	std::string			line;
 
 	while (std::getline(m_content, line))
 	{
@@ -171,6 +240,7 @@ Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_c
 {
 	std::ifstream		file(m_configFile.c_str());
 
+	initDirectiveMap();
 	if (!file)
 		throw std::runtime_error("Cannot open file " + m_configFile);
 	m_content << file.rdbuf();
@@ -202,7 +272,7 @@ void	Configuration::printConfig() const
 		std::cout << "clientMaxBodySize: " << it->clientMaxBodySize.value << " " << it->clientMaxBodySize.unit << std::endl;
 		for (std::vector<LocationBlock>::const_iterator it2 = it->locationBlocks.begin(); it2 != it->locationBlocks.end(); ++it2)
 		{
-			std::cout << "  A location :" << std::endl;
+			std::cout << "--LOCATION--" << std::endl;
 			std::cout << "  exactMatch: " << it2->exactMatch << std::endl;
 			std::cout << "  path: " << it2->path << std::endl;
 			std::cout << "  root: " << it2->root << std::endl;

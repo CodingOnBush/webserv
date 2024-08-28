@@ -10,10 +10,10 @@ _A port is a number on which the server will listen for incoming requests. A hos
 - Setup default error pages.
 - Limit client body size.
 - Setup routes with one or multiple of the following rules/configuration (routes wont be using regexp) :
-	- Define a list of accepted HTTP methods for the route
-	- Define a HTTP redirection
-	- Define a directory or a file from where the file should be searched (for example, if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is /tmp/www/pouic/toto/pouet).
-	- Turn on or off directory listing.
+	- Define a list of accepted HTTP methods for the route ()
+	- Define a HTTP redirection (return)
+	- Define a directory or a file from where the file should be searched (for example, if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is /tmp/www/pouic/toto/pouet). (root and alias)
+	- Turn on or off directory listing. (autoindex)
 	- Set a default file to answer if the request is a directory.
 	- Execute CGI based on certain file extension (for example .php).
 	- Make it work with POST and GET methods.
