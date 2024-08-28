@@ -161,12 +161,13 @@ void Server::readingLoop(int epoll_fd, epoll_event ev, epoll_event *events)
 			}
 			else if (events[i].events & EPOLLIN)
 			{
-				receiveRequest(events[i].data.fd, ev, epoll_fd);
+				std::string fullRequest = receiveRequest(events[i].data.fd, ev, epoll_fd);
+				Request req(fullRequest);
 				break;
 			}
 			else if (events[j].events & EPOLLOUT)
 			{
-				sendResponse(events[j].data.fd, ev, epoll_fd);
+				sendResponse(events[j].data.fd, ev, epoll_fd, req);
 				break;
 			}
 		}
@@ -203,7 +204,7 @@ void Server::acceptConnection(int server, int epoll_fd, epoll_event ev)
 	}
 }
 
-void Server::receiveRequest(int fd, epoll_event ev, int epoll_fd)
+std::string Server::receiveRequest(int fd, epoll_event ev, int epoll_fd)
 {
 	int return_value = 0;
 	char buffer[BUFFER_SIZE];
@@ -214,15 +215,17 @@ void Server::receiveRequest(int fd, epoll_event ev, int epoll_fd)
 	{
 		fullRequest.append(buffer, return_value);
 	}
-	Request request(fullRequest);
-	request.printRequest(request);
+	// Request request(fullRequest);
+	// request.printRequest(request);
 	ev.events = EPOLLOUT;
 	ev.data.fd = fd;
 	epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd, &ev);
+	return (fullRequest);
 }
 
-void Server::sendResponse(int fd, epoll_event ev, int epoll_fd)
+void Server::sendResponse(int fd, epoll_event ev, int epoll_fd, Request req)
 {
+	(void)req;
 	try {
 		if (send(fd, response.c_str(), response.size(), 0) < 0)
 			throw std::runtime_error("send() failed");

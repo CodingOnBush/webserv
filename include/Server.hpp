@@ -41,7 +41,6 @@ public:
 	void startServer(std::vector<int> ports);
 	void acceptConnection(int server, int epoll_fd, epoll_event ev);
 	void setResponse(std::string response);
-	void sendResponse(int fd, epoll_event ev, int epoll_fd);
-	void receiveRequest(int fd, epoll_event ev, int epoll_fd);
-	void errorAndExit(std::string error);
+	void sendResponse(int fd, epoll_event ev, int epoll_fd, Request req);
+	std::string receiveRequest(int fd, epoll_event ev, int epoll_fd);
 };
