@@ -13,42 +13,24 @@ int Server::createSocket(int socket_fd)
 	int opt = 1;
 	socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (socket_fd < 0)
-	{
-		errorAndExit("socket failed");
-	}
+		throw std::runtime_error("socket() failed");
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) < 0)
-	{
-		std::cerr << "setsockopt failed" << std::endl;
-		close(socket_fd);
-		exit(EXIT_FAILURE);
-	}
+		throw std::runtime_error("setsockopt() failed");;
 	return socket_fd;
-}
-
-void Server::errorAndExit(std::string error)
-{
-	std::cerr << error << std::endl;
-	exit(EXIT_FAILURE);
 }
 
 void Server::setSocketNonBlocking(int socket_fd)
 {
-	if (fcntl(socket_fd, F_SETFL, O_NONBLOCK) < 0) // setting the socket to non-blocking
-	{
-		errorAndExit("fcntl failed");
-	}
+	if (fcntl(socket_fd, F_SETFL, O_NONBLOCK) < 0)
+		throw std::runtime_error("fcntl() failed");
 }
 
 void Server::bindAndListen(int socket_fd)
 {
 	if (bind(socket_fd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
-	{
-		errorAndExit("bind() failed");
-	}
+		throw std::runtime_error("bind() failed");
 	if (listen(socket_fd, MAX_CLIENTS) < 0) // 32 is the maximum size of the queue of pending connections
-	{
-		errorAndExit("listen() failed");
-	}
+		throw std::runtime_error("listen() failed");
 }
 
 std::vector<int> Server::setUpSockets(std::vector<int> ports)
@@ -73,9 +55,7 @@ int Server::createEpoll(std::vector<int> ports)
 {
 	int epoll_fd = epoll_create(MAX_EVENTS + ports.size());
 	if (epoll_fd < 0)
-	{
-		errorAndExit("epoll_create failed");
-	}
+		throw std::runtime_error("epoll_create() failed");
 	return epoll_fd;
 }
 
@@ -84,9 +64,7 @@ void Server::addToInterestList(int epoll_fd, epoll_event ev, std::vector<int>::i
 	ev.events = EPOLLIN;
 	ev.data.fd = *it;
 	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, *it, &ev) < 0)
-	{
-		errorAndExit("epoll_ctl failed");
-	}
+		throw std::runtime_error("epoll_ctl() failed");
 }
 
 int fd_is_server(int fd, std::vector<int> sockets_fd)
@@ -108,9 +86,7 @@ void Server::readingLoop(int epoll_fd, epoll_event ev, epoll_event *events)
 	while (1)
 	{
 		if ((nb_fds = epoll_wait(epoll_fd, events, MAX_EVENTS, timeout)) < 0)
-		{
-			errorAndExit("epoll_wait() failed");
-		}
+			throw std::runtime_error("epoll_wait() failed");
 		else if (nb_fds == 0)
 		{
 			std::cout << "Waiting for connection" << std::endl;
@@ -120,9 +96,8 @@ void Server::readingLoop(int epoll_fd, epoll_event ev, epoll_event *events)
 			int server = 0;
 			if (events[i].events & EPOLLERR || events[i].events & EPOLLHUP)
 			{
-				std::cerr << "epoll error" << std::endl;
 				close(events[i].data.fd);
-				continue;
+				throw std::runtime_error("epoll error");
 			}
 			if ((server = fd_is_server(events[i].data.fd, this->sockets_fd)) > 0)
 			{
@@ -146,18 +121,15 @@ void Server::acceptConnection(int server, int epoll_fd, epoll_event ev)
 {
 	int new_connection = accept(server, NULL, NULL);
 	if (new_connection < 0)
-	{
-		std::cerr << "accept() failed" << std::endl;
-		exit(EXIT_FAILURE);
-	}
+		throw std::runtime_error("accept() failed");
 	std::cout << "New client connection to server accepted" << std::endl;
 	setSocketNonBlocking(new_connection);
 	ev.events = EPOLLIN | EPOLLET;
 	ev.data.fd = new_connection;
 	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, new_connection, &ev) < 0)
 	{
-		std::cerr << "epoll_ctl failed" << std::endl;
 		close(new_connection);
+		throw std::runtime_error("epoll_ctl() failed");
 	}
 }
 
@@ -182,9 +154,7 @@ void Server::receiveRequest(int fd, epoll_event ev, int epoll_fd)
 void Server::sendResponse(int fd, epoll_event ev, int epoll_fd)
 {
 	if (send(fd, response.c_str(), response.size(), 0) < 0)
-	{
-		errorAndExit("send() failed");
-	}
+		throw std::runtime_error("send() failed");
 	std::cout << "Response sent" << response << std::endl;
 	ev.events = EPOLLIN;
 	ev.data.fd = fd;
