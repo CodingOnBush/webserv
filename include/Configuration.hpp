@@ -66,7 +66,7 @@ class Configuration
 {
 	private:
 		std::string							m_configFile;// maybe remove it later
-		std::vector<ServerBlock>			m_serverBlocks;
+		std::vector<ServerBlock>			m_serverBlocks; // we need to check that we can not setup the same port multiple times 
 
 		std::stringstream					m_content;
 		std::map<std::string, directives>	m_directives;
