@@ -1,61 +1,97 @@
 #include "Response.hpp"
 
-void Response::setStatusLine()
-{
-	statusLine = "HTTP/1.1 200 OK\n";
-	// statusLine += req.getVersion() + " ";
-	// statusLine += std::to_string(resp.status) + " ";
-	// statusLine += getStatusMessage();
-}
+Response::Response(Request &req) : req(req) {};
 
+Response::~Response() {};
+
+std::string Response::getStatusMsg(int code)
+{
+	switch (code)
+	{
+	case 200:
+		return "OK";
+	case 201:
+		return "Created";
+	case 202:
+		return "Accepted";
+	case 204:
+		return "No Content";
+	case 400:
+		return "Bad Request";
+	case 401:
+		return "Unauthorized";
+	case 403:
+		return "Forbidden";
+	case 404:
+		return "Not Found";
+	case 405:
+		return "Method Not Allowed";
+	case 409:
+		return "Conflict";
+	case 411:
+		return "Length Required";
+	case 413:
+		return "Payload Too Large";
+	case 415:
+		return "Unsupported Media Type";
+	case 500:
+		return "Internal Server Error";
+	case 501:
+		return "Not Implemented";
+	case 505:
+		return "HTTP Version Not Supported";
+	}
+	return "Internal Server Error";
+}
 void Response::setBody(std::string const &body)
 {
 	this->body = body;
 }
-
-void Response::setResponse()
+void Response::setStatusLine()
 {
-	response = statusLine;
-	// response += getHeaders();
-	response += body;
+	std::stringstream ss;
+	ss << "HTTP/" << req.getVersion() << " " << statusCode << " " << getStatusMsg(statusCode) << "\n";
+	statusLine = ss.str();
 }
-void Response::handleGetRequest(Request &req, Configuration &config)
+
+void Response::createResponseStr()
 {
-	(void)req;
-	(void)config;
+	std::stringstream ss;
+	// to do: add headers to response
+	ss << statusLine << body << "\n";
+	response = ss.str();
+}
+void Response::handleGetRequest()
+{
 	setStatusLine();
 	// std::string headers = setHeaders(req, config, resp);
 	setBody("<!DOCTYPE html><html lang=\"en\"><head>  <title>A simple webpage</title></head>"
-        "<body>  <h1>Simple HTML webpage</h1>  <p>Hello, world!</p></body></html>\r\n\r\n");
+			"<body>  <h1>Simple HTML webpage</h1>  <p>Hello, world!</p></body></html>\r\n\r\n");
 	setStatusLine();
-	setResponse();
+	createResponseStr();
 }
 
-void Response::handlePostRequest(Request &req, Configuration &config)
+void Response::handlePostRequest()
 {
-	(void)req;
-	(void)config;
 	return;
 }
 
-void Response::handleDeleteRequest(Request &req, Configuration &config)
+void Response::handleDeleteRequest()
 {
-	(void)req;
-	(void)config;
 	return;
 }
-std::string Response::getResponse(Request &req, Configuration &config)
+std::string Response::getResponse()
 {
 	switch (req.getMethod())
 	{
 	case GET:
-		handleGetRequest(req, config);
+		handleGetRequest();
 		break;
 	case POST:
-		handlePostRequest(req, config);
+		handlePostRequest();
 		break;
 	case DELETE:
-		handleDeleteRequest(req, config);
+		handleDeleteRequest();
 		break;
 	}
 	return response;
