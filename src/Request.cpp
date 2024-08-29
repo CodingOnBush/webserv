@@ -56,6 +56,7 @@ void Request::setMethod(const std::string &str)
     else if (str == "DELETE")
         this->method = DELETE;
     else
+        this->method = UNKNOWN;
         throw std::logic_error("Method is not supported");
 }
 

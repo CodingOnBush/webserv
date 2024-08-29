@@ -12,7 +12,8 @@
 enum http_method {
 	GET,
 	POST,
-	DELETE
+	DELETE,
+	UNKNOWN
 };
 
 enum directives {
