@@ -8,6 +8,7 @@
 #include <map>
 #include <cstddef>
 #include <sstream>
+#include <cstdlib>// for std::atoi
 
 enum http_method {
 	GET,
@@ -81,23 +82,19 @@ class Configuration
 		// and more
 
 		void		initDirectiveMap();
-		void		parseConfigFile();
-		void		parseServerBlock(std::stringstream &content);
-		void		parseLocationBlock(std::stringstream &content, ServerBlock &serverBlock);
-		void		setLocationValues(std::string const &expression, std::string const &value, LocationBlock &locationBlock);
-		void		setServerValues(std::string const &expression, std::string const &value, ServerBlock &serverBlock);
+		
 		std::string	extractDirective(std::string const &line);
 		std::string	extractValue(std::string const &line);
+		void		parseServerBlock(std::stringstream &content);
+		void		parseLocationBlock(std::stringstream &content, ServerBlock &serverBlock, std::string const &line);
+		
+		void		setLocationValues(std::string const &expression, std::string const &value, LocationBlock &locationBlock);
+		void		setServerValues(std::string const &expression, std::string const &value, ServerBlock &serverBlock);
 
 		void		setListen(std::string const &value, ServerBlock &serverBlock);
 		void		setName(std::string const &value, ServerBlock &serverBlock);
-		void		setServerRoot(std::string const &value, ServerBlock &serverBlock);
 		void		setErrorPage(std::string const &value, ServerBlock &serverBlock);
-		void		setServerClientMaxBodySize(std::string const &value, ServerBlock &serverBlock);
-
-		void		setLocationRoot(std::string const &value, LocationBlock &locationBlock);
 		void		setAlias(std::string const &value, LocationBlock &locationBlock);
-		void		setLocationClientMaxBodySize(std::string const &value, LocationBlock &locationBlock);
 		void		setAutoindex(std::string const &value, LocationBlock &locationBlock);
 		void		setIndex(std::string const &value, LocationBlock &locationBlock);
 		void		setRedirect(std::string const &value, LocationBlock &locationBlock);
@@ -105,7 +102,14 @@ class Configuration
 		void		setCgi(std::string const &value, LocationBlock &locationBlock);
 		void		setUploadLocation(std::string const &value, LocationBlock &locationBlock);
 		void		setMethod(std::string const &value, LocationBlock &locationBlock);
+		
+		void		setServerRoot(std::string const &value, ServerBlock &serverBlock);
+		void		setServerClientMaxBodySize(std::string const &value, ServerBlock &serverBlock);
 
+		void		setLocationRoot(std::string const &value, LocationBlock &locationBlock);
+		void		setLocationClientMaxBodySize(std::string const &value, LocationBlock &locationBlock);
+
+		void		parseConfigFile();
 	public:
 		Configuration(std::string const &t_configFile);
 		~Configuration();

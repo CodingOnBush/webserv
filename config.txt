@@ -54,9 +54,9 @@ server {
 }
 
 server {
-	listen 1313;
+	listen 1315;
 	server_name ptdr.com;
-	location / {
+	location /salut {
 		root ./web/staticSite/;
 				index StaticWs.html;
 	}

@@ -1,4 +1,25 @@
 # Instructions from the subject
+
+## TODO
+if a the root directive in a location block isn't defined, I have to set it as the root of the server block.
+
+
+Is it possible ?
+server
+	localhost:8080
+server
+	127.0.0.42:8080
+
+maybe I can use std::set ?
+
+I need to check the evaluation sheet.
+
+what they need ?
+- request header : server_name
+- ip address and port : listen
+
+
+
 ## Uderstand the subject
 **_Choose the port and host of each ’server’._**
 - server block to be able to have several servers in the configuration file.\
