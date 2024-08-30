@@ -5,6 +5,7 @@
 #include <sys/epoll.h>
 #include <vector>
 #include <map>
+#include <set>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +14,7 @@
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
+#include <poll.h>
 #include "Request.hpp"
 #include "Configuration.hpp"
 
@@ -54,10 +56,22 @@ class Server
 		std::set<int>	listenFds;
 		std::vector< struct pollfd > pollFds;
 		struct sockaddr_in servaddr;
+		std::vector<Request> requests;
+		std::string response;
+		
  
 	public:
 	Server();
+	Server(const Configuration &config);
 	~Server();
-	void setServerSockets(Configuration &config);
+	void addToPoll(int fd);
 	void monitorFds();
+	void setSocketNonBlocking(int socket_fd);
+	void acceptConnection(int fd);
+	void receiveRequest(int fd);
+	void setResponse(std::string response);
+	void sendResponse(int fd);
+	std::string setErrorMessage();
+	void startServer();
+	void setServerSockets(const Configuration &config);
 };

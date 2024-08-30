@@ -65,7 +65,7 @@ class Configuration
 {
 	private:
 		std::string							m_configFile;// maybe remove it later
-		std::vector<ServerBlock>			m_serverBlocks;
+		// std::vector<ServerBlock>			m_serverBlocks;
 
 		std::stringstream					m_content;
 		std::map<std::string, directives>	m_directives;
@@ -82,6 +82,7 @@ class Configuration
 		void	initDirectiveMap();
 
 	public:
+		std::vector<ServerBlock>			m_serverBlocks;
 		Configuration(std::string const &t_configFile);
 		~Configuration();
 		// std::vector<int>			getPorts() const;

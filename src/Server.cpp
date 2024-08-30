@@ -1,4 +1,4 @@
-#include "../include/Server.hpp"
+// #include "../include/Server.hpp"
 
 // Server::Server()
 // {
@@ -193,9 +193,9 @@
 // 		this->response += response;
 // }
 
-void Server::setServerSockets(Configuration &config)
+void Server::setServerSockets(const Configuration &config)
 {
-	for (std::vector<ServerBlock>::iterator it = config.m_serverBlocks.begin(); it != config.m_serverBlocks.end(); it++)
+	for (std::vector<ServerBlock>::const_iterator it = config.m_serverBlocks.begin(); it != config.m_serverBlocks.end(); it++)
 	{
 		int socket_fd;
 		int opt = 1;
@@ -207,7 +207,7 @@ void Server::setServerSockets(Configuration &config)
 		servaddr.sin_family = AF_INET;
 		servaddr.sin_addr.s_addr = INADDR_ANY;
 		servaddr.sin_port = htons(it->port);
-		if (bind(socket_fd, &servaddr, sizeof(servaddr)) < 0)
+		if (bind(socket_fd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
 			throw std::runtime_error("bind() failed");
 		if (listen(socket_fd, MAX_CLIENTS) < 0)
 			throw std::runtime_error("listen() failed");
@@ -233,13 +233,16 @@ void Server::monitorFds()
 	}
 }
 
+Server::Server()
+{
+}
+
 Server::Server(const Configuration &config)
 {
 	try
 	{
 		setServerSockets(config);
 		monitorFds();
-		bindAndListen();
 	}
 	catch(const std::exception& e)
 	{
@@ -258,7 +261,7 @@ void Server::setSocketNonBlocking(int socket_fd)
 		throw std::runtime_error("fcntl() failed");
 }
 
-void Server::acceptNewConnection(int fd)
+void Server::acceptConnection(int fd)
 {
 	int opt = 1;
 	int new_connection = accept(fd, NULL, NULL);
@@ -268,13 +271,53 @@ void Server::acceptNewConnection(int fd)
 	setSocketNonBlocking(new_connection);
 	setsockopt(new_connection, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
 	addToPoll(new_connection);
+	// ServersToPortSockets.insert(std::pair<ServerBlock, int>(ServersToPortSockets.begin()->first, new_connection));
+	//NOT SURE IF THIS IS THE RIGHT WAY TO DO IT
+}
+
+void Server::receiveRequest(int fd)
+{
+	int return_value = 0;
+	char buffer[BUFFER_SIZE];
+	std::string fullRequest;
+
+	memset(buffer, 0, BUFFER_SIZE);
+	while ((return_value = recv(fd, buffer, BUFFER_SIZE - 1, 0)) > 0)
+	{
+		fullRequest.append(buffer, return_value);
+	}
+	Request req(fullRequest);
+	req.state = "DONE";
+	requests.push_back(req);
+}
+
+std::string Server::setErrorMessage()
+{
+	std::string error = "Something failed!\r\n";
+	error += "\r\n";
+	return error;
+}
+
+void Server::sendResponse(int fd)
+{
+	if (this->requests[fd].state == "ERROR")
+	{
+		std::string error = setErrorMessage();
+		send(fd, error.c_str(), error.length(), 0 );
+		this->requests[fd].state = "SENT";
+		return ;
+	}
+	if (send(fd, response.c_str(), response.size(), 0) < 0)
+			throw std::runtime_error("send() failed");
+	std::cout << "Response sent" << response << std::endl;
+	close(fd);
 }
 
 void Server::startServer()
 {
 	int nfds = 0;
 	int timeout = 1000;
-	int j = 0;
+	// int j = 0;
 
 	while (1)
 	{
@@ -285,23 +328,36 @@ void Server::startServer()
 		{
 			std::cout << "Waiting for connection" << std::endl;
 		}
-		for (int i = 0; i < pollfds.size(); i++)
+		for (size_t i = 0; i < pollFds.size(); i++)
 		{
-			int fd = pollfds[i].fd;
+			int fd = pollFds[i].fd;
 
-			if (pollfds[i].revents == 0)
+			if (pollFds[i].revents == 0)
 				continue;
-			if (pollfds[i].revents & POLLIN)
+			if (pollFds[i].revents & POLLIN)
 			{
 				if ( listenFds.count(fd) == 1 )
 				{
-					acceptNewConnection(currentFd);
+					acceptConnection(fd);
 				}
 				else
 				{
-					readRequest(currentFd);
+					receiveRequest(fd);
 				}
+			}
+			else if (pollFds[i].revents & POLLOUT)
+			{
+				sendResponse(fd);
+				break;
 			}
 		}
 	}
+}
+
+void Server::setResponse(std::string response)
+{
+	if (response.empty())
+		this->response = response;
+	else
+		this->response += response;
 }

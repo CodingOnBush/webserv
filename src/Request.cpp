@@ -85,6 +85,7 @@ void Request::setHeaders(std::istringstream &stream)
     }
 }
 
+
 bool Request::isValidHeader(const std::string &line, std::string &name, std::string &value)
 {
     size_t pos = line.find(':');

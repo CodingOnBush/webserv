@@ -34,6 +34,7 @@ private:
 	bool parseBody(std::string &body);
 
 public:
+	std::string state;
 	Request(const std::string &buffer);
 	~Request();
 	// getters
