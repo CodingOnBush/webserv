@@ -6,6 +6,44 @@ std::vector<int> listenFds;
 std::vector<struct pollfd> pollFdsList;
 std::vector<Request> requests;
 
+void printSeparator()
+{
+	std::cout << "--------------------------------" << std::endl;
+}
+
+void printallinfo()
+{
+	for (std::map<std::pair<std::string, int>, int>::iterator it = socketsToPorts.begin(); it != socketsToPorts.end(); it++)
+	{
+		std::cout << "socket : " << it->second << " port : " << it->first.second << std::endl;
+	}
+	printSeparator();
+	for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
+	{
+		std::cout << "socket : " << it->first << std::endl;
+		std::vector<ServerBlock> serverBlocks = it->second;
+		for (size_t i = 0; i < serverBlocks.size(); i++)
+		{
+			std::cout << "servName : " << serverBlocks[i].serverNames[0] << std::endl;
+		}
+	}
+	printSeparator();
+	for (size_t i = 0; i < listenFds.size(); i++)
+	{
+		std::cout << "listenFd : " << listenFds[i] << std::endl;
+	}
+	printSeparator();
+	for (size_t i = 0; i < pollFdsList.size(); i++)
+	{
+		std::cout << "pollFd : " << pollFdsList[i].fd << std::endl;
+	}
+	printSeparator();
+	for (size_t i = 0; i < requests.size(); i++)
+	{
+		requests[i].printRequest(requests[i]);
+	}
+}
+
 void setNonBlocking(int fd)
 {
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
@@ -33,12 +71,25 @@ int createSocket(ServerBlock serverBlock, struct sockaddr_in servaddr)
 	return socket_fd;
 }
 
-void listenToSockets(){
+void listenToSockets()
+{
 	for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
 	{
 		int socket_fd = it->first;
 		std::vector<ServerBlock> serverBlocks = it->second;
 		listenFds.push_back(socket_fd);
+	}
+}
+
+void rmFromPollWatchlist(int fd)
+{
+	for (size_t i = 0; i < pollFdsList.size(); i++)
+	{
+		if (pollFdsList[i].fd == fd)
+		{
+			pollFdsList.erase(pollFdsList.begin() + i);
+			break;
+		}
 	}
 }
 
@@ -68,6 +119,7 @@ void initiateWebServer(const Configuration &config)
 			if (listen(socket_fd, MAX_CLIENTS) < 0)
 				throw std::runtime_error("listen() failed");
 			socketsToPorts[ipPort] = socket_fd;
+			serversToFd[socket_fd].push_back(serverBlocks[i]);
 		}
 		else
 		{
@@ -100,12 +152,14 @@ void receiveRequest(int fd)
 	int return_value = 0;
 	char buffer[BUFFER_SIZE];
 	std::string fullRequest;
+	int ret_total = 0;
 
-	memset(buffer, 0, BUFFER_SIZE);
 	while ((return_value = recv(fd, buffer, BUFFER_SIZE - 1, 0)) > 0)
 	{
 		fullRequest.append(buffer, return_value);
+		ret_total += return_value;
 	}
+	std::cout << "ret_total" << ret_total << std::endl;
 	Request req(fullRequest);
 	req.printRequest(req);
 	requests.push_back(req);
@@ -118,6 +172,7 @@ void sendResponse(int fd)
 	response += "Content-Length: 13\n\n";
 	response += "Hello World !\r\n\r\n";
 	send(fd, response.c_str(), response.size(), 0);
+	requests[fd].state = "SENT";
 }
 
 int findCount(int fd)
@@ -165,6 +220,11 @@ void runWebserver(void)
 			else if (pollFdsList[i].revents & POLLOUT)
 			{
 				sendResponse(fd);
+			}
+			if (requests[fd].state == "SENT")
+			{
+				// rmFromPollWatchlist(fd);
+				close(fd);
 			}
 		}
 	}

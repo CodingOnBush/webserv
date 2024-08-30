@@ -51,12 +51,13 @@ int main(int ac, char **av)
 	{
 		Configuration config("config.txt");
 		initiateWebServer(config);
-		runWebserver();
+		// printallinfo();
 	}
 	catch (std::exception &e)
 	{
 		std::cerr << "Error: " << e.what() << std::endl;
 		return (1);
 	}
+	runWebserver();
 	return (0);
 }
