@@ -43,7 +43,7 @@ static void	initServerBlock(ServerBlock &serverBlock)
 	serverBlock.serverNames.clear();
 	serverBlock.root = "/";
 	serverBlock.errorPages.clear();
-	serverBlock.clientMaxBodySize.value = "10";
+	serverBlock.clientMaxBodySize.value = "1";
 	serverBlock.clientMaxBodySize.unit = "M";
 	serverBlock.locationBlocks.clear();
 }
@@ -71,8 +71,6 @@ std::string	Configuration::extractValue(std::string const &line)
 		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
 	value.erase(0, value.find_first_not_of(" \t"));
 	value[value.size() - 1] = '\0';
-	value.erase(value.size() - 1);
-	// std::cout << "VALUE : [" << value << "]" << std::endl;
 	return (value);
 }
 
@@ -88,7 +86,6 @@ std::string Configuration::extractDirective(std::string const &line)
 
 void Configuration::setListen(std::string const &value, ServerBlock &serverBlock)
 {
-	// std::cout << "INSIDE SET LISTEN : [" << value << "]" << std::endl;
 	if (value.empty() || value.find(' ') != std::string::npos)
 		throw std::runtime_error("[setListen]Invalid value'" + value + "'");
 	if (value.find(':') != std::string::npos)
@@ -301,7 +298,7 @@ void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &
 		{
 			directive = extractDirective(row);
 			value = extractValue(row);
-			// value.erase(0, directive.size() + 1);
+			value.erase(0, directive.size() + 1);
 			setLocationValues(directive, value, locationBlock);
 		}
 	}
@@ -339,13 +336,13 @@ void	Configuration::parseServerBlock(std::stringstream &content)
 
 void	Configuration::parseConfigFile()
 {
-	std::string			line;
+	std::string	line;
 
 	while (std::getline(m_content, line))
 	{
-		if (line.empty())
+		if (line.empty() || line.erase(line.find_last_not_of(" \t\r" ) + 1).empty() || line[0] == '#')
 			continue;
-		if (line == "server {")
+		else if (line == "server {")
 			parseServerBlock(m_content);
 		else
 			throw std::runtime_error("[parseConfigFile]Unknown directive '" + line + "'");
@@ -354,14 +351,28 @@ void	Configuration::parseConfigFile()
 
 Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_configFile)
 {
-	std::ifstream		file(m_configFile.c_str());
+	std::ifstream	file(m_configFile.c_str());
 
 	initDirectiveMap();
 	if (!file)
 		throw std::runtime_error("Cannot open file " + m_configFile);
 	m_content << file.rdbuf();
 	file.close();
-	parseConfigFile();
+	parseConfigFile();//maybe move what's inside this function here
+	// while(std::getline(file, line))
+	// {
+	// 	if (line.empty() || line.erase(line.find_last_not_of(" \t\r" ) + 1).empty() | line[0] == '#')
+	// 		continue;
+	// 	else if (isSeverBlock(line))
+	// 	{
+	// 		// std::cout << "server block found" << std::endl;
+	// 		parseServerBlock(line);
+	// 	}
+	// 	else
+	// 		throw std::runtime_error("[parseConfigFile]Unknown directive '" + line + "'");
+	// }
+	
+	
 }
 
 Configuration::~Configuration()

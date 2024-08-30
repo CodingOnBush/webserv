@@ -1,15 +1,9 @@
-server {
-	listen 1313;
-	server_name server1 server2;
-}
-
-GET / HTTP\1.1\r\n 
-host: localserver\r\n
-\r\n 
+			
 
 server {
 	listen 1313;
 	server_name ;
+
 	location / {
 		root ./web/pages;
 		autoindex on;

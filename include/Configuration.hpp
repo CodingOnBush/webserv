@@ -118,6 +118,9 @@ class Configuration
 		void	printConfig() const;
 
 		// getters
+		/*
+			We need getter for server_names, ports, etc
+		*/
 };
 
 #endif // CONFIGURATION_HPP
