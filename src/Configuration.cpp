@@ -1,5 +1,23 @@
 #include "../include/Configuration.hpp"
 
+void	Configuration::initDirectiveMap()
+{
+	m_directives["listen"] = LISTEN;
+	m_directives["server_name"] = SERVER_NAME;
+	m_directives["root"] = ROOT;
+	m_directives["error_page"] = ERROR_PAGE;
+	m_directives["client_max_body_size"] = CLIENT_MAX_BODY_SIZE;
+	m_directives["location"] = LOCATION;
+	m_directives["autoindex"] = AUTOINDEX;
+	m_directives["index"] = INDEX;
+	m_directives["return"] = RETURN;
+	m_directives["path_info"] = PATH_INFO;
+	m_directives["cgi"] = CGI;
+	m_directives["alias"] = ALIAS;
+	m_directives["upload_location"] = UPLOAD_LOCATION;
+	m_directives["set_method"] = SET_METHOD;
+}
+
 static void	initLocationBlock(LocationBlock &locationBlock)
 {
 	locationBlock.exactMatch = false;
@@ -27,24 +45,6 @@ static void	initServerBlock(ServerBlock &serverBlock)
 	serverBlock.clientMaxBodySize.value = "10";
 	serverBlock.clientMaxBodySize.unit = "M";
 	serverBlock.locationBlocks.clear();
-}
-
-void	Configuration::initDirectiveMap()
-{
-	m_directives["listen"] = LISTEN;
-	m_directives["server_name"] = SERVER_NAME;
-	m_directives["root"] = ROOT;
-	m_directives["error_page"] = ERROR_PAGE;
-	m_directives["client_max_body_size"] = CLIENT_MAX_BODY_SIZE;
-	m_directives["location"] = LOCATION;
-	m_directives["autoindex"] = AUTOINDEX;
-	m_directives["index"] = INDEX;
-	m_directives["redirect"] = REDIRECT;
-	m_directives["path_info"] = PATH_INFO;
-	m_directives["cgi"] = CGI;
-	m_directives["alias"] = ALIAS;
-	m_directives["upload_location"] = UPLOAD_LOCATION;
-	m_directives["set_method"] = SET_METHOD;
 }
 
 std::string	Configuration::extractValue(std::string const &line)
@@ -84,22 +84,13 @@ void	Configuration::setServerValues(std::string const &expression, std::string c
 		serverBlock.root = value;
 		break;
 	case ERROR_PAGE:
-		// {
-		// 	std::istringstream	iss(value);
-		// 	std::string			errorCode;
-		// 	std::string			uri;
-
-		// 	iss >> errorCode;
-		// 	iss >> uri;
-		// 	serverBlock.errorPages[errorCode] = uri;
-		// }
 		std::cout << "error_page: [" << value << "]" << std::endl;
 		break;
 	case CLIENT_MAX_BODY_SIZE:
 		std::cout << "client_max_body_size: [" << value << "]" << std::endl;
 		break;
 	default:
-		// throw std::runtime_error("[setServerValues]Unknown directive '" + expression + "'");
+		throw std::runtime_error("[setServerValues]Unknown directive '" + expression + "'");
 		break;
 	}
 }
@@ -110,56 +101,54 @@ void	Configuration::setLocationValues(std::string const &expression, std::string
 	{
 	case ROOT:
 		locationBlock.root = value;
-		std::cout << "\troot: [" << value << "]" << std::endl;
+		// std::cout << "\troot: [" << value << "]" << std::endl;
 		break;
 
 	case ALIAS:
 		locationBlock.alias = value;
-		std::cout << "\talias: [" << value << "]" << std::endl;
+		// std::cout << "\talias: [" << value << "]" << std::endl;
 		break;
 
 	case CLIENT_MAX_BODY_SIZE:
-		// {
-		// 	std::istringstream	iss(value);
-		// 	std::string			unit;
-		// 	std::string			val;
-
-		// 	iss >> val;
-		// 	iss >> unit;
-		// 	locationBlock.clientMaxBodySize.value = val;
-		// 	locationBlock.clientMaxBodySize.unit = unit;
-		// }
 		std::cout << "\tclient_max_body_size: [" << value << "]" << std::endl;
 		break;
-	
+
 	case AUTOINDEX:
 		std::cout << "\tautoindex: [" << value << "]" << std::endl;
+		if (value != "on" || value != "off")
+			throw std::runtime_error("Invalid value for autoindex directive");
+		if (value == "on")
+			locationBlock.autoindex = true;
+		if (value == "off")
+			locationBlock.autoindex = false;
+		std::cout << "\tautoindex: [" << locationBlock.autoindex << "]" << std::endl;
 		break;
-	
+
 	case INDEX:
 		std::cout << "\tindex: [" << value << "]" << std::endl;
 		break;
 
-	case REDIRECT:
-		std::cout << "\tredirect: [" << value << "]" << std::endl;
+	case RETURN:
+		std::cout << "\treturn: [" << value << "]" << std::endl;
 		break;
 
 	case PATH_INFO:
 		std::cout << "\tpath_info: [" << value << "]" << std::endl;
 		break;
-	
+
 	case CGI:
 		std::cout << "\tcgi_param: [" << value << "]" << std::endl;
 		break;
 
 	case UPLOAD_LOCATION:
-		std::cout << "\tupload_location: [" << value << "]" << std::endl;
+		// std::cout << "\tupload_location: [" << value << "]" << std::endl;
+		locationBlock.uploadLocation = value;
 		break;
-	
+
 	case SET_METHOD:
 		std::cout << "\tmethod: [" << value << "]" << std::endl;
 		break;
-	
+
 	default:
 		throw std::runtime_error("[setLocationValues]Unknown directive '" + expression + "'");
 		break;

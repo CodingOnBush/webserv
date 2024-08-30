@@ -24,7 +24,7 @@ enum directives {
 	LOCATION,
 	AUTOINDEX,
 	INDEX,
-	REDIRECT,
+	RETURN,
 	PATH_INFO,
 	CGI,
 	UPLOAD_LOCATION,
@@ -76,7 +76,7 @@ class Configuration
 
 		// all the server blocks parsed from the config file
 		std::vector<ServerBlock>			m_serverBlocks;
-		
+
 		// std::vector<int>			_ports; // for vic's part
 		// and more
 
@@ -88,13 +88,13 @@ class Configuration
 		void		setServerValues(std::string const &expression, std::string const &value, ServerBlock &serverBlock);
 		std::string	extractDirective(std::string const &line);
 		std::string	extractValue(std::string const &line);
-		
+
 		void		setListen(std::string const &value, ServerBlock &serverBlock);
 		void		setName(std::string const &value, ServerBlock &serverBlock);
 		void		setServerRoot(std::string const &value, ServerBlock &serverBlock);
 		void		setErrorPage(std::string const &value, ServerBlock &serverBlock);
 		void		setServerClientMaxBodySize(std::string const &value, ServerBlock &serverBlock);
-		
+
 		void		setLocationRoot(std::string const &value, LocationBlock &locationBlock);
 		void		setAlias(std::string const &value, LocationBlock &locationBlock);
 		void		setLocationClientMaxBodySize(std::string const &value, LocationBlock &locationBlock);
@@ -110,7 +110,7 @@ class Configuration
 		Configuration(std::string const &t_configFile);
 		~Configuration();
 		// std::vector<int>			getPorts() const;
-		
+
 		void	printConfig() const;
 
 		// getters

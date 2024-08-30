@@ -5,7 +5,7 @@ server {
 		root ./web/pages;
 		autoindex on;
 		set_method GET|POST|DELETE;
-		upload_file_path ./web/upload;
+		upload_location ./web/upload;
 	}
 	client_max_body_size 10;
 	location /upload/ {

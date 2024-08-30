@@ -1,5 +1,5 @@
 
-#include "Server.hpp"
+// #include "Server.hpp"
 #include "Configuration.hpp"
 
 #define MAX_EV 4096
@@ -9,7 +9,7 @@ int main(int ac, char **av)
 {
 	// signal(SIGINT, SIG_DFL);
 	// parse the config file and set the server ports through the vector
-	
+
 	if (ac != 2)
 	{
 		std::cerr << "Usage: ./webserv <config_file>" << std::endl;
