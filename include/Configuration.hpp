@@ -76,7 +76,7 @@ class Configuration
 		std::stringstream					m_content;
 
 		// all the server blocks parsed from the config file
-		std::vector<ServerBlock>			m_serverBlocks;
+		// std::vector<ServerBlock>			m_serverBlocks;
 
 		// std::vector<int>			_ports; // for vic's part
 		// and more

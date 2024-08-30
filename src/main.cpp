@@ -47,9 +47,16 @@ int main(int ac, char **av)
 {
 	(void)ac;
 	(void)av;
-	Configuration config("config/webserv.conf");
-	initiateWebServer(config);
-	runWebserver();
-
+	try
+	{
+		Configuration config("config.txt");
+		initiateWebServer(config);
+		runWebserver();
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+		return (1);
+	}
 	return (0);
 }
