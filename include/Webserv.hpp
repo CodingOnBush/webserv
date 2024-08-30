@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Server.hpp"
 #include "Request.hpp"
 #include "Configuration.hpp"
 
@@ -23,6 +22,9 @@
 #include <signal.h>
 #include <poll.h>
 
+#define MAX_CLIENTS 32
+#define BUFFER_SIZE 1024
+
 void setNonBlocking(int fd);
 void setOpt(int fd);
 int createSocket(ServerBlock serverBlock, struct sockaddr_in servaddr);
@@ -30,4 +32,6 @@ void listenToSockets();
 void setPollWatchlist(int fd);
 void initiateWebServer(const Configuration &config);
 void acceptConnection(int fd);
+void receiveRequest(int fd);
+void sendResponse(int fd, std::string response);
 void runWebserver(void);

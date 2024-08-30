@@ -1,7 +1,7 @@
 #include "../include/Webserv.hpp"
 
 std::map<std::pair<std::string, int>, int> socketsToPorts;
-std::map<int, std::vector<ServerBlock>> serversToFd;
+std::map<int, std::vector<ServerBlock> > serversToFd;
 std::vector<int> listenFds;
 std::vector<struct pollfd> pollFdsList;
 std::vector<Request> requests;
@@ -27,7 +27,6 @@ int createSocket(ServerBlock serverBlock, struct sockaddr_in servaddr)
 		throw std::runtime_error("socket() failed");
 	setNonBlocking(socket_fd);
 	setOpt(socket_fd);
-	struct sockaddr_in servaddr;
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = INADDR_ANY;
 	servaddr.sin_port = htons(serverBlock.port);
@@ -35,7 +34,7 @@ int createSocket(ServerBlock serverBlock, struct sockaddr_in servaddr)
 }
 
 void listenToSockets(){
-	for (std::map<int, std::vector<ServerBlock>>::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
+	for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
 	{
 		int socket_fd = it->first;
 		std::vector<ServerBlock> serverBlocks = it->second;
@@ -96,7 +95,7 @@ void acceptConnection(int fd)
 	serversToFd[new_connection] = serversToFd[fd];
 }
 
-std::string receiveRequest(int fd)
+void receiveRequest(int fd)
 {
 	int return_value = 0;
 	char buffer[BUFFER_SIZE];
@@ -121,6 +120,17 @@ void sendResponse(int fd)
 	send(fd, response.c_str(), response.size(), 0);
 }
 
+int findCount(int fd)
+{
+	int count = 0;
+	for (size_t i = 0; i < listenFds.size(); i++)
+	{
+		if (listenFds[i] == fd)
+			count++;
+	}
+	return count;
+}
+
 void runWebserver(void)
 {
 	int nfds = 0;
@@ -143,7 +153,7 @@ void runWebserver(void)
 				continue;
 			if (pollFdsList[i].revents & POLLIN)
 			{
-				if (listenFds.count(fd) == 1)
+				if (findCount(fd) == 1)
 				{
 					acceptConnection(fd);
 				}
