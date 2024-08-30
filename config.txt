@@ -1,16 +1,72 @@
 server {
-	listen 80;
-	server_name example.com;
+	listen 1313;
+	server_name server1 server2;
+}
 
+GET / HTTP\1.1\r\n 
+host: localserver\r\n
+\r\n 
+
+server {
+	listen 1313;
+	server_name ;
 	location / {
-		root /var/www/html;
-		index index.html index.htm;
+		root ./web/pages;
+		autoindex on;
+		set_method GET|POST|DELETE;
+		upload_location ./web/upload;
+	}
+	client_max_body_size 10;
+	location /upload/ {
+		root ./web/;
+		index def.html;
+		autoindex on;
+		set_method GET|DELETE;
+		cgi .py /usr/bin/python3;
+		cgi .rb /usr/bin/ruby;
+	}
+	location /SSHKey.crt {
+		root ./web/pages;
+		return https://youtu.be/dQw4w9WgXcQ?feature=shared&t=1;
+	}
+	location /mini/ {
+		set_method GET|POST;
+		root ./web/scripts/;
+		autoindex on;
+		cgi .py /usr/bin/python3;
+		cgi .rb /usr/bin/ruby;
+	}
+	location /python/ {
+		index welcome.py;
+		set_method GET|POST;
+		root ./web/scripts/;
+		cgi .py /usr/bin/python3;
+	}
+	location /ruby/ {
+		index index.html;
+		set_method GET|POST;
+		root ./web/scripts/;
+		cgi .rb /usr/bin/ruby;
 	}
 
-	location /images/ {
-		root /var/www/media;
+	error_page 403 ./web/errors/403.html;
+	error_page 404 ./web/errors/404.html;
+}
+
+server {
+	listen 1312;
+	server_name localhost;
+	location / {
+		root ./web/staticSite/;
+				index StaticWs.html;
 	}
+}
 
-	server_name example.com;
-
+server {
+	listen 1315;
+	server_name ptdr.com;
+	location /salut {
+		root ./web/staticSite/;
+				index StaticWs.html;
+	}
 }
