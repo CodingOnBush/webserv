@@ -71,6 +71,8 @@ std::string	Configuration::extractValue(std::string const &line)
 		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
 	value.erase(0, value.find_first_not_of(" \t"));
 	value[value.size() - 1] = '\0';
+	value.erase(value.size() - 1);
+	// std::cout << "VALUE : [" << value << "]" << std::endl;
 	return (value);
 }
 
@@ -107,11 +109,9 @@ void Configuration::setName(std::string const &value, ServerBlock &serverBlock)
 	std::string	word;
 	std::istringstream	iss(value);
 
-	std::cout << "INSIDE SET NAME : [" << value << "]" << std::endl;
+	// std::cout << "INSIDE SET NAME : [" << value << "]" << std::endl;
 	while (iss >> word)
-	{
-		//
-	}	
+		serverBlock.serverNames.push_back(word);	
 }
 
 void Configuration::setErrorPage(std::string const &value, ServerBlock &serverBlock)
@@ -301,7 +301,7 @@ void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &
 		{
 			directive = extractDirective(row);
 			value = extractValue(row);
-			value.erase(0, directive.size() + 1);
+			// value.erase(0, directive.size() + 1);
 			setLocationValues(directive, value, locationBlock);
 		}
 	}

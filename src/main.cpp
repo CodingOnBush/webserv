@@ -21,7 +21,7 @@ int main(int ac, char **av)
 		std::vector<int> ports;
 		*/
 		Configuration	config(av[1]);
-		// config.printConfig();
+		config.printConfig();
 	}
 	catch (std::exception &e) {
 		std::cerr << "Error: " << e.what() << std::endl;
