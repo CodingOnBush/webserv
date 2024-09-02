@@ -331,6 +331,8 @@ void	Configuration::parseServerBlock(std::stringstream &content)
 			setServerValues(directive, value, server);
 		}
 	}
+	if (server.serverNames.empty())
+		server.serverNames.push_back("webserv");
 	m_serverBlocks.push_back(server);
 }
 
