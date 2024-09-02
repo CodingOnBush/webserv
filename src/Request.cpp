@@ -5,6 +5,8 @@ Request::Request(const std::string &buffer) : buffer(buffer)
     parseRequest();
 };
 
+Request::Request() {};
+
 Request::~Request() {};
 
 std::string Request::getBuffer() const
@@ -85,6 +87,7 @@ void Request::setHeaders(std::istringstream &stream)
         headers[name] = value;
     }
 }
+
 
 bool Request::isValidHeader(const std::string &line, std::string &name, std::string &value)
 {

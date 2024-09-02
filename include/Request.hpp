@@ -35,8 +35,10 @@ private:
 	bool parseBody(std::string &body);
 
 public:
+	std::string state;
 	bool isDir;
 	Request(const std::string &buffer);
+	Request();
 	~Request();
 	// getters
 	std::string getBuffer() const;
