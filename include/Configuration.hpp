@@ -88,6 +88,8 @@ class Configuration
 		void		parseServerBlock(std::stringstream &content);
 		void		parseLocationBlock(std::stringstream &content, ServerBlock &serverBlock, std::string const &line);
 		
+		void		parseServerDirective(std::string const &line, ServerBlock &serverBlock);
+
 		void		setLocationValues(std::string const &expression, std::string const &value, LocationBlock &locationBlock);
 		void		setServerValues(std::string const &expression, std::string const &value, ServerBlock &serverBlock);
 
@@ -109,8 +111,8 @@ class Configuration
 		void		setLocationRoot(std::string const &value, LocationBlock &locationBlock);
 		void		setLocationClientMaxBodySize(std::string const &value, LocationBlock &locationBlock);
 
-		void		parseConfigFile();
 	public:
+		Configuration();
 		Configuration(std::string const &t_configFile);
 		~Configuration();
 		// std::vector<int>			getPorts() const;

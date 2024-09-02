@@ -1,6 +1,11 @@
 #include "../include/Configuration.hpp"
 #include "Configuration.hpp"
 
+static int	isEmptyLine(std::string line)
+{
+	return (line.empty() || line.erase(line.find_last_not_of(" \t\r" ) + 1).empty() || line[0] == '#');
+}
+
 void	Configuration::initDirectiveMap()
 {
 	m_directives["listen"] = LISTEN;
@@ -103,12 +108,12 @@ The server_name directive tells the server:
 */
 void Configuration::setName(std::string const &value, ServerBlock &serverBlock)
 {
-	std::string	word;
 	std::istringstream	iss(value);
+	std::string			word;
 
-	// std::cout << "INSIDE SET NAME : [" << value << "]" << std::endl;
+	
 	while (iss >> word)
-		serverBlock.serverNames.push_back(word);	
+		serverBlock.serverNames.push_back(word);
 }
 
 void Configuration::setErrorPage(std::string const &value, ServerBlock &serverBlock)
@@ -284,13 +289,18 @@ void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &
 	std::string		value;
 
 	initLocationBlock(locationBlock);
-	// std::cout << "location line : [" << line << "]" << std::endl;
-	/*
-	TDOD : I need to extract the path from this location block
-	*/
+	locationBlock.path = line;
+	if (locationBlock.path[locationBlock.path.size() - 1] != '{' || locationBlock.path[locationBlock.path.size() - 2] != ' ')
+		throw std::runtime_error("[parseLocationBlock]Invalid location block '" + locationBlock.path + "'");
+	locationBlock.path.erase(locationBlock.path.size() - 1);
+	if (locationBlock.path.empty() || isEmptyLine(locationBlock.path))
+		throw std::runtime_error("[parseLocationBlock]Invalid location block '" + locationBlock.path + "'");
+	locationBlock.path[locationBlock.path.size() - 1] = '\0';
+	if (locationBlock.path.find(' ') != std::string::npos)
+		throw std::runtime_error("[parseLocationBlock]Invalid location block '" + locationBlock.path + "'");
 	while (std::getline(content, row))
 	{
-		if (row.empty())
+		if (isEmptyLine(row))
 			continue;
 		if (row == "\t}")
 			break;
@@ -299,11 +309,35 @@ void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &
 			directive = extractDirective(row);
 			value = extractValue(row);
 			value.erase(0, directive.size() + 1);
-			setLocationValues(directive, value, locationBlock);
+			setLocationValues(extractDirective(row), value, locationBlock);
 		}
 	}
 	setLocationDefaultValues(serverBlock, locationBlock);
 	serverBlock.locationBlocks.push_back(locationBlock);
+}
+
+void	Configuration::parseServerDirective(std::string const &line, ServerBlock &serverBlock)
+{
+	std::string	directive = line.substr(line.find_first_not_of(" \t"), line.size());
+	std::string	directives[5] = {"listen", "server_name", "root", "error_page", "client_max_body_size"};
+
+	for (int i = 0; i < 5; i++)
+	{
+		if (!directive.rfind(directives[i], 0))
+		{
+			std::string	value = directive.substr(directives[i].size());
+			value = value.substr(value.find_first_not_of(" \t"));
+			if (value[value.size() - 1] != ';')
+				throw std::runtime_error("[parseServerDirective]Directive '" + directive + "' must end with a semicolon");
+			value[value.size() - 1] = '\0';
+			std::cout << "{" << directives[i] << "} : [" << value << "]" << std::endl;
+
+			// setServerValues(directives[i], value, serverBlock);
+
+
+			return;
+		}
+	}
 }
 
 void	Configuration::parseServerBlock(std::stringstream &content)
@@ -313,68 +347,58 @@ void	Configuration::parseServerBlock(std::stringstream &content)
 	std::string	directive;
 	std::string	value;
 
-	// std::cout << std::endl << "\033[0;33;42m----- SERVER -----\033[0m" << std::endl;
 	initServerBlock(server);
 	while (std::getline(content, line))
 	{
-		if (line.empty())
+		if (isEmptyLine(line))
 			continue;
-		if (line.rfind("\tlocation", 0) == 0)
-			parseLocationBlock(content, server, line);
 		else if (line == "}")
 			break;
+		else if (line.rfind("\tlocation", 0) == 0)
+			parseLocationBlock(content, server, line.substr(10));
 		else
 		{
-			directive = extractDirective(line);
-			value = extractValue(line);
-			value.erase(0, directive.size() + 1);
-			setServerValues(directive, value, server);
+			parseServerDirective(line, server);
+			// directive = extractDirective(line);
+			// value = extractValue(line);
+			// value.erase(0, directive.size() + 1);
+			// setServerValues(directive, value, server);
 		}
 	}
+	// std::cout << "server name: " << server.serverNames.size() << std::endl;
 	if (server.serverNames.empty())
-		server.serverNames.push_back("webserv");
-	m_serverBlocks.push_back(server);
-}
-
-void	Configuration::parseConfigFile()
-{
-	std::string	line;
-
-	while (std::getline(m_content, line))
 	{
-		if (line.empty() || line.erase(line.find_last_not_of(" \t\r" ) + 1).empty() || line[0] == '#')
-			continue;
-		else if (line == "server {")
-			parseServerBlock(m_content);
-		else
-			throw std::runtime_error("[parseConfigFile]Unknown directive '" + line + "'");
+		// std::cout << "no server name found, adding default one" << std::endl;
+		server.serverNames.push_back("webserv");
 	}
+	// else
+		// std::cout << "server name found: " << server.serverNames[0] << std::endl;
+	m_serverBlocks.push_back(server);
 }
 
 Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_configFile)
 {
 	std::ifstream	file(m_configFile.c_str());
+	std::string		line;
 
 	initDirectiveMap();
 	if (!file)
 		throw std::runtime_error("Cannot open file " + m_configFile);
-	m_content << file.rdbuf();
+	this->m_content << file.rdbuf();
 	file.close();
-	parseConfigFile();//maybe move what's inside this function here
-	// while(std::getline(file, line))
-	// {
-	// 	if (line.empty() || line.erase(line.find_last_not_of(" \t\r" ) + 1).empty() | line[0] == '#')
-	// 		continue;
-	// 	else if (isSeverBlock(line))
-	// 	{
-	// 		// std::cout << "server block found" << std::endl;
-	// 		parseServerBlock(line);
-	// 	}
-	// 	else
-	// 		throw std::runtime_error("[parseConfigFile]Unknown directive '" + line + "'");
-	// }
-	
-	
+	while (std::getline(this->m_content, line))
+	{
+		if (isEmptyLine(line))
+			continue;
+		else if (line == "server {")
+			parseServerBlock(this->m_content);
+		else
+			throw std::runtime_error("[parseConfigFile]Unknown directive '" + line + "'");
+	}
+}
+
+Configuration::Configuration()
+{
 }
 
 Configuration::~Configuration()
