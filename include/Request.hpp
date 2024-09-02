@@ -12,6 +12,12 @@
 #include <stdexcept>
 #include "Configuration.hpp"
 
+enum requestState
+{
+	RECEIVED,
+	SENT,
+};
+
 class Request
 {
 private:
@@ -22,6 +28,7 @@ private:
 	std::map<std::string, std::string> headers;
 	std::map<std::string, std::string> queries;
 	std::string body;
+	int state;
 	// parsing
 	void parseRequest();
 	void parseRequestLine(const std::string &line);
@@ -35,8 +42,7 @@ private:
 	bool parseBody(std::string &body);
 
 public:
-	std::string state;
-	bool isDir;
+	// bool isDir;
 	Request(const std::string &buffer);
 	Request();
 	~Request();
@@ -47,6 +53,8 @@ public:
 	std::string getVersion() const;
 	std::map<std::string, std::string> getHeaders() const;
 	std::string getBody() const;
+	void setRequestState(int state);
+	int getRequestState();
 	// debug
 	void printRequest(Request &req);
 };

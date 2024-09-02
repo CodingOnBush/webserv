@@ -124,7 +124,7 @@ void receiveRequest(int fd)
 	std::cout << "ret_total" << ret_total << std::endl;
 	Request req(fullRequest);
 	req.printRequest(req);
-	req.state = "RECEIVED";
+	req.setRequestState(RECEIVED);
 	requests.insert(std::make_pair(fd, req));
 }
 
@@ -135,7 +135,7 @@ void sendResponse(int fd)
 	response += "Content-Length: 13\n\n";
 	response += "Hello World !\r\n\r\n";
 	int bytes_sent = send(fd, response.c_str(), response.size(), 0);
-	requests[fd].state = "SENT";
+	requests[fd].setRequestState(SENT);
 }
 
 int findCount(int fd)
@@ -151,12 +151,11 @@ int findCount(int fd)
 
 void runWebserver(void)
 {
-	int nfds = 0;
 	int timeout = 1000;
 
 	while (1)
 	{
-		nfds = poll(&pollFdsList[0], pollFdsList.size(), timeout);
+		int nfds = poll(&pollFdsList[0], pollFdsList.size(), timeout);
 		if (nfds < 0)
 			throw std::runtime_error("poll() failed");
 		if (nfds == 0)
@@ -184,7 +183,7 @@ void runWebserver(void)
 			{
 				sendResponse(fd);
 			}
-			if (requests[fd].state == "SENT")
+			if (requests[fd].getRequestState() == SENT)
 			{
 				rmFromPollWatchlist(fd);
 				serversToFd.erase(fd);

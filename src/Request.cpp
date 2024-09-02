@@ -205,6 +205,15 @@ void Request::parseRequest()
     // parseBody(body);
 }
 
+void Request::setRequestState(int state)
+{
+    this->state = state;
+}
+
+int Request::getRequestState()
+{
+    return state;
+}
 void Request::printRequest(Request &req)
 {
     std::cout << "Request buffer:" << std::endl;
