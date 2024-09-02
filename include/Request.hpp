@@ -55,6 +55,7 @@ public:
 	std::string getBody() const;
 	void setRequestState(int state);
 	int getRequestState();
+	void clearRequest();
 	// debug
 	void printRequest(Request &req);
 };

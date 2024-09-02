@@ -187,6 +187,7 @@ void runWebserver(void)
 			{
 				rmFromPollWatchlist(fd);
 				serversToFd.erase(fd);
+				requests[fd].clearRequest(); // check if it's required
 				requests.erase(fd);
 				// responses[fd].clear();
 				// responses.erase(fd);

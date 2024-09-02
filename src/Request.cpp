@@ -214,6 +214,15 @@ int Request::getRequestState()
 {
     return state;
 }
+
+void Request::clearRequest(void)
+{
+	this->method = 0;
+	this->uri.clear();
+	this->headers.clear();
+	this->state = 0;
+	this->body.clear();
+}
 void Request::printRequest(Request &req)
 {
     std::cout << "Request buffer:" << std::endl;
