@@ -5,6 +5,8 @@ Request::Request(const std::string &buffer) : buffer(buffer)
     parseRequest();
 };
 
+Request::Request() {};
+
 Request::~Request() {};
 
 std::string Request::getBuffer() const

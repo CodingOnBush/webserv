@@ -4,45 +4,46 @@ std::map<std::pair<std::string, int>, int> socketsToPorts;
 std::map<int, std::vector<ServerBlock> > serversToFd;
 std::vector<int> listenFds;
 std::vector<struct pollfd> pollFdsList;
-std::vector<Request> requests;
+std::map<int, Request> requests;
 
-void printSeparator()
-{
-	std::cout << "--------------------------------" << std::endl;
-}
+// void printSeparator()
+// {
+// 	std::cout << "--------------------------------" << std::endl;
+// }
 
-void printallinfo()
-{
-	for (std::map<std::pair<std::string, int>, int>::iterator it = socketsToPorts.begin(); it != socketsToPorts.end(); it++)
-	{
-		std::cout << "socket : " << it->second << " port : " << it->first.second << std::endl;
-	}
-	printSeparator();
-	for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
-	{
-		std::cout << "socket : " << it->first << std::endl;
-		std::vector<ServerBlock> serverBlocks = it->second;
-		for (size_t i = 0; i < serverBlocks.size(); i++)
-		{
-			std::cout << "servName : " << serverBlocks[i].serverNames[0] << std::endl;
-		}
-	}
-	printSeparator();
-	for (size_t i = 0; i < listenFds.size(); i++)
-	{
-		std::cout << "listenFd : " << listenFds[i] << std::endl;
-	}
-	printSeparator();
-	for (size_t i = 0; i < pollFdsList.size(); i++)
-	{
-		std::cout << "pollFd : " << pollFdsList[i].fd << std::endl;
-	}
-	printSeparator();
-	for (size_t i = 0; i < requests.size(); i++)
-	{
-		requests[i].printRequest(requests[i]);
-	}
-}
+// void printallinfo()
+// {
+// 	for (std::map<std::pair<std::string, int>, int>::iterator it = socketsToPorts.begin(); it != socketsToPorts.end(); it++)
+// 	{
+// 		std::cout << "socket : " << it->second << " port : " << it->first.second << std::endl;
+// 	}
+// 	printSeparator();
+// 	for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
+// 	{
+// 		std::cout << "socket : " << it->first << std::endl;
+// 		std::vector<ServerBlock> serverBlocks = it->second;
+// 		for (size_t i = 0; i < serverBlocks.size(); i++)
+// 		{
+// 			std::cout << "servName : " << serverBlocks[i].serverNames[0] << std::endl;
+// 		}
+// 	}
+// 	printSeparator();
+// 	for (size_t i = 0; i < listenFds.size(); i++)
+// 	{
+// 		std::cout << "listenFd : " << listenFds[i] << std::endl;
+// 	}
+// 	printSeparator();
+// 	for (size_t i = 0; i < pollFdsList.size(); i++)
+// 	{
+// 		std::cout << "pollFd : " << pollFdsList[i].fd << std::endl;
+// 	}
+// 	printSeparator();
+	// for (std::map<int, Request>::iterator it = requests.begin(); it != requests.end(); it++)
+	// {
+	// 	std::cout << "request fd : " << it->first << std::endl;
+	// 	std::cout << "request state : " << it->second.state << std::endl;
+	// }
+// }
 
 void setNonBlocking(int fd)
 {
@@ -162,7 +163,9 @@ void receiveRequest(int fd)
 	std::cout << "ret_total" << ret_total << std::endl;
 	Request req(fullRequest);
 	req.printRequest(req);
-	requests.push_back(req);
+	req.state = "RECEIVED";
+	// requests[fd] = req;
+	requests.insert(std::make_pair(fd, req));
 }
 
 void sendResponse(int fd)
@@ -171,7 +174,7 @@ void sendResponse(int fd)
 	response += "Content-Type: text/html\r\n";
 	response += "Content-Length: 13\n\n";
 	response += "Hello World !\r\n\r\n";
-	send(fd, response.c_str(), response.size(), 0);
+	int bytes_sent = send(fd, response.c_str(), response.size(), 0);
 	requests[fd].state = "SENT";
 }
 
@@ -223,7 +226,11 @@ void runWebserver(void)
 			}
 			if (requests[fd].state == "SENT")
 			{
-				// rmFromPollWatchlist(fd);
+				rmFromPollWatchlist(fd);
+				serversToFd.erase(fd);
+				requests.erase(fd);
+				// responses[fd].clear();
+				// responses.erase(fd);
 				close(fd);
 			}
 		}

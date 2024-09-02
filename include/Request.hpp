@@ -36,6 +36,7 @@ private:
 public:
 	std::string state;
 	Request(const std::string &buffer);
+	Request();
 	~Request();
 	// getters
 	std::string getBuffer() const;
