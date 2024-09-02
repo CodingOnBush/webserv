@@ -25,9 +25,6 @@
 #define MAX_CLIENTS 32
 #define BUFFER_SIZE 1024
 
-//debugging functions
-void printallinfo();
-
 //functions
 void setNonBlocking(int fd);
 void setOpt(int fd);

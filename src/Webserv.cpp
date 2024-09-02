@@ -6,45 +6,6 @@ std::vector<int> listenFds;
 std::vector<struct pollfd> pollFdsList;
 std::map<int, Request> requests;
 
-// void printSeparator()
-// {
-// 	std::cout << "--------------------------------" << std::endl;
-// }
-
-// void printallinfo()
-// {
-// 	for (std::map<std::pair<std::string, int>, int>::iterator it = socketsToPorts.begin(); it != socketsToPorts.end(); it++)
-// 	{
-// 		std::cout << "socket : " << it->second << " port : " << it->first.second << std::endl;
-// 	}
-// 	printSeparator();
-// 	for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
-// 	{
-// 		std::cout << "socket : " << it->first << std::endl;
-// 		std::vector<ServerBlock> serverBlocks = it->second;
-// 		for (size_t i = 0; i < serverBlocks.size(); i++)
-// 		{
-// 			std::cout << "servName : " << serverBlocks[i].serverNames[0] << std::endl;
-// 		}
-// 	}
-// 	printSeparator();
-// 	for (size_t i = 0; i < listenFds.size(); i++)
-// 	{
-// 		std::cout << "listenFd : " << listenFds[i] << std::endl;
-// 	}
-// 	printSeparator();
-// 	for (size_t i = 0; i < pollFdsList.size(); i++)
-// 	{
-// 		std::cout << "pollFd : " << pollFdsList[i].fd << std::endl;
-// 	}
-// 	printSeparator();
-	// for (std::map<int, Request>::iterator it = requests.begin(); it != requests.end(); it++)
-	// {
-	// 	std::cout << "request fd : " << it->first << std::endl;
-	// 	std::cout << "request state : " << it->second.state << std::endl;
-	// }
-// }
-
 void setNonBlocking(int fd)
 {
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
@@ -164,7 +125,6 @@ void receiveRequest(int fd)
 	Request req(fullRequest);
 	req.printRequest(req);
 	req.state = "RECEIVED";
-	// requests[fd] = req;
 	requests.insert(std::make_pair(fd, req));
 }
 
