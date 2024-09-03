@@ -49,6 +49,7 @@ void rmFromPollWatchlist(int fd)
 	{
 		if (pollFdsList[i].fd == fd)
 		{
+			close(fd);
 			pollFdsList.erase(pollFdsList.begin() + i);
 			break;
 		}
@@ -162,12 +163,18 @@ void runWebserver(void)
 		{
 			std::cout << "Waiting for connection" << std::endl;
 		}
-		for (size_t i = 0; i < pollFdsList.size(); i++)
+		//The variable j serves as a counter to keep track of the number of file 
+		//descriptors that have events (revents) set. This is necessary because 
+		//the poll function returns the number of file descriptors with events, 
+		//and the loop needs to process exactly that many file descriptors.
+		int j = 0;
+		for (size_t i = 0; i < pollFdsList.size() && j < nfds; i++)
 		{
 			int fd = pollFdsList[i].fd;
 
 			if (pollFdsList[i].revents == 0)
 				continue;
+			j++;
 			if (pollFdsList[i].revents & POLLIN)
 			{
 				if (findCount(fd) == 1)
