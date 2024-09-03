@@ -199,6 +199,7 @@ void runWebserver(void)
 			}
 			else if (pollFdsList[i].revents & POLLOUT)
 			{
+				// CHECK HERE IF THE FULL REQUEST HAS BEEN PARSED!!!
 				sendResponse(fd);
 			}
 			if (requests[fd].getRequestState() == SENT)
