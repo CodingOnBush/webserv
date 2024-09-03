@@ -112,21 +112,30 @@ void acceptConnection(int fd)
 
 void receiveRequest(int fd)
 {
-	int return_value = 0;
 	char buffer[BUFFER_SIZE];
 	std::string fullRequest;
 	int ret_total = 0;
 
-	while ((return_value = recv(fd, buffer, BUFFER_SIZE - 1, 0)) > 0)
+	ssize_t return_value = recv(fd, buffer, BUFFER_SIZE, 0);
+	if (return_value == -1)
+		return;
+	
+	Request &req = requests[fd];
+	if (return_value == 0)
 	{
-		fullRequest.append(buffer, return_value);
-		ret_total += return_value;
+		req.setRequestState(SENT);
+		return;
 	}
-	std::cout << "ret_total" << ret_total << std::endl;
-	Request req(fullRequest);
+	std::stringstream ss;
+	ss.write(buffer, return_value);
+	req.parseRequest(ss);
 	req.printRequest(req);
-	req.setRequestState(RECEIVED);
-	requests.insert(std::make_pair(fd, req));
+	// req.setRequestState(RECEIVED);
+	// requests.insert(std::make_pair(fd, req));
+	// if ( request.state == DONE )
+	// {
+	// 	request.setServer( getServer( clientFd, request.getHeaders()["host"] ) );
+	// }
 }
 
 void sendResponse(int fd)

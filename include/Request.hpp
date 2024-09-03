@@ -12,42 +12,52 @@
 #include <stdexcept>
 #include "Configuration.hpp"
 
+#define CRLF "\r\n" // Carriage Return Line Feed
+#define CRLF2 "\r\n\r\n"
+
 enum requestState
 {
 	RECEIVED,
 	SENT,
 };
 
+enum parsingState
+{
+	REQUEST_LINE,
+	HEADERS,
+	BODY,
+	PARSING_DONE
+};
+
 class Request
 {
 private:
-	std::string buffer;
 	int method;
 	std::string uri;
 	std::string version;
 	std::map<std::string, std::string> headers;
-	std::map<std::string, std::string> queries;
+	// std::map<std::string, std::string> queries;
 	std::string body;
+	int parsingState;
 	int state;
 	// parsing
-	void parseRequest();
 	void parseRequestLine(const std::string &line);
+	void setParsingState(int state);
 	void setUri(const std::string &str);
 	void setMethod(const std::string &str);
 	void setVersion(const std::string &str);
-	void setHeaders(std::istringstream &stream);
+	void setHeaders(std::stringstream &stream);
 	bool isValidHeader(const std::string &line, std::string &name, std::string &value);
 	void parseHeaderName(const std::string &str, std::string &name);
 	void parseHeaderValue(const std::string &str, std::string &value);
-	bool parseBody(std::string &body);
+	void parseBody(std::stringstream &stream);
+	bool hasBody();
 
 public:
 	// bool isDir;
-	Request(const std::string &buffer);
 	Request();
 	~Request();
 	// getters
-	std::string getBuffer() const;
 	int getMethod() const;
 	std::string getUri() const;
 	std::string getVersion() const;
@@ -56,6 +66,7 @@ public:
 	void setRequestState(int state);
 	int getRequestState();
 	void clearRequest();
+	void parseRequest(std::stringstream &stream);
 	// debug
 	void printRequest(Request &req);
 };

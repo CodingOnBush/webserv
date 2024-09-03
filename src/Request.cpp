@@ -1,18 +1,10 @@
-#include "Request.hpp"
+#include "Request.hpp"                                        
 
-Request::Request(const std::string &buffer) : buffer(buffer)
-{
-    parseRequest();
+Request::Request() {
+    this->parsingState = REQUEST_LINE;
 };
 
-Request::Request() {};
-
 Request::~Request() {};
-
-std::string Request::getBuffer() const
-{
-    return buffer;
-}
 
 int Request::getMethod() const
 {
@@ -59,7 +51,7 @@ void Request::setMethod(const std::string &str)
         this->method = DELETE;
     else
         this->method = UNKNOWN; // should result in 400 Bad Request response ?
-        throw std::logic_error("Method is not supported");
+    throw std::logic_error("Method is not supported");
 }
 
 void Request::setVersion(const std::string &str)
@@ -75,7 +67,7 @@ void Request::setVersion(const std::string &str)
     }
 }
 
-void Request::setHeaders(std::istringstream &stream)
+void Request::setHeaders(std::stringstream &stream)
 {
     std::string line;
 
@@ -86,8 +78,13 @@ void Request::setHeaders(std::istringstream &stream)
             break;
         headers[name] = value;
     }
+    std::cout << "Line: " << line << std::endl;
+    if (line.empty() || line == CRLF)
+        setParsingState(BODY);
+    else
+        setParsingState(HEADERS);
+    // std::cout << "Parsing state: " << parsingState << std::endl;
 }
-
 
 bool Request::isValidHeader(const std::string &line, std::string &name, std::string &value)
 {
@@ -97,7 +94,6 @@ bool Request::isValidHeader(const std::string &line, std::string &name, std::str
 
     std::string header_name = line.substr(0, pos);
     std::string header_value = line.substr(pos + 1);
-
     try
     {
         parseHeaderName(header_name, name);
@@ -137,24 +133,28 @@ void Request::parseHeaderValue(const std::string &str, std::string &value)
     }
 }
 
-bool Request::parseBody(std::string &body)
+void Request::parseBody(std::stringstream &stream)
 {
-    (void)body;
-    // unchunking body logic
-    // if (body.empty())
-    //     return true;
-    // std::string newBody = "";
-    // size_t clen = atoi((*this)["Content-Length"].c_str());
-    // if (!((*this)["Transfer-Encoding"] == "chunked")) return;
-    // while (newBody.length() < clen) {
-    //   int position = body.find("\r\n");
-    //   int len = std::strtol(body.substr(0, position).c_str(), NULL, 16);
-    //   body = body.substr(position + 2, body.length());
-    //   newBody.append(this->body.substr(0, len));
-    //   body = body.substr(len + 1, body.length());
-    // }
-    // this->body = newBody;
-    return true;
+    if (!hasBody())
+    {
+        setParsingState(PARSING_DONE);
+        return;
+    }
+    std::string content_length = headers["Content-Length"];
+    std::stringstream ss(content_length);
+    int len;
+    ss >> len;
+      std::string new_body;
+    for (int i = 0; i < len; i++)
+    {
+        if (stream.eof())
+            break;
+        char c;
+        stream.get(c);
+        new_body += c;
+    }
+    this->body += new_body;
+    setParsingState(PARSING_DONE);
 }
 void Request::parseRequestLine(const std::string &line)
 {
@@ -191,18 +191,35 @@ void Request::parseRequestLine(const std::string &line)
         std::cerr << e.what() << std::endl;
     }
 }
-
-void Request::parseRequest()
+bool Request::hasBody()
 {
-    std::string line;
-    std::istringstream stream(buffer);
+    return headers.find("Content-Length") != headers.end();
+}
 
-    // check if buffer is empty and protect
+void Request::setParsingState(int state)
+{
+    this->parsingState = state;
+}
+
+void Request::parseRequest(std::stringstream &stream)
+{
+    std::cout << "Parsing request" << std::endl;
+    std::cout << "STR:" << stream.str() << std::endl;
+    std::string line;
+    std::cout << "END" << std::endl;
+    if (parsingState == BODY)
+    {
+        parseBody(stream);
+        return;
+    }
     std::getline(stream, line);
     parseRequestLine(line);
-    setHeaders(stream);
-    body = buffer.substr(buffer.find("\r\n\r\n") + 4, buffer.length());
-    // parseBody(body);
+    setParsingState(HEADERS);
+    if (parsingState == HEADERS)
+        setHeaders(stream);
+    parseBody(stream);
+    // else
+    // setParsingState(PARSING_DONE);
 }
 
 void Request::setRequestState(int state)
@@ -217,16 +234,14 @@ int Request::getRequestState()
 
 void Request::clearRequest(void)
 {
-	this->method = 0;
-	this->uri.clear();
-	this->headers.clear();
-	this->state = 0;
-	this->body.clear();
+    this->method = 0;
+    this->uri.clear();
+    this->headers.clear();
+    this->state = 0;
+    this->body.clear();
 }
 void Request::printRequest(Request &req)
 {
-    std::cout << "Request buffer:" << std::endl;
-    std::cout << req.getBuffer() << std::endl;
     std::cout << std::string(21, '*') << std::endl;
     std::cout << "Method: " << req.getMethod() << std::endl;
     std::cout << "URI: " << req.getUri() << std::endl;
