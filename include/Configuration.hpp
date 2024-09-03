@@ -82,12 +82,12 @@ class Configuration
 		// and more
 
 		void		initDirectiveMap();
-		
+
 		std::string	extractDirective(std::string const &line);
 		std::string	extractValue(std::string const &line);
 		void		parseServerBlock(std::stringstream &content);
 		void		parseLocationBlock(std::stringstream &content, ServerBlock &serverBlock, std::string const &line);
-		
+
 		void		parseServerDirective(std::string const &line, ServerBlock &serverBlock);
 
 		void		setLocationValues(std::string const &expression, std::string const &value, LocationBlock &locationBlock);
@@ -104,8 +104,8 @@ class Configuration
 		void		setCgi(std::string const &value, LocationBlock &locationBlock);
 		void		setUploadLocation(std::string const &value, LocationBlock &locationBlock);
 		void		setMethod(std::string const &value, LocationBlock &locationBlock);
-		
-		void		setServerRoot(std::string const &value, ServerBlock &serverBlock);
+
+		// void		setServerRoot(std::string const &value, ServerBlock &serverBlock);
 		void		setServerClientMaxBodySize(std::string const &value, ServerBlock &serverBlock);
 
 		void		setLocationRoot(std::string const &value, LocationBlock &locationBlock);

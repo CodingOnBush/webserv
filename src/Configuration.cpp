@@ -1,5 +1,6 @@
 #include "../include/Configuration.hpp"
 #include "Configuration.hpp"
+#include <string>
 
 static int	isEmptyLine(std::string line)
 {
@@ -103,7 +104,7 @@ void Configuration::setListen(std::string const &value, ServerBlock &serverBlock
 }
 
 /*
-The server_name directive tells the server: 
+The server_name directive tells the server:
 "If someone requests example.com, this server should handle it."
 */
 void Configuration::setName(std::string const &value, ServerBlock &serverBlock)
@@ -111,7 +112,7 @@ void Configuration::setName(std::string const &value, ServerBlock &serverBlock)
 	std::istringstream	iss(value);
 	std::string			word;
 
-	
+
 	while (iss >> word)
 		serverBlock.serverNames.push_back(word);
 }
@@ -161,14 +162,6 @@ void	Configuration::setMethod(std::string const &value, LocationBlock &locationB
 {
 }
 
-void Configuration::setServerRoot(std::string const &value, ServerBlock &serverBlock)
-{
-	// std::cout << "INSIDE SET SERVERROOT : [" << value << "]" << std::endl;
-	if (value.empty() || value.find(' ') != std::string::npos)
-		throw std::runtime_error("[setServerRoot]Invalid value'" + value + "'");
-	serverBlock.root = value;
-}
-
 void	Configuration::setServerClientMaxBodySize(std::string const &value, ServerBlock &serverBlock)
 {
 }
@@ -185,37 +178,26 @@ void	Configuration::setLocationClientMaxBodySize(std::string const &value, Locat
 {
 }
 
-void	Configuration::setServerValues(std::string const &expression, std::string const &value, ServerBlock &serverBlock)
+void	Configuration::setServerValues(std::string const &key, std::string const &value, ServerBlock &serverBlock)
 {
-	switch (m_directives[expression])
-	{
-	case LISTEN:
-		// std::cout << "listen: [" << value << "]" << std::endl;
+	std::cout << "{" << key << "} : [" << value << "]" << std::endl;
+
+	if (key == "listen")
 		setListen(value, serverBlock);
-		break;
-	case SERVER_NAME:
-		// std::cout << "server_name: [" << value << "]" << std::endl;
+	else if (key == "server_name")
 		setName(value, serverBlock);
-		break;
-	case ROOT:
-		// the value of the root directive should not contain any space
-		// if (value.find(' ') != std::string::npos)
-		// 	throw std::runtime_error("[setServerValues]Invalid value'" + value + "'");
-		// serverBlock.root = value;
-		setServerRoot(value, serverBlock);
-		break;
-	case ERROR_PAGE:
-		// std::cout << "error_page: [" << value << "]" << std::endl;
-		// setErrorPage(value, serverBlock);
-		break;
-	case CLIENT_MAX_BODY_SIZE:
-		// std::cout << "client_max_body_size: [" << value << "]" << std::endl;
-		// setServerClientMaxBodySize(value, serverBlock);
-		break;
-	default:
-		throw std::runtime_error("[setServerValues]Unknown directive '" + expression + "'");
-		break;
+	else if (key == "root")
+	{
+		if (value.find_first_of(" \t\n\v\f\r") == std::string::npos)
+			throw std::runtime_error("root directive must have only one value or none");
+		serverBlock.root = value;
 	}
+	else if (key == "error_page")
+		setErrorPage(value, serverBlock);
+	else if (key == "client_max_body_size")
+		setServerClientMaxBodySize(value, serverBlock);
+	else
+		throw std::runtime_error("Unknown directive '" + key + "'");
 }
 
 void	Configuration::setLocationValues(std::string const &expression, std::string const &value, LocationBlock &locationBlock)
@@ -318,26 +300,27 @@ void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &
 
 void	Configuration::parseServerDirective(std::string const &line, ServerBlock &serverBlock)
 {
-	std::string	directive = line.substr(line.find_first_not_of(" \t"), line.size());
-	std::string	directives[5] = {"listen", "server_name", "root", "error_page", "client_max_body_size"};
+	std::string	dir = line.substr(line.find_first_not_of(" \t"), line.size());
+	std::string	keys[5] = {"listen", "server_name", "root", "error_page", "client_max_body_size"};
+	std::string	value;
 
 	for (int i = 0; i < 5; i++)
 	{
-		if (!directive.rfind(directives[i], 0))
+		if (!dir.rfind(keys[i], 0))
 		{
-			std::string	value = directive.substr(directives[i].size());
+			value = dir.substr(keys[i].size());
 			value = value.substr(value.find_first_not_of(" \t"));
 			if (value[value.size() - 1] != ';')
-				throw std::runtime_error("[parseServerDirective]Directive '" + directive + "' must end with a semicolon");
+				throw std::runtime_error("[parseServerDirective]Directive '" + dir + "' must end with a semicolon");
 			value[value.size() - 1] = '\0';
-			std::cout << "{" << directives[i] << "} : [" << value << "]" << std::endl;
-
-			// setServerValues(directives[i], value, serverBlock);
+			// std::cout << "{" << keys[i] << "} : [" << value << "]" << std::endl;
+			setServerValues(keys[i], value, serverBlock);
 
 
 			return;
 		}
 	}
+	throw std::runtime_error("[parseServerDirective]Unknown directive '" + dir + "'");
 }
 
 void	Configuration::parseServerBlock(std::stringstream &content)
