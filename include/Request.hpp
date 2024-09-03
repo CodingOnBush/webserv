@@ -12,9 +12,6 @@
 #include <stdexcept>
 #include "Configuration.hpp"
 
-#define CRLF "\r\n" // Carriage Return Line Feed
-#define CRLF2 "\r\n\r\n"
-
 enum requestState
 {
 	RECEIVED,
@@ -67,6 +64,6 @@ public:
 	int getRequestState();
 	void clearRequest();
 	void parseRequest(std::stringstream &stream);
-	// debug
-	void printRequest(Request &req);
 };
+
+void printRequest(Request &req);

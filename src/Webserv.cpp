@@ -129,7 +129,7 @@ void receiveRequest(int fd)
 	std::stringstream ss;
 	ss.write(buffer, return_value);
 	req.parseRequest(ss);
-	req.printRequest(req);
+	// req.printRequest(req);
 	// req.setRequestState(RECEIVED);
 	// requests.insert(std::make_pair(fd, req));
 	// if ( request.state == DONE )
@@ -140,6 +140,7 @@ void receiveRequest(int fd)
 
 void sendResponse(int fd)
 {
+	printRequest(requests[fd]);
 	std::string response = "HTTP/1.1 200 OK\n";
 	response += "Content-Type: text/html\r\n";
 	response += "Content-Length: 13\n\n";

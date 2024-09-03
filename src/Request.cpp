@@ -1,6 +1,7 @@
-#include "Request.hpp"                                        
+#include "Request.hpp"
 
-Request::Request() {
+Request::Request()
+{
     this->parsingState = REQUEST_LINE;
 };
 
@@ -70,20 +71,29 @@ void Request::setVersion(const std::string &str)
 void Request::setHeaders(std::stringstream &stream)
 {
     std::string line;
-
     while (std::getline(stream, line))
     {
-        std::string name, value;
-        if (!isValidHeader(line, name, value) || line.empty())
+        if (!line.empty() && line[line.size() - 1] == '\r')
+        {
+            line.erase(line.size() - 1);
+        }
+
+        if (line.empty())
+        {
+            setParsingState(BODY);
             break;
-        headers[name] = value;
+        }
+        std::string name, value;
+        if (isValidHeader(line, name, value))
+        {
+            headers[name] = value;
+        }
     }
-    std::cout << "Line: " << line << std::endl;
-    if (line.empty() || line == CRLF)
-        setParsingState(BODY);
-    else
+
+    if (parsingState != BODY)
+    {
         setParsingState(HEADERS);
-    // std::cout << "Parsing state: " << parsingState << std::endl;
+    }
 }
 
 bool Request::isValidHeader(const std::string &line, std::string &name, std::string &value)
@@ -144,7 +154,7 @@ void Request::parseBody(std::stringstream &stream)
     std::stringstream ss(content_length);
     int len;
     ss >> len;
-      std::string new_body;
+    std::string new_body;
     for (int i = 0; i < len; i++)
     {
         if (stream.eof())
@@ -203,10 +213,7 @@ void Request::setParsingState(int state)
 
 void Request::parseRequest(std::stringstream &stream)
 {
-    std::cout << "Parsing request" << std::endl;
-    std::cout << "STR:" << stream.str() << std::endl;
     std::string line;
-    std::cout << "END" << std::endl;
     if (parsingState == BODY)
     {
         parseBody(stream);
@@ -218,7 +225,6 @@ void Request::parseRequest(std::stringstream &stream)
     if (parsingState == HEADERS)
         setHeaders(stream);
     parseBody(stream);
-    // else
     // setParsingState(PARSING_DONE);
 }
 
@@ -240,7 +246,7 @@ void Request::clearRequest(void)
     this->state = 0;
     this->body.clear();
 }
-void Request::printRequest(Request &req)
+void printRequest(Request &req)
 {
     std::cout << std::string(21, '*') << std::endl;
     std::cout << "Method: " << req.getMethod() << std::endl;
