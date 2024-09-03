@@ -2,7 +2,7 @@
 
 server {
 	listen 1313;
-	server_name;
+	server_name
 
 	location / {
 		root ./web/pages;

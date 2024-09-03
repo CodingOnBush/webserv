@@ -106,7 +106,8 @@ void Configuration::setListen(std::string const &value, ServerBlock &serverBlock
 	// TODO : listen localhost; but I have port at 0.
 	if (value.empty() || value.find(' ') != std::string::npos)
 		throw std::runtime_error("[setListen]Invalid value'" + value + "'");
-	if (value.find(':') != std::string::npos)
+	std::cout << "value : [" << value << "]" << std::endl;
+	if (value.find_first_of(':') != std::string::npos)
 	{
 		serverBlock.host = value.substr(0, value.find(':'));
 		serverBlock.port = std::atoi(value.substr(value.find(':') + 1).c_str());
@@ -158,11 +159,13 @@ static void	parseNames(std::string const &value, std::vector<std::string> &names
 
 void	Configuration::setServerValues(std::string const &key, std::string const &value, ServerBlock &serverBlock)
 {
-
 	if ((key == "root" || key == "listen" || key == "client_max_body_size") && value.find_first_of(" \t\n\v\f\r") != std::string::npos)
 		throw std::runtime_error("Directive '" + key + "' must have only one value");
 	if (key == "listen")
+	{
+		
 		setListen(value, serverBlock);
+	}
 	else if (key == "server_name")
 		parseNames(value, serverBlock.serverNames);
 	else if (key == "root")
