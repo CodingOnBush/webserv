@@ -51,8 +51,10 @@ void Request::setMethod(const std::string &str)
     else if (str == "DELETE")
         this->method = DELETE;
     else
+    {
         this->method = UNKNOWN; // should result in 400 Bad Request response ?
-    throw std::logic_error("Method is not supported");
+        throw std::logic_error("Method is not supported");
+    }
 }
 
 void Request::setVersion(const std::string &str)

@@ -108,6 +108,7 @@ void acceptConnection(int fd)
 	setOpt(new_connection);
 	setPollWatchlist(new_connection);
 	serversToFd[new_connection] = serversToFd[fd];
+	requests[new_connection] = Request();
 }
 
 void receiveRequest(int fd)
