@@ -1,8 +1,8 @@
 			
 
 server {
-	listen               1313                  ;
-	server_name
+	listen 1313;
+	server_name;
 
 	location / {
 		root ./web/pages;
@@ -10,7 +10,7 @@ server {
 		set_method GET|POST|DELETE;
 		upload_location ./web/upload;
 	}
-	client_max_body_size 10;
+	client_max_body_size 10M;
 	location /upload/ {
 		root ./web/;
 		index def.html;
