@@ -5,6 +5,7 @@ std::map<int, std::vector<ServerBlock> > serversToFd;
 std::vector<int> listenFds;
 std::vector<struct pollfd> pollFdsList;
 std::map<int, Request> requests;
+std::map<int, Response> responses;
 
 void setNonBlocking(int fd)
 {
@@ -124,14 +125,13 @@ void receiveRequest(int fd)
 	Request &req = requests[fd];
 	if (return_value == 0)
 	{
-		req.setRequestState(SENT);
+		req.setRequestState(RECEIVED);
 		return;
 	}
 	std::stringstream ss;
 	ss.write(buffer, return_value);
 	req.parseRequest(ss);
 	// req.printRequest(req);
-	// req.setRequestState(RECEIVED);
 	// requests.insert(std::make_pair(fd, req));
 	// if ( request.state == DONE )
 	// {
@@ -142,12 +142,14 @@ void receiveRequest(int fd)
 void sendResponse(int fd)
 {
 	printRequest(requests[fd]);
-	std::string response = "HTTP/1.1 200 OK\n";
-	response += "Content-Type: text/html\r\n";
-	response += "Content-Length: 13\n\n";
-	response += "Hello World !\r\n\r\n";
-	int bytes_sent = send(fd, response.c_str(), response.size(), 0);
-	requests[fd].setRequestState(SENT);
+	// std::string response = "HTTP/1.1 200 OK\n";
+	// response += "Content-Type: text/html\r\n";
+	// response += "Content-Length: 13\n\n";
+	// response += "Hello World !\r\n\r\n";
+	Response resp(requests[fd]);
+	responses[fd] = resp;
+	int bytes_sent = send(fd, responses[fd].getResponse().c_str(), responses[fd].getResponse().size(), 0);
+	requests[fd].setRequestState(PROCESSED);
 }
 
 int findCount(int fd)
@@ -199,10 +201,12 @@ void runWebserver(void)
 			}
 			else if (pollFdsList[i].revents & POLLOUT)
 			{
-				// CHECK HERE IF THE FULL REQUEST HAS BEEN PARSED!!!
-				sendResponse(fd);
+				if (requests[fd].getParsingState() == PARSING_DONE)
+				{
+					sendResponse(fd);
+				}
 			}
-			if (requests[fd].getRequestState() == SENT)
+			if (requests[fd].getRequestState() == PROCESSED)
 			{
 				rmFromPollWatchlist(fd);
 				serversToFd.erase(fd);

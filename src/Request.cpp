@@ -166,7 +166,10 @@ void Request::parseBody(std::stringstream &stream)
         new_body += c;
     }
     this->body += new_body;
-    setParsingState(PARSING_DONE);
+    std::cout << "Body: " << this->body.size() << std::endl;
+    std::cout << "Content-Length: " << len << std::endl;
+    // if (this->body.size() == len)
+    //     setParsingState(PARSING_DONE);
 }
 void Request::parseRequestLine(const std::string &line)
 {
@@ -213,6 +216,10 @@ void Request::setParsingState(int state)
     this->parsingState = state;
 }
 
+int Request::getParsingState()
+{
+    return this->parsingState;
+}
 void Request::parseRequest(std::stringstream &stream)
 {
     std::string line;
@@ -221,13 +228,15 @@ void Request::parseRequest(std::stringstream &stream)
         parseBody(stream);
         return;
     }
-    std::getline(stream, line);
-    parseRequestLine(line);
-    setParsingState(HEADERS);
+    if (parsingState == REQUEST_LINE)
+    {
+        std::getline(stream, line);
+        parseRequestLine(line);
+        setParsingState(HEADERS);
+    }
     if (parsingState == HEADERS)
         setHeaders(stream);
     parseBody(stream);
-    // setParsingState(PARSING_DONE);
 }
 
 void Request::setRequestState(int state)

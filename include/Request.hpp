@@ -15,7 +15,7 @@
 enum requestState
 {
 	RECEIVED,
-	SENT,
+	PROCESSED,
 };
 
 enum parsingState
@@ -62,6 +62,7 @@ public:
 	std::string getBody() const;
 	void setRequestState(int state);
 	int getRequestState();
+	int getParsingState();
 	void clearRequest();
 	void parseRequest(std::stringstream &stream);
 };

@@ -20,6 +20,7 @@ private:
 	void setBody(std::string const &body);
 
 public:
+	Response();
 	Response(Request &req);
 	~Response();
 	std::string getResponse();
