@@ -101,15 +101,7 @@ std::string Response::setHeaders(Request &req, Configuration &config, Response &
 }
 void Response::handleGetRequest(Configuration &config)
 {
-	Response resp;
-	std::stringstream ss;
-	std::string headers = setHeaders(req, config, resp);
-	// setBody("<!DOCTYPE html><html lang=\"en\"><head>  <title>A simple webpage</title></head>"
-			// "<body>  <h1>Simple HTML webpage</h1>  <p>Hello, world!</p></body></html>\r\n\r\n");
-	setStatusLine();
-	// createResponseStr();
-	ss << statusLine << headers << body << "\n";
-	response = ss.str();
+	createResponseStr();
 }
 
 void Response::handlePostRequest(Configuration &config)

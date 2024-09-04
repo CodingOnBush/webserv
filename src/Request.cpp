@@ -103,9 +103,8 @@ bool Request::isValidHeader(const std::string &line, std::string &name, std::str
     size_t pos = line.find(':');
     if (pos == std::string::npos)
         return false;
-
     std::string header_name = line.substr(0, pos);
-    std::string header_value = line.substr(pos + 1);
+    std::string header_value = line.substr(pos + 2);
     try
     {
         parseHeaderName(header_name, name);
