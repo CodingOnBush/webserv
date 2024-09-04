@@ -36,4 +36,4 @@ void initiateWebServer(const Configuration &config);
 void acceptConnection(int fd);
 void receiveRequest(int fd);
 void sendResponse(int fd, std::string response);
-void runWebserver(void);
+void runWebserver(Configuration &config);
