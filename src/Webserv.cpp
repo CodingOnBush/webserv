@@ -131,21 +131,11 @@ void receiveRequest(int fd)
 	std::stringstream ss;
 	ss.write(buffer, return_value);
 	req.parseRequest(ss);
-	// req.printRequest(req);
-	// requests.insert(std::make_pair(fd, req));
-	// if ( request.state == DONE )
-	// {
-	// 	request.setServer( getServer( clientFd, request.getHeaders()["host"] ) );
-	// }
 }
 
 void sendResponse(int fd, Configuration &config)
 {
 	printRequest(requests[fd]);
-	// std::string response = "HTTP/1.1 200 OK\n";
-	// response += "Content-Type: text/html\r\n";
-	// response += "Content-Length: 13\n\n";
-	// response += "Hello World !\r\n\r\n";
 	Response resp(requests[fd]);
 	responses[fd] = resp;
 	int bytes_sent = send(fd, responses[fd].getResponse(config).c_str(), responses[fd].getResponse(config).size(), 0);

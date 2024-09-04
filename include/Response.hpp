@@ -3,6 +3,7 @@
 #include <map>
 #include "Configuration.hpp"
 #include "Request.hpp"
+#include <dirent.h>
 
 class Configuration;
 class Request;
