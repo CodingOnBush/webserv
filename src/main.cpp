@@ -1,62 +1,54 @@
-#include "Configuration.hpp"
 #include "Webserv.hpp"
 
 #define MAX_EV 4096
 
-
-// int main(int ac, char **av)
-// {
-// 	// signal(SIGINT, SIG_DFL);
-// 	// parse the config file and set the server ports through the vector
-	
-// 	// if (ac != 2)
-// 	// {
-// 	// 	std::cerr << "Usage: ./webserv <config_file>" << std::endl;
-// 	// 	return (1);
-// 	// }
-// 	// try {
-// 	// 	/*
-// 	// 	vic need this :
-// 	// 	std::vector<int> ports;
-// 	// 	*/
-// 	// 	Configuration	config(av[1]);
-// 	// 	config.printConfig();
-// 	// }
-// 	// catch (std::exception &e) {
-// 	// 	std::cerr << "Error: " << e.what() << std::endl;
-// 	// 	return (1);
-// 	// }
-// 	(void)ac;
-// 	(void)av;
-// 	Server server;
-// 	std::vector<int> ports;
-// 	ports.push_back(8080);
-// 	ports.push_back(8081);
-
-// 	server.setResponse("HTTP/1.1 200 OK\n");
-// 	server.setResponse("Content-Type: text/html\r\n");
-// 	server.setResponse("Content-Length: 13\n\n");
-// 	server.setResponse("Hello World !\r\n\r\n");
-// 	// server.startServer(ports);
-	
-// 	// server.CloseServer();
-// 	return (0);
-// }
-
-int main(int ac, char **av)
+int	main(int ac, char **av)
 {
-	(void)ac;
-	(void)av;
-	try
+	// signal(SIGINT, SIG_DFL);
+	// parse the config file and set the server ports through the vector
+	if (ac > 2)
 	{
-		Configuration config("config.txt");
-		initiateWebServer(config);
-		runWebserver();
-	}
-	catch (std::exception &e)
-	{
-		std::cerr << "Error: " << e.what() << std::endl;
+		std::cerr << "Usage: ./webserv <config_file>" << std::endl;
 		return (1);
+	}
+	if (ac == 2)
+	{
+		try
+		{
+			Configuration config(av[1]);
+			config.printConfig();
+			initiateWebServer(config);
+			runWebserver();
+		}
+		catch (std::exception &e)
+		{
+			std::cerr << "Error: " << e.what() << std::endl;
+			return (1);
+		}
+	}
+	else
+	{
+		try
+		{
+			Configuration config;
+			config.printConfig();
+			initiateWebServer(config);
+			runWebserver();
+		}
+		catch (std::exception &e)
+		{
+			std::cerr << "Error: " << e.what() << std::endl;
+			return (1);
+		}
+		return (0);
 	}
 	return (0);
 }
+
+/*
+TODO :
+./webserv config.txt
+	celui ou on a un servername qui fini pas par un ;
+body size only in bytes - changer pour juste avoir un int et pas une struct
+servername directive alone - si toute seule comme ca : "server_name" sans le ;
+*/

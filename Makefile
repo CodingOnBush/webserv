@@ -8,13 +8,13 @@ SRC_DIR	:=	./src
 BIN_DIR	:=	./bin
 
 SRC		:=	$(wildcard $(SRC_DIR)/*.cpp)
-# SRC		:=	$(SRC_DIR)/main.cpp $(SRC_DIR)/Configuration.cpp
 
 OBJ		:=	$(SRC:$(SRC_DIR)/%.cpp=$(BIN_DIR)/%.o)
 
 -include $(wildcard *.d)
 
 all: $(NAME)
+# ./$(NAME) file.conf
 
 $(NAME): $(OBJ)
 	$(CPP) $(CFLAGS) $(OBJ) -I $(INC_DIR) -o $(NAME)

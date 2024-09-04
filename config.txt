@@ -1,14 +1,15 @@
 
 server {
 	listen 1313;
-	server_name ;
+	server_name;
+
 	location / {
 		root ./web/pages;
 		autoindex on;
 		set_method GET|POST|DELETE;
 		upload_location ./web/upload;
 	}
-	client_max_body_size 10;
+	client_max_body_size 10M;
 	location /upload/ {
 		root ./web/;
 		index def.html;

@@ -66,7 +66,7 @@ void setPollWatchlist(int fd)
 void initiateWebServer(const Configuration &config)
 {
 	std::vector<ServerBlock> serverBlocks = config.m_serverBlocks;
-
+std::cout << "serverBlocks.size() = " << serverBlocks.size() << std::endl;
 	for (size_t i = 0; i < serverBlocks.size(); i++)
 	{
 		std::pair<std::string, int> ipPort = std::make_pair(serverBlocks[i].host, serverBlocks[i].port);

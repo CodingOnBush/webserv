@@ -36,3 +36,6 @@ public:
 	// std::map<std::string, std::string> getHeaders() const;
 	// std::string getBody() const;
 };
+
+
+

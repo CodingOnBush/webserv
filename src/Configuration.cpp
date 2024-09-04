@@ -1,27 +1,69 @@
 #include "../include/Configuration.hpp"
 #include "Configuration.hpp"
 
-void	Configuration::initDirectiveMap()
+static std::string	getLocationPath(std::string const &line)
 {
-	m_directives["listen"] = LISTEN;
-	m_directives["server_name"] = SERVER_NAME;
-	m_directives["root"] = ROOT;
-	m_directives["error_page"] = ERROR_PAGE;
-	m_directives["client_max_body_size"] = CLIENT_MAX_BODY_SIZE;
-	m_directives["location"] = LOCATION;
-	m_directives["autoindex"] = AUTOINDEX;
-	m_directives["index"] = INDEX;
-	m_directives["return"] = RETURN;
-	m_directives["path_info"] = PATH_INFO;
-	m_directives["cgi"] = CGI;
-	m_directives["alias"] = ALIAS;
-	m_directives["upload_location"] = UPLOAD_LOCATION;
-	m_directives["set_method"] = SET_METHOD;
+	std::string	res = line;
+
+	if (res.compare(" {") == 0)
+		throw std::runtime_error("Invalid location path");
+	res = res.substr(res.find_first_not_of(" \t"));
+	res[res.size() - 1] = '\0';
+	res[res.size() - 2] = '\0';
+	if (res.empty() || res[0] == '\0')
+		throw std::runtime_error("Invalid location path");
+	if (res.find(' ') != std::string::npos)
+		throw std::runtime_error("Invalid location path");
+	return res;
+}
+
+static bool	isEmptyLine(std::string line)
+{
+	if (line.empty())
+		return true;
+	if (line.find_first_not_of(" \t\r") == std::string::npos)
+		return true;
+	if (line[0] == '#')
+		return true;
+	return false;
+}
+
+static bool	isOnOrOff(std::string const &value)
+{
+	if (!value.compare("on") || !value.compare("off"))
+		throw std::runtime_error("Invalid value '" + value + "'");
+	return (value == "on");
+}
+
+static BodySize	createBodySize(std::string const &value)
+{
+	BodySize	bodySize;
+	std::string	unit;
+	std::string	number;
+
+	if (value.empty() || value[0] == '\0')
+		throw std::runtime_error("client_max_body_size no value");
+	number = value.substr(0, value.find_first_not_of("0123456789"));
+	if (number.empty() || number[0] == '\0')
+		throw std::runtime_error("client_max_body_size no number found");
+	unit = value.substr(value.find_first_not_of("0123456789"));
+	if (unit.size() != 2)
+		throw std::runtime_error("client_max_body_size invalid unit size");
+	if (unit[0] == 'K' || unit[0] == 'k')
+		unit = "K";
+	else if (unit[0] == 'M' || unit[0] == 'm')
+		unit = "M";
+	else if (unit[0] == 'G' || unit[0] == 'g')
+		unit = "G";
+	else
+		throw std::runtime_error("client_max_body_size invalid unit (k/K, m/M, g/G)");
+	bodySize.value = number;
+	bodySize.unit = unit;
+	return bodySize;
 }
 
 static void	initLocationBlock(LocationBlock &locationBlock)
 {
-	locationBlock.exactMatch = false;
 	locationBlock.path = "";
 	locationBlock.root = "";
 	locationBlock.alias = "";
@@ -43,7 +85,7 @@ static void	initServerBlock(ServerBlock &serverBlock)
 	serverBlock.serverNames.clear();
 	serverBlock.root = "/";
 	serverBlock.errorPages.clear();
-	serverBlock.clientMaxBodySize.value = "10";
+	serverBlock.clientMaxBodySize.value = "1";
 	serverBlock.clientMaxBodySize.unit = "M";
 	serverBlock.locationBlocks.clear();
 }
@@ -59,39 +101,13 @@ static void	setLocationDefaultValues(ServerBlock &serverBlock, LocationBlock &lo
 	}
 }
 
-std::string	Configuration::extractValue(std::string const &line)
-{
-	std::istringstream	iss(line);
-	std::string			value;
-
-	std::getline(iss, value);
-	if (value.empty())
-		throw std::runtime_error("Directive '" + line + "' must have a value");
-	if (value[value.size() - 1] != ';')
-		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
-	value.erase(0, value.find_first_not_of(" \t"));
-	value[value.size() - 1] = '\0';
-	// value.erase(value.size() - 1);
-	// std::cout << "VALUE : [" << value << "]" << std::endl;
-	return (value);
-}
-
-std::string Configuration::extractDirective(std::string const &line)
-{
-	std::istringstream	iss(line);
-	std::string			directive;
-
-	iss >> directive;
-	directive.erase(0, directive.find_first_not_of(" \t"));
-	return (directive);
-}
-
 void Configuration::setListen(std::string const &value, ServerBlock &serverBlock)
 {
-	// std::cout << "INSIDE SET LISTEN : [" << value << "]" << std::endl;
+	// TODO : listen localhost; but I have port at 0.
 	if (value.empty() || value.find(' ') != std::string::npos)
 		throw std::runtime_error("[setListen]Invalid value'" + value + "'");
-	if (value.find(':') != std::string::npos)
+	std::cout << "value : [" << value << "]" << std::endl;
+	if (value.find_first_of(':') != std::string::npos)
 	{
 		serverBlock.host = value.substr(0, value.find(':'));
 		serverBlock.port = std::atoi(value.substr(value.find(':') + 1).c_str());
@@ -100,45 +116,26 @@ void Configuration::setListen(std::string const &value, ServerBlock &serverBlock
 		serverBlock.port = std::atoi(value.c_str());
 }
 
-/*
-The server_name directive tells the server: 
-"If someone requests example.com, this server should handle it."
-*/
-void Configuration::setName(std::string const &value, ServerBlock &serverBlock)
+void Configuration::addErrorPage(std::string const &value, ServerBlock &serverBlock)
 {
-	std::string	word;
-	std::istringstream	iss(value);
+	std::string	code;
+	std::string	uri;
 
-	// std::cout << "INSIDE SET NAME : [" << value << "]" << std::endl;
-	while (iss >> word)
-		serverBlock.serverNames.push_back(word);	
-}
-
-void Configuration::setErrorPage(std::string const &value, ServerBlock &serverBlock)
-{
-}
-
-void	Configuration::setAlias(std::string const &value, LocationBlock &locationBlock)
-{
-	// std::cout << "INSIDE SET ALIAS : [" << value << "]" << std::endl;
-	if (value.empty() || value.find(' ') != std::string::npos)
-		throw std::runtime_error("[setAlias]Invalid value'" + value + "'");
-	locationBlock.alias = value;
-}
-
-void	Configuration::setAutoindex(std::string const &value, LocationBlock &locationBlock)
-{
-}
-
-void	Configuration::setIndex(std::string const &value, LocationBlock &locationBlock)
-{
+	if (value.empty() || value.find_first_of(" \t") == std::string::npos)
+		throw std::runtime_error("error_page wrong format.");
+	code = value.substr(0, value.find_first_of(" \t"));
+	if (code.find_first_not_of("0123456789") != std::string::npos)
+		throw std::runtime_error("error_page code must be a number.");
+	// TODO : check if code is a valid http code
+	uri = value.substr(value.find_first_not_of(" \t", code.size()));
+	if (uri.empty() || uri[0] == '\0')
+		throw std::runtime_error("error_page uri is empty.");
+	if (uri.find_first_of(" \t") != std::string::npos)
+		throw std::runtime_error("error_page uri must be a single value.");
+	serverBlock.errorPages[code] = uri;
 }
 
 void	Configuration::setRedirect(std::string const &value, LocationBlock &locationBlock)
-{
-}
-
-void	Configuration::setPathInfo(std::string const &value, LocationBlock &locationBlock)
 {
 }
 
@@ -146,136 +143,91 @@ void	Configuration::setCgi(std::string const &value, LocationBlock &locationBloc
 {
 }
 
-void	Configuration::setUploadLocation(std::string const &value, LocationBlock &locationBlock)
-{
-	// std::cout << "INSIDE SET UPLOADLOCATION : [" << value << "]" << std::endl;
-	// if I found a space inside the value, I will throw an exception
-	if (value.empty() || value.find(' ') != std::string::npos)
-		throw std::runtime_error("[setUploadLocation]Invalid value'" + value + "'");
-	locationBlock.uploadLocation = value;
-}
 
 void	Configuration::setMethod(std::string const &value, LocationBlock &locationBlock)
 {
 }
 
-void Configuration::setServerRoot(std::string const &value, ServerBlock &serverBlock)
+static void	parseNames(std::string const &value, std::vector<std::string> &names)
 {
-	// std::cout << "INSIDE SET SERVERROOT : [" << value << "]" << std::endl;
-	if (value.empty() || value.find(' ') != std::string::npos)
-		throw std::runtime_error("[setServerRoot]Invalid value'" + value + "'");
-	serverBlock.root = value;
+	std::istringstream	iss(value);
+	std::string			word;
+
+	while (iss >> word && word [0] != '\0')
+		names.push_back(word);
 }
 
-void	Configuration::setServerClientMaxBodySize(std::string const &value, ServerBlock &serverBlock)
+void	Configuration::setServerValues(std::string const &key, std::string const &value, ServerBlock &serverBlock)
 {
-}
-
-void	Configuration::setLocationRoot(std::string const &value, LocationBlock &locationBlock)
-{
-	// std::cout << "INSIDE SET LOCATIONROOT : [" << value << "]" << std::endl;
-	if (value.empty() || value.find(' ') != std::string::npos)
-		throw std::runtime_error("[setLocationRoot]Invalid value'"+ value + "'");
-	if (!value.empty())
-		locationBlock.root = value;
-}
-void	Configuration::setLocationClientMaxBodySize(std::string const &value, LocationBlock &locationBlock)
-{
-}
-
-void	Configuration::setServerValues(std::string const &expression, std::string const &value, ServerBlock &serverBlock)
-{
-	switch (m_directives[expression])
+	if ((key == "root" || key == "listen" || key == "client_max_body_size") && value.find_first_of(" \t\n\v\f\r") != std::string::npos)
+		throw std::runtime_error("Directive '" + key + "' must have only one value");
+	if (key == "listen")
 	{
-	case LISTEN:
-		// std::cout << "listen: [" << value << "]" << std::endl;
+		
 		setListen(value, serverBlock);
-		break;
-	case SERVER_NAME:
-		// std::cout << "server_name: [" << value << "]" << std::endl;
-		setName(value, serverBlock);
-		break;
-	case ROOT:
-		// the value of the root directive should not contain any space
-		// if (value.find(' ') != std::string::npos)
-		// 	throw std::runtime_error("[setServerValues]Invalid value'" + value + "'");
-		// serverBlock.root = value;
-		setServerRoot(value, serverBlock);
-		break;
-	case ERROR_PAGE:
-		// std::cout << "error_page: [" << value << "]" << std::endl;
-		// setErrorPage(value, serverBlock);
-		break;
-	case CLIENT_MAX_BODY_SIZE:
-		// std::cout << "client_max_body_size: [" << value << "]" << std::endl;
-		// setServerClientMaxBodySize(value, serverBlock);
-		break;
-	default:
-		throw std::runtime_error("[setServerValues]Unknown directive '" + expression + "'");
-		break;
 	}
+	else if (key == "server_name")
+		parseNames(value, serverBlock.serverNames);
+	else if (key == "root")
+		serverBlock.root = value;
+	else if (key == "error_page")
+		addErrorPage(value, serverBlock);
+	else if (key == "client_max_body_size")
+		serverBlock.clientMaxBodySize = createBodySize(value);
+	else
+		throw std::runtime_error("[setServerValues]Unknown directive '" + key + "'");
 }
 
-void	Configuration::setLocationValues(std::string const &expression, std::string const &value, LocationBlock &locationBlock)
+void	Configuration::setLocationValues(std::string const &key, std::string const &value, LocationBlock &locationBlock)
 {
-	directives d = m_directives[expression];
+	if ((key == "root" || key == "alias" || key == "client_max_body_size" || key == "autoindex" || key == "path_info" || key == "upload_location") && value.find_first_of(" \t\n\v\f\r") != std::string::npos)
+		throw std::runtime_error("Directive '" + key + "' must have only one value");
+	if (key == "root")
+		locationBlock.root = value;
+	else if (key == "alias")
+		locationBlock.alias = value;
+	else if (key == "client_max_body_size")
+		locationBlock.clientMaxBodySize = createBodySize(value);
+	else if (key == "autoindex")
+		locationBlock.autoindex = isOnOrOff(value);
+	else if (key == "index")
+		parseNames(value, locationBlock.indexes);
+	else if (key == "return")
+		setRedirect(value, locationBlock);
+	else if (key == "path_info")
+		locationBlock.pathInfo = isOnOrOff(value);
+	else if (key == "cgi")
+		setCgi(value, locationBlock);
+	else if (key == "upload_location")
+		locationBlock.uploadLocation = value;
+	else if (key == "set_method")
+		setMethod(value, locationBlock);
+	else
+		throw std::runtime_error("[setLocationValues]Unknown directive '" + key + "'");
+}
 
-	// if I found a space inside the value of a directive that should not have one
-	if ((d == ROOT || d == ALIAS || d == UPLOAD_LOCATION) && value.find(' ') != std::string::npos)
-		throw std::runtime_error("[setLocationValues]Invalid value'" + value + "'");
-	switch (d) {
-		case ROOT:
-			// locationBlock.root = value;
-			setLocationRoot(value, locationBlock);
-			break;
+void	Configuration::parseLocationDirective(std::string &line, LocationBlock &locationBlock)
+{
+	std::string	dir = line.substr(line.find_first_not_of(" \t"), line.size());
+	std::string	keys[11] = {
+		"root", "alias", "client_max_body_size", 
+		"autoindex", "index", "return", "path_info", 
+		"cgi", "upload_location", "set_method"
+	};
+	std::string	value;
 
-		case ALIAS:
-			// locationBlock.alias = value;
-			setAlias(value, locationBlock);
-			break;
-
-		case UPLOAD_LOCATION:
-			locationBlock.uploadLocation = value;
-			break;
-
-		case CLIENT_MAX_BODY_SIZE:
-			// std::cout << "\tclient_max_body_size: [" << value << "]" << std::endl;
-			// setLocationClientMaxBodySize(value, locationBlock);
-			break;
-
-		case AUTOINDEX:
-			// std::cout << "\tautoindex: [" << value << "]" << std::endl;
-			// setAutoindex(value, locationBlock);
-			break;
-
-		case INDEX:
-			// std::cout << "\tindex: [" << value << "]" << std::endl;
-			// setIndex(value, locationBlock);
-			break;
-
-		case RETURN:
-			// std::cout << "\treturn: [" << value << "]" << std::endl;
-			// setRedirect(value, locationBlock);
-			break;
-
-		case PATH_INFO:
-			// std::cout << "\tpath_info: [" << value << "]" << std::endl;
-			// setPathInfo(value, locationBlock);
-			break;
-
-		case CGI:
-			// std::cout << "\tcgi_param: [" << value << "]" << std::endl;
-			// setCgi(value, locationBlock);
-			break;
-
-		case SET_METHOD:
-			// std::cout << "\tmethod: [" << value << "]" << std::endl;
-			// setMethod(value, locationBlock);
-			break;
-
-		default:
-			throw std::runtime_error("[setLocationValues]Unknown directive '" + expression + "'");
-			break;
+	for (int i = 0; i < 11; i++)
+	{
+		if (!dir.rfind(keys[i], 0))
+		{
+			value = dir.substr(keys[i].size());
+			value = value.substr(value.find_first_not_of(" \t"));
+			if (value[value.size() - 1] != ';')
+				throw std::runtime_error("[parseLocationDirective]Directive '" + dir + "' must end with a semicolon");
+			value[value.size() - 1] = '\0';
+			setLocationValues(keys[i], value, locationBlock);
+			return;
+		}
 	}
 }
 
@@ -286,27 +238,45 @@ void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &
 	std::string		directive;
 	std::string		value;
 
+	if (line[line.size() - 1] != '{' || line[line.size() - 2] != ' ')
+		throw std::runtime_error("Location block must end with a ' {'");
 	initLocationBlock(locationBlock);
-	// std::cout << "location line : [" << line << "]" << std::endl;
-	/*
-	TDOD : I need to extract the path from this location block
-	*/
+	locationBlock.path = getLocationPath(line);
 	while (std::getline(content, row))
 	{
-		if (row.empty())
+		if (isEmptyLine(row))
 			continue;
 		if (row == "\t}")
 			break;
 		else
-		{
-			directive = extractDirective(row);
-			value = extractValue(row);
-			value.erase(0, directive.size() + 1);
-			setLocationValues(directive, value, locationBlock);
-		}
+			parseLocationDirective(row, locationBlock);
 	}
 	setLocationDefaultValues(serverBlock, locationBlock);
+	if (locationBlock.indexes.empty())
+		locationBlock.indexes.push_back("default.html");
 	serverBlock.locationBlocks.push_back(locationBlock);
+}
+
+void	Configuration::parseServerDirective(std::string const &line, ServerBlock &serverBlock)
+{
+	std::string	dir = line.substr(line.find_first_not_of(" \t"), line.size());
+	std::string	keys[5] = {"listen", "server_name", "root", "error_page", "client_max_body_size"};
+	std::string	value;
+
+	for (int i = 0; i < 5; i++)
+	{
+		if (!dir.rfind(keys[i], 0))
+		{
+			value = dir.substr(keys[i].size());
+			value = value.substr(value.find_first_not_of(" \t"));
+			if (value[value.size() - 1] != ';')
+				throw std::runtime_error("[parseServerDirective]Directive '" + dir + "' must end with a semicolon");
+			value[value.size() - 1] = '\0';
+			setServerValues(keys[i], value, serverBlock);
+			return;
+		}
+	}
+	throw std::runtime_error("[parseServerDirective]Unknown directive '" + dir + "'");
 }
 
 void	Configuration::parseServerBlock(std::stringstream &content)
@@ -316,58 +286,83 @@ void	Configuration::parseServerBlock(std::stringstream &content)
 	std::string	directive;
 	std::string	value;
 
-	// std::cout << std::endl << "\033[0;33;42m----- SERVER -----\033[0m" << std::endl;
 	initServerBlock(server);
 	while (std::getline(content, line))
 	{
-		if (line.empty())
+		if (isEmptyLine(line))
 			continue;
-		if (line.rfind("\tlocation", 0) == 0)
-			parseLocationBlock(content, server, line);
 		else if (line == "}")
 			break;
+		else if (line.rfind("\tlocation", 0) == 0)
+			parseLocationBlock(content, server, line.substr(9));
 		else
-		{
-			directive = extractDirective(line);
-			value = extractValue(line);
-			value.erase(0, directive.size() + 1);
-			setServerValues(directive, value, server);
-		}
+			parseServerDirective(line, server);
 	}
+	if (server.serverNames.empty())
+		server.serverNames.push_back("webserv");
 	m_serverBlocks.push_back(server);
 }
 
-void	Configuration::parseConfigFile()
+Configuration::Configuration()
 {
-	std::string			line;
+	ServerBlock	server;
 
-	while (std::getline(m_content, line))
-	{
-		if (line.empty())
-			continue;
-		if (line == "server {")
-			parseServerBlock(m_content);
-		else
-			throw std::runtime_error("[parseConfigFile]Unknown directive '" + line + "'");
-	}
+	initServerBlock(server);
+	m_serverBlocks.push_back(server);
 }
 
 Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_configFile)
 {
-	std::ifstream		file(m_configFile.c_str());
+	std::ifstream	file(m_configFile.c_str());
+	std::string		line;
 
-	initDirectiveMap();
 	if (!file)
 		throw std::runtime_error("Cannot open file " + m_configFile);
-	m_content << file.rdbuf();
+	this->m_content << file.rdbuf();
 	file.close();
-	parseConfigFile();
+	while (std::getline(this->m_content, line))
+	{
+		if (isEmptyLine(line))
+			continue;
+		else if (line == "server {")
+			parseServerBlock(this->m_content);
+		else
+			throw std::runtime_error("Unknown directive '" + line + "'");
+	}
 }
 
 Configuration::~Configuration()
 {
 }
 
+std::vector<ServerBlock> const &Configuration::getServerBlocks() const
+{
+	return m_serverBlocks;
+}
+
+
+// This function can be used to get the body size in bytes
+const int	Configuration::getBodySize(BodySize const &bodySize) const
+{
+	int	weight = std::atoi(bodySize.value.c_str());
+
+	if (bodySize.unit == "K")
+		weight *= 1024;
+	else if (bodySize.unit == "M")
+		weight *= 1024 * 1024;
+	else if (bodySize.unit == "G")
+		weight *= 1024 * 1024 * 1024;
+	return weight;
+}
+
+std::vector<int>	Configuration::getPorts() const
+{
+	std::vector<int>	ports;
+
+	for (std::vector<ServerBlock>::const_iterator it = m_serverBlocks.begin(); it != m_serverBlocks.end(); ++it)
+		ports.push_back(it->port);
+	return ports;
+}
 
 void	Configuration::printConfig() const
 {
@@ -383,13 +378,12 @@ void	Configuration::printConfig() const
 		std::cout << "root: " << it->root << std::endl;
 		std::cout << "errorPages: ";
 		for (std::map<std::string, std::string>::const_iterator it2 = it->errorPages.begin(); it2 != it->errorPages.end(); ++it2)
-			std::cout << it2->first << " " << it2->second << " ";
+			std::cout << it2->first << ":" << it2->second << " ";
 		std::cout << std::endl;
 		std::cout << "clientMaxBodySize: " << it->clientMaxBodySize.value << " " << it->clientMaxBodySize.unit << std::endl;
 		for (std::vector<LocationBlock>::const_iterator it2 = it->locationBlocks.begin(); it2 != it->locationBlocks.end(); ++it2)
 		{
 			std::cout << "--LOCATION--" << std::endl;
-			std::cout << "  exactMatch: " << it2->exactMatch << std::endl;
 			std::cout << "  path: " << it2->path << std::endl;
 			std::cout << "  root: " << it2->root << std::endl;
 			std::cout << "  alias: " << it2->alias << std::endl;
