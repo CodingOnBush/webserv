@@ -159,17 +159,15 @@ void Request::parseBody(std::stringstream &stream)
     std::string new_body;
     for (int i = 0; i < len; i++)
     {
-        if (stream.eof())
-            break;
         char c;
         stream.get(c);
+        if (stream.eof())
+            break;
         new_body += c;
     }
     this->body += new_body;
-    std::cout << "Body: " << this->body.size() << std::endl;
-    std::cout << "Content-Length: " << len << std::endl;
-    // if (this->body.size() == len)
-    //     setParsingState(PARSING_DONE);
+    if (this->body.size() == len)
+        setParsingState(PARSING_DONE);
 }
 void Request::parseRequestLine(const std::string &line)
 {
@@ -223,11 +221,11 @@ int Request::getParsingState()
 void Request::parseRequest(std::stringstream &stream)
 {
     std::string line;
-    if (parsingState == BODY)
-    {
-        parseBody(stream);
-        return;
-    }
+    // if (parsingState == BODY)
+    // {
+    //     parseBody(stream);
+    //     return;
+    // }
     if (parsingState == REQUEST_LINE)
     {
         std::getline(stream, line);
@@ -236,7 +234,10 @@ void Request::parseRequest(std::stringstream &stream)
     }
     if (parsingState == HEADERS)
         setHeaders(stream);
-    parseBody(stream);
+    if (parsingState == BODY)
+    {
+        parseBody(stream);
+    }
 }
 
 void Request::setRequestState(int state)
