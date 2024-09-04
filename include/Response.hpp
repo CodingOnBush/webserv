@@ -23,13 +23,14 @@ public:
 	Response();
 	Response(Request &req);
 	~Response();
-	std::string getResponse();
+	std::string getResponse(Configuration &config);
 	void setStatusCode(int code);
 	void setStatusLine();
 	void createResponseStr();
-	void handleGetRequest();
-	void handlePostRequest();
-	void handleDeleteRequest();
+	void handleGetRequest(Configuration &config);
+	void handlePostRequest(Configuration &config);
+	void handleDeleteRequest(Configuration &config);
+	std::string setHeaders(Request &req, Configuration &config, Response &resp);
 	// std::string getStatusCode() const;
 	// std::string getStatusMsg() const;
 	// void setHeader(const std::string &name, const std::string &value);

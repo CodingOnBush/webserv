@@ -139,7 +139,7 @@ void receiveRequest(int fd)
 	// }
 }
 
-void sendResponse(int fd)
+void sendResponse(int fd, Configuration &config)
 {
 	printRequest(requests[fd]);
 	// std::string response = "HTTP/1.1 200 OK\n";
@@ -148,7 +148,7 @@ void sendResponse(int fd)
 	// response += "Hello World !\r\n\r\n";
 	Response resp(requests[fd]);
 	responses[fd] = resp;
-	int bytes_sent = send(fd, responses[fd].getResponse().c_str(), responses[fd].getResponse().size(), 0);
+	int bytes_sent = send(fd, responses[fd].getResponse(config).c_str(), responses[fd].getResponse(config).size(), 0);
 	requests[fd].setRequestState(PROCESSED);
 }
 
@@ -163,7 +163,7 @@ int findCount(int fd)
 	return count;
 }
 
-void runWebserver(void)
+void runWebserver(Configuration &config)
 {
 	int timeout = 1000;
 
@@ -203,7 +203,7 @@ void runWebserver(void)
 			{
 				if (requests[fd].getParsingState() == PARSING_DONE)
 				{
-					sendResponse(fd);
+					sendResponse(fd, config);
 				}
 			}
 			if (requests[fd].getRequestState() == PROCESSED)

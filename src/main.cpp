@@ -18,7 +18,7 @@ int	main(int ac, char **av)
 			Configuration config(av[1]);
 			config.printConfig();
 			initiateWebServer(config);
-			runWebserver();
+			runWebserver(config);
 		}
 		catch (std::exception &e)
 		{
@@ -33,7 +33,7 @@ int	main(int ac, char **av)
 			Configuration config;
 			config.printConfig();
 			initiateWebServer(config);
-			runWebserver();
+			runWebserver(config);
 		}
 		catch (std::exception &e)
 		{
