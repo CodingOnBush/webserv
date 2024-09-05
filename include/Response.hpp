@@ -4,6 +4,7 @@
 #include "Configuration.hpp"
 #include "Request.hpp"
 #include <dirent.h>
+#include <unistd.h> 
 
 class Configuration;
 class Request;

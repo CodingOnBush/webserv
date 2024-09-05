@@ -52,30 +52,29 @@ void Response::setBody(std::string const &body)
 void Response::setStatusLine()
 {
 	std::stringstream ss;
-	ss << "HTTP/" << req.getVersion() << " " << statusCode << " " << getStatusMsg(statusCode) << "\n";
+	ss << req.getVersion() << " " << statusCode << " " << getStatusMsg(statusCode) << "\n";
 	statusLine = ss.str();
 }
 
 void Response::createResponseStr()
 {
 	std::stringstream ss;
-	std::string statusLine = "HTTP/1.1 200 OK\n";
+	setStatusLine();
 	std::string headers = "Content-Type: text/html\r\nContent-Length: 153\n\n";
 	ss << statusLine << headers << body << "\n";
 	response = ss.str();
 }
 
 std::string Response::setHeaders(Request &req, Configuration &config, Response &resp)
-{	
+{
 	// std::string headers = "Content-Type: text/html\r\nContent-Length: 153\n\n";
 	// return headers;
-	return "";	
+	return "";
 }
 
 void Response::handleGetRequest(Configuration &config)
 {
 	processServerBlock(config, this->req);
-	
 	createResponseStr();
 }
 
@@ -100,8 +99,8 @@ std::string Response::getResponse(Configuration &config)
 		break;
 	case DELETE:
 		handleDeleteRequest(config);
-	// case UNKNOWN:
-	// 	handleUnknownRequest();
+		// case UNKNOWN:
+		// 	handleUnknownRequest();
 		break;
 	}
 	return response;
@@ -110,12 +109,8 @@ std::string Response::getResponse(Configuration &config)
 std::string Response::getPath(std::vector<ServerBlock>::iterator it, std::string uri)
 {
 	std::vector<LocationBlock> locationBlocks = it->locationBlocks;
-
-	std::cout << "URI: " << uri << std::endl;
 	for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++)
 	{
-		std::cout << "PATH: " << it->path << std::endl;
-
 		if (it->path == uri)
 		{
 			return it->root;
@@ -126,29 +121,27 @@ std::string Response::getPath(std::vector<ServerBlock>::iterator it, std::string
 
 void Response::handleDir(std::string path)
 {
-	std::cout << "Root: " << path << std::endl;
 	DIR *directoryPtr = opendir(path.c_str());
 	if (directoryPtr == NULL)
 	{
 		if (errno == ENOENT)
 		{
-			std::cout << "Directory not found" << std::endl;
+			this->statusCode = 404;
 			return;
 		}
 		else if (errno == EACCES)
 		{
-			std::cout << "Directory access denied" << std::endl;
+			this->statusCode = 403;
 			return;
 		}
 		else
 		{
-			std::cout << "Directory error" << std::endl;
+			this->statusCode = 500;
 			return;
 		}
 	}
 	else
 	{
-		std::cout << "Directory found" << std::endl;
 		struct dirent *dir;
 		while ((dir = readdir(directoryPtr)) != NULL)
 		{
@@ -167,11 +160,16 @@ void Response::handleDir(std::string path)
 				}
 				file.close();
 				this->body = body.str();
+				this->statusCode = 200;
 			}
 			else
 			{
-				std::cout << "Failed to open file: " << filePath << std::endl;
+				this->statusCode = 403;
 			}
+		}
+		if (this->statusCode == 0)
+		{
+			this->statusCode = 404;
 		}
 		closedir(directoryPtr);
 	}
