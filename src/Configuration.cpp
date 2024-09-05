@@ -39,7 +39,7 @@ static bool	isEmptyLine(std::string line)
 
 static bool	isOnOrOff(std::string const &value)
 {
-	if (!value.compare("on") || !value.compare("off"))
+	if (value != "on" && value != "off")
 		throw std::runtime_error("Invalid value '" + value + "'");
 	return (value == "on");
 }
@@ -56,7 +56,7 @@ static BodySize	createBodySize(std::string const &value)
 	if (number.empty() || number[0] == '\0')
 		throw std::runtime_error("client_max_body_size no number found");
 	unit = value.substr(value.find_first_not_of("0123456789"));
-	if (unit.size() != 2)
+	if (unit.size() != 1)
 		throw std::runtime_error("client_max_body_size invalid unit size");
 	if (unit[0] == 'K' || unit[0] == 'k')
 		unit = "K";
@@ -115,7 +115,6 @@ void Configuration::setListen(std::string const &value, ServerBlock &serverBlock
 	// TODO : listen localhost; but I have port at 0.
 	if (value.empty() || value.find(' ') != std::string::npos)
 		throw std::runtime_error("[setListen]Invalid value'" + value + "'");
-	std::cout << "value : [" << value << "]" << std::endl;
 	if (value.find_first_of(':') != std::string::npos)
 	{
 		serverBlock.host = value.substr(0, value.find(':'));
