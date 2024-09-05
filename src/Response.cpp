@@ -60,48 +60,22 @@ void Response::createResponseStr()
 {
 	std::stringstream ss;
 	std::string statusLine = "HTTP/1.1 200 OK\n";
-	std::string headers = "Content-Type: text/html\r\nContent-Length: 153\n\n";
+	std::string headers = "Content-Type: text/html\r\nContent-Length: 0\n\n";
 	// std::string body = "<!DOCTYPE html><html lang=\"en\"><head>  <title>A simple webpage</title></head><body>  <h1>Simple HTML webpage</h1>  <p>Hello, world!</p></body></html>\r\n\r\n";
 	ss << statusLine << headers << body << "\n";
 	response = ss.str();
 }
 
 std::string Response::setHeaders(Request &req, Configuration &config, Response &resp)
-{
-	std::map<std::string, std::string> headers = req.getHeaders();
-
-	if (headers.empty())
-	{
-		statusCode = 400;
-		return "";
-	}
-	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-	{
-		if (it->first == "Host")
-		{
-			for (std::vector<ServerBlock>::const_iterator it2 = config.getServerBlocks().begin(); it2 != config.getServerBlocks().end(); it2++)
-			{
-				std::stringstream ss;
-				ss << it2->host << ":" << it2->port;
-				std::cout << "Host1: " << ss.str() << std::endl;
-				std::cout << "Host2: " << it->second << std::endl;
-				if (ss.str() == it->second)
-				{
-					statusCode = 200;
-					std::cout << "Host found" << std::endl;
-					return "Content-Type: text/html\r\nContent-Length: 153\n\n";
-				}
-			}
-		}
-	}
-	return ("No host found");
-	
+{	
 	// std::string headers = "Content-Type: text/html\r\nContent-Length: 153\n\n";
 	// return headers;
+	return "";	
 }
+
 void Response::handleGetRequest(Configuration &config)
 {
-	DIR*	directoryPtr ;
+	DIR*	directoryPtr;
 	// = opendir(_requestLine.absolutePath.c_str());
 	// if (directoryPtr == NULL) {
 	// 	if (errno == ENOENT) {
@@ -112,8 +86,17 @@ void Response::handleGetRequest(Configuration &config)
 	// 		_noBodyResponseDriver(500, "", false);
 	// 	}
 	// 	return ;
-	// }	
+	// }
+	processServerBlock(config, this->req);
+	
 	createResponseStr();
+	// std::stringstream ss;
+	// std::string headers = "Content-Type: text/html\r\nContent-Length: 153\n\n";
+	// // std::string headers = setHeaders(req, config, *this);
+	// std::string body = "<!DOCTYPE html><html lang=\"en\"><head>  <title>A simple webpage</title></head><body>  <h1>Simple HTML webpage</h1>  <p>Hello, world!</p></body></html>\r\n\r\n";
+	// std::string statusLine = "HTTP/1.1 200 OK\n";
+	// ss << statusLine << headers << body << "\n";
+	// response = ss.str();
 }
 
 void Response::handlePostRequest(Configuration &config)

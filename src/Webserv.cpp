@@ -65,8 +65,8 @@ void setPollWatchlist(int fd)
 
 void initiateWebServer(const Configuration &config)
 {
-	std::vector<ServerBlock> serverBlocks = config.m_serverBlocks;
-std::cout << "serverBlocks.size() = " << serverBlocks.size() << std::endl;
+	std::vector<ServerBlock> serverBlocks = config.getServerBlocks();
+	std::cout << "serverBlocks.size() = " << serverBlocks.size() << std::endl;
 	for (size_t i = 0; i < serverBlocks.size(); i++)
 	{
 		std::pair<std::string, int> ipPort = std::make_pair(serverBlocks[i].host, serverBlocks[i].port);
@@ -138,7 +138,8 @@ void sendResponse(int fd, Configuration &config)
 	printRequest(requests[fd]);
 	Response resp(requests[fd]);
 	responses[fd] = resp;
-	int bytes_sent = send(fd, responses[fd].getResponse(config).c_str(), responses[fd].getResponse(config).size(), 0);
+	std::string generatedResponse = responses[fd].getResponse(config);
+	int bytes_sent = send(fd, generatedResponse.c_str(), generatedResponse.size(), 0);
 	requests[fd].setRequestState(PROCESSED);
 }
 
