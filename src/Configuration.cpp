@@ -3,18 +3,27 @@
 
 static std::string	getLocationPath(std::string const &line)
 {
-	std::string	res = line;
+	// std::string	res = line;
 
-	if (res.compare(" {") == 0)
-		throw std::runtime_error("Invalid location path");
-	res = res.substr(res.find_first_not_of(" \t"));
-	res[res.size() - 1] = '\0';
-	res[res.size() - 2] = '\0';
-	if (res.empty() || res[0] == '\0')
-		throw std::runtime_error("Invalid location path");
-	if (res.find(' ') != std::string::npos)
-		throw std::runtime_error("Invalid location path");
-	return res;
+	// if (res.compare(" {") == 0)
+	// 	throw std::runtime_error("Invalid location path");
+	// res = res.substr(res.find_first_not_of(" \t"));
+	// res[res.size() - 1] = '\0';
+	// res[res.size() - 2] = '\0';
+	// if (res.empty() || res[0] == '\0')
+	// 	throw std::runtime_error("Invalid location path");
+	// if (res.find(' ') != std::string::npos)
+	// 	throw std::runtime_error("Invalid location path");
+	// return res;
+	//Chat generated this code:
+	std::string res = line;
+    res.erase(0, res.find_first_not_of(" \t"));
+    res.erase(res.find_last_not_of(" \t") - 1);
+    if (res.empty() || res == "{" || res.find(' ') != std::string::npos)
+    {
+        throw std::runtime_error("Invalid location path");
+    }
+    return res;
 }
 
 static bool	isEmptyLine(std::string line)
@@ -153,7 +162,7 @@ static void	parseNames(std::string const &value, std::vector<std::string> &names
 	std::istringstream	iss(value);
 	std::string			word;
 
-	while (iss >> word && word [0] != '\0')
+	while (iss >> word && !word.empty())
 		names.push_back(word);
 }
 
@@ -224,7 +233,7 @@ void	Configuration::parseLocationDirective(std::string &line, LocationBlock &loc
 			value = value.substr(value.find_first_not_of(" \t"));
 			if (value[value.size() - 1] != ';')
 				throw std::runtime_error("[parseLocationDirective]Directive '" + dir + "' must end with a semicolon");
-			value[value.size() - 1] = '\0';
+			value = value.substr(0, value.size() - 1);
 			setLocationValues(keys[i], value, locationBlock);
 			return;
 		}
@@ -271,7 +280,7 @@ void	Configuration::parseServerDirective(std::string const &line, ServerBlock &s
 			value = value.substr(value.find_first_not_of(" \t"));
 			if (value[value.size() - 1] != ';')
 				throw std::runtime_error("[parseServerDirective]Directive '" + dir + "' must end with a semicolon");
-			value[value.size() - 1] = '\0';
+			value = value.substr(0, value.size() - 1);
 			setServerValues(keys[i], value, serverBlock);
 			return;
 		}
