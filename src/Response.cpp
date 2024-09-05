@@ -60,8 +60,7 @@ void Response::createResponseStr()
 {
 	std::stringstream ss;
 	std::string statusLine = "HTTP/1.1 200 OK\n";
-	std::string headers = "Content-Type: text/html\r\nContent-Length: 0\n\n";
-	// std::string body = "<!DOCTYPE html><html lang=\"en\"><head>  <title>A simple webpage</title></head><body>  <h1>Simple HTML webpage</h1>  <p>Hello, world!</p></body></html>\r\n\r\n";
+	std::string headers = "Content-Type: text/html\r\nContent-Length: 153\n\n";
 	ss << statusLine << headers << body << "\n";
 	response = ss.str();
 }
@@ -75,28 +74,9 @@ std::string Response::setHeaders(Request &req, Configuration &config, Response &
 
 void Response::handleGetRequest(Configuration &config)
 {
-	DIR*	directoryPtr;
-	// = opendir(_requestLine.absolutePath.c_str());
-	// if (directoryPtr == NULL) {
-	// 	if (errno == ENOENT) {
-	// 		_noBodyResponseDriver(404, "", false);
-	// 	} else if (errno == EACCES) {
-	// 		_noBodyResponseDriver(403, "", false);
-	// 	} else {
-	// 		_noBodyResponseDriver(500, "", false);
-	// 	}
-	// 	return ;
-	// }
 	processServerBlock(config, this->req);
 	
 	createResponseStr();
-	// std::stringstream ss;
-	// std::string headers = "Content-Type: text/html\r\nContent-Length: 153\n\n";
-	// // std::string headers = setHeaders(req, config, *this);
-	// std::string body = "<!DOCTYPE html><html lang=\"en\"><head>  <title>A simple webpage</title></head><body>  <h1>Simple HTML webpage</h1>  <p>Hello, world!</p></body></html>\r\n\r\n";
-	// std::string statusLine = "HTTP/1.1 200 OK\n";
-	// ss << statusLine << headers << body << "\n";
-	// response = ss.str();
 }
 
 void Response::handlePostRequest(Configuration &config)
@@ -125,4 +105,99 @@ std::string Response::getResponse(Configuration &config)
 		break;
 	}
 	return response;
+}
+
+std::string Response::getPath(std::vector<ServerBlock>::iterator it, std::string uri)
+{
+	std::vector<LocationBlock> locationBlocks = it->locationBlocks;
+
+	std::cout << "URI: " << uri << std::endl;
+	for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++)
+	{
+		std::cout << "PATH: " << it->path << std::endl;
+
+		if (it->path == uri)
+		{
+			return it->root;
+		}
+	}
+	return "";
+}
+
+void Response::handleDir(std::string path)
+{
+	std::cout << "Root: " << path << std::endl;
+	DIR *directoryPtr = opendir(path.c_str());
+	if (directoryPtr == NULL)
+	{
+		if (errno == ENOENT)
+		{
+			std::cout << "Directory not found" << std::endl;
+			return;
+		}
+		else if (errno == EACCES)
+		{
+			std::cout << "Directory access denied" << std::endl;
+			return;
+		}
+		else
+		{
+			std::cout << "Directory error" << std::endl;
+			return;
+		}
+	}
+	else
+	{
+		std::cout << "Directory found" << std::endl;
+		struct dirent *dir;
+		while ((dir = readdir(directoryPtr)) != NULL)
+		{
+			std::string fileName = dir->d_name;
+			std::string filePath = path + "/" + fileName;
+			if (fileName != "index.html")
+				continue;
+			std::ifstream file(filePath.c_str());
+			std::stringstream body;
+			if (file.is_open())
+			{
+				std::string line;
+				while (std::getline(file, line))
+				{
+					body << line << std::endl;
+				}
+				file.close();
+				this->body = body.str();
+			}
+			else
+			{
+				std::cout << "Failed to open file: " << filePath << std::endl;
+			}
+		}
+		closedir(directoryPtr);
+	}
+}
+void Response::processServerBlock(Configuration &config, Request &req)
+{
+	std::vector<ServerBlock>::iterator it;
+	std::vector<ServerBlock> serverBlocks = config.getServerBlocks();
+	std::string host = req.getHeaders()["Host"];
+	size_t pos = host.find(':');
+	std::string hostName = host.substr(0, pos);
+	std::string portValue = host.substr(pos + 1);
+	int port;
+	std::stringstream ss(portValue);
+	ss >> port;
+	for (std::vector<ServerBlock>::iterator it = serverBlocks.begin(); it != serverBlocks.end(); it++)
+	{
+		if (it->host == hostName && it->port == port)
+		{
+			std::string path = getPath(it, req.getUri());
+			if (path.size() == 0)
+			{
+				statusCode = 404;
+				return;
+			}
+			handleDir(path);
+		}
+	}
 }

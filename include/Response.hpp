@@ -19,7 +19,9 @@ private:
 	std::string response;
 	std::string getStatusMsg(int code);
 	void setBody(std::string const &body);
-
+	void processServerBlock(Configuration &config, Request &req);
+	std::string getPath(std::vector<ServerBlock>::iterator it, std::string uri);
+	void handleDir(std::string path);
 public:
 	Response();
 	Response(Request &req);
@@ -32,14 +34,4 @@ public:
 	void handlePostRequest(Configuration &config);
 	void handleDeleteRequest(Configuration &config);
 	std::string setHeaders(Request &req, Configuration &config, Response &resp);
-	// std::string getStatusCode() const;
-	// std::string getStatusMsg() const;
-	// void setHeader(const std::string &name, const std::string &value);
-	// std::map<std::string, std::string> getHeaders() const;
-	// std::string getBody() const;
 };
-
-void processServerBlock(Configuration &config, Request &req);
-ServerBlock getServerConfig(Configuration &config, Request &req);
-std::string getPath(std::vector<ServerBlock>::iterator it, std::string uri);
-void handleDir(std::string path);
