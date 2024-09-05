@@ -49,7 +49,7 @@ void handleDir(std::string path)
 		{
 			std::string fileName = dir->d_name;
 			std::string filePath = path + "/" + fileName;
-			if (fileName == "." || fileName == "..")
+			if (fileName != "index.html")
 				continue;
 			std::ifstream file(filePath.c_str());
 			std::stringstream body;
@@ -61,7 +61,7 @@ void handleDir(std::string path)
 					body << line << std::endl;
 				}
 				file.close();
-				std::cout << body.str() << std::endl;
+				// std::cout << body.str() << std::endl;
 			}
 			else
 			{
