@@ -18,6 +18,59 @@ std::string getPath(std::vector<ServerBlock>::iterator it, std::string uri)
 	}
 	return "";
 }
+
+void handleDir(std::string path)
+{
+	std::cout << "Root: " << path << std::endl;
+	DIR *directoryPtr = opendir(path.c_str());
+	if (directoryPtr == NULL)
+	{
+		if (errno == ENOENT)
+		{
+			std::cout << "Directory not found" << std::endl;
+			return;
+		}
+		else if (errno == EACCES)
+		{
+			std::cout << "Directory access denied" << std::endl;
+			return;
+		}
+		else
+		{
+			std::cout << "Directory error" << std::endl;
+			return;
+		}
+	}
+	else
+	{
+		std::cout << "Directory found" << std::endl;
+		struct dirent *dir;
+		while ((dir = readdir(directoryPtr)) != NULL)
+		{
+			std::string fileName = dir->d_name;
+			std::string filePath = path + "/" + fileName;
+			if (fileName == "." || fileName == "..")
+				continue;
+			std::ifstream file(filePath.c_str());
+			std::stringstream body;
+			if (file.is_open())
+			{
+				std::string line;
+				while (std::getline(file, line))
+				{
+					body << line << std::endl;
+				}
+				file.close();
+				std::cout << body.str() << std::endl;
+			}
+			else
+			{
+				std::cout << "Failed to open file: " << filePath << std::endl;
+			}
+		}
+		closedir(directoryPtr);
+	}
+}
 void processServerBlock(Configuration &config, Request &req)
 {
 	std::vector<ServerBlock>::iterator it;
@@ -31,39 +84,17 @@ void processServerBlock(Configuration &config, Request &req)
 	ss >> port;
 	for (std::vector<ServerBlock>::iterator it = serverBlocks.begin(); it != serverBlocks.end(); it++)
 	{
-		std::cout << "Request Host: " << hostName << std::endl;
-		std::cout << "Request Port: " << port << std::endl;
-		std::cout << "Config Host: " << it->host << std::endl;
-		std::cout << "Config Port: " << it->port << std::endl;
 		if (it->host == hostName && it->port == port)
 		{
 			std::cout << "Host found" << std::endl;
 			std::string path = getPath(it, req.getUri());
-			std::cout << "Root: " << path << std::endl;
-			DIR *directoryPtr = opendir(path.c_str());
-			if (directoryPtr == NULL)
+			if (path.size() == 0)
 			{
-				if (errno == ENOENT)
-				{
-					std::cout << "Directory not found" << std::endl;
-					return;
-				}
-				else if (errno == EACCES)
-				{
-					std::cout << "Directory access denied" << std::endl;
-					return;
-				}
-				else
-				{
-					std::cout << "Directory error" << std::endl;
-					return;
-				}
-			}
-			else
-			{
-				std::cout << "Directory found" << std::endl;
+				// handle in separate function
+				std::cout << "Path not found" << std::endl;
 				return;
 			}
+			handleDir(path);
 		}
 	}
 	std::cout << "Host not found" << std::endl;

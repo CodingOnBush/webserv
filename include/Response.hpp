@@ -42,3 +42,4 @@ public:
 void processServerBlock(Configuration &config, Request &req);
 ServerBlock getServerConfig(Configuration &config, Request &req);
 std::string getPath(std::vector<ServerBlock>::iterator it, std::string uri);
+void handleDir(std::string path);
