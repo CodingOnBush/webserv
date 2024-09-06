@@ -120,10 +120,9 @@ std::string Response::getPath(std::vector<ServerBlock>::iterator it, std::string
 	}
 	return "";
 }
-
-void Response::handleDir(std::string path)
+void Response::handleDir(std::string configPath, std::string requestUri)
 {
-	DIR *directoryPtr = opendir(path.c_str());
+	DIR *directoryPtr = opendir(configPath.c_str());
 	if (directoryPtr == NULL)
 	{
 		if (errno == ENOENT)
@@ -149,25 +148,37 @@ void Response::handleDir(std::string path)
 		while ((dir = readdir(directoryPtr)) != NULL)
 		{
 			std::string fileName = dir->d_name;
-			std::string filePath = path + "/" + fileName;
-			if (fileName != "index.html")
+			std::cout << "File name: " << fileName << std::endl;
+			std::string filePath = configPath + "/" + fileName;
+			std::cout << "File path: " << filePath << std::endl;
+			std::cout << "Request URI: " << requestUri << std::endl;
+			std::cout << "File name: " << fileName << std::endl;
+			std::cout << "Config path: " << configPath << std::endl;
+			if (fileName == "." || fileName == "..")
 				continue;
-			std::ifstream file(filePath.c_str());
-			std::stringstream body;
-			if (file.is_open())
+			if (requestUri == "/")
 			{
-				std::string line;
-				while (std::getline(file, line))
-				{
-					body << line << std::endl;
-				}
-				file.close();
-				this->body = body.str();
-				this->statusCode = 200;
+				filePath = configPath + "/" + "index.html";
 			}
-			else
+			if (requestUri == "/" || requestUri == "/" + fileName)
 			{
-				this->statusCode = 403;
+				std::ifstream file(filePath.c_str());
+				std::stringstream body;
+				if (file.is_open())
+				{
+					std::string line;
+					while (std::getline(file, line))
+					{
+						body << line << std::endl;
+					}
+					file.close();
+					this->body = body.str();
+					this->statusCode = 200;
+				}
+				else
+				{
+					this->statusCode = 403;
+				}
 			}
 		}
 		if (this->statusCode == 0)
@@ -193,14 +204,15 @@ void Response::processServerBlock(Configuration &config, Request &req)
 	{
 		if (it->host == hostName && it->port == port)
 		{
-			std::string path = getPath(it, req.getUri());
+			std::string uri = req.getUri();
+			std::string path = getPath(it, uri);
 			if (path.size() == 0)
 			{
 				std::cout << "Path not found" << std::endl;
 				statusCode = 404;
 				return;
 			}
-			handleDir(path);
+			handleDir(path, uri);
 		}
 	}
 }

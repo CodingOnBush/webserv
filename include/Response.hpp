@@ -22,7 +22,7 @@ private:
 	void setBody(std::string const &body);
 	void processServerBlock(Configuration &config, Request &req);
 	std::string getPath(std::vector<ServerBlock>::iterator it, std::string uri);
-	void handleDir(std::string path);
+	void handleDir(std::string configPath, std::string requestUri);
 public:
 	Response();
 	Response(Request &req);
