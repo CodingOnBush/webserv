@@ -60,16 +60,16 @@ void Response::createResponseStr()
 {
 	std::stringstream ss;
 	setStatusLine();
-	std::string headers = "Content-Type: text/html\r\nContent-Length: 153\n\n";
+	setHeaders();
 	ss << statusLine << headers << body << "\n";
 	response = ss.str();
 }
 
-std::string Response::setHeaders(Request &req, Configuration &config, Response &resp)
+void Response::setHeaders()
 {
-	// std::string headers = "Content-Type: text/html\r\nContent-Length: 153\n\n";
-	// return headers;
-	return "";
+	std::stringstream ss;
+	ss << "Content-Type: text/html\r\n" << "Content-Length: " << body.size() << "\r\n\r\n";
+	headers = ss.str();
 }
 
 void Response::handleGetRequest(Configuration &config)
@@ -111,6 +111,8 @@ std::string Response::getPath(std::vector<ServerBlock>::iterator it, std::string
 	std::vector<LocationBlock> locationBlocks = it->locationBlocks;
 	for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++)
 	{
+		std::cout << "PATH: " << it->path << std::endl;
+		std::cout << "URI: " << it->root << std::endl;
 		if (it->path == uri)
 		{
 			return it->root;
@@ -126,6 +128,7 @@ void Response::handleDir(std::string path)
 	{
 		if (errno == ENOENT)
 		{
+			std::cout << "Directory does not exist" << std::endl;
 			this->statusCode = 404;
 			return;
 		}
@@ -169,6 +172,7 @@ void Response::handleDir(std::string path)
 		}
 		if (this->statusCode == 0)
 		{
+			std::cout << "No index.html file found" << std::endl;
 			this->statusCode = 404;
 		}
 		closedir(directoryPtr);
@@ -192,6 +196,7 @@ void Response::processServerBlock(Configuration &config, Request &req)
 			std::string path = getPath(it, req.getUri());
 			if (path.size() == 0)
 			{
+				std::cout << "Path not found" << std::endl;
 				statusCode = 404;
 				return;
 			}

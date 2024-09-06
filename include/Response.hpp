@@ -13,9 +13,9 @@ class Response
 {
 private:
 	Request req;
-	std::string statusLine; // HTTP/1.1 404 Not Found OR HTTP/1.1 200 OK
+	std::string statusLine;
 	int statusCode;
-	std::map<std::string, std::string> headers;
+	std::string headers;
 	std::string body;
 	std::string response;
 	std::string getStatusMsg(int code);
@@ -28,11 +28,10 @@ public:
 	Response(Request &req);
 	~Response();
 	std::string getResponse(Configuration &config);
-	void setStatusCode(int code);
 	void setStatusLine();
 	void createResponseStr();
 	void handleGetRequest(Configuration &config);
 	void handlePostRequest(Configuration &config);
 	void handleDeleteRequest(Configuration &config);
-	std::string setHeaders(Request &req, Configuration &config, Response &resp);
+	void setHeaders();
 };
