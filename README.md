@@ -16,6 +16,18 @@ Todo List - Webserv
 - add exceptions instead of returning error and exiting
 - correctly rename all vars and functions
 
+NEW TODOS:
+- Set headers dynamically
+- Proper status code everywhere (all requests)
+- Setup the server_names or not, check how does server_name work (add check ?)
+- Setup default error pages (add check)
+- Limit client body size (add check)
+- HTTP methods (add check)
+- Turn on or off directory listing
+- Decide which files we want to serve to demonstrate functionality of webserv
+- CGI part with dynamic content
+
+
 Project parts:
 
 1. Server logic
