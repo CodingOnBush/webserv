@@ -5,6 +5,7 @@
 #include "Request.hpp"
 #include <dirent.h>
 #include <unistd.h> 
+#include <sys/stat.h>
 
 class Configuration;
 class Request;
@@ -22,7 +23,10 @@ private:
 	void setBody(std::string const &body);
 	void processServerBlock(Configuration &config, Request &req);
 	std::string getPath(std::vector<ServerBlock>::iterator it, std::string uri);
-	void handleDir(std::string configPath, std::string requestUri);
+	void handleLocation(std::string configPath, std::string requestUri);
+	LocationBlock getLocationBlock(std::vector<ServerBlock>::iterator it, std::string uri);
+	void handleDirectory(std::string path);
+	void handleFile(std::string path);
 public:
 	Response();
 	Response(Request &req);
@@ -35,3 +39,7 @@ public:
 	void handleDeleteRequest(Configuration &config);
 	void setHeaders();
 };
+
+
+bool isDirectory( const std::string & path );
+bool isFile( const std::string & path );

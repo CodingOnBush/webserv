@@ -68,7 +68,8 @@ void Response::createResponseStr()
 void Response::setHeaders()
 {
 	std::stringstream ss;
-	ss << "Content-Type: text/html\r\n" << "Content-Length: " << body.size() << "\r\n\r\n";
+	ss << "Content-Type: text/html\r\n"
+	   << "Content-Length: " << body.size() << "\r\n\r\n";
 	headers = ss.str();
 }
 
@@ -120,8 +121,24 @@ std::string Response::getPath(std::vector<ServerBlock>::iterator it, std::string
 	}
 	return "";
 }
-void Response::handleDir(std::string configPath, std::string requestUri)
+
+LocationBlock Response::getLocationBlock(std::vector<ServerBlock>::iterator it, std::string uri)
 {
+	LocationBlock *location = NULL;
+	std::vector<LocationBlock> locationBlocks = it->locationBlocks;
+	for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++)
+	{
+		if (it->path == uri)
+		{
+			return *it;
+		}
+	}
+	return *location;
+}
+void Response::handleLocation(std::string configPath, std::string requestUri)
+{
+	std::cout << "Config path: " << configPath << std::endl;
+	std::cout << "Request URI: " << requestUri << std::endl;
 	DIR *directoryPtr = opendir(configPath.c_str());
 	if (directoryPtr == NULL)
 	{
@@ -148,14 +165,9 @@ void Response::handleDir(std::string configPath, std::string requestUri)
 		while ((dir = readdir(directoryPtr)) != NULL)
 		{
 			std::string fileName = dir->d_name;
-			std::cout << "File name: " << fileName << std::endl;
-			std::string filePath = configPath + "/" + fileName;
-			std::cout << "File path: " << filePath << std::endl;
-			std::cout << "Request URI: " << requestUri << std::endl;
-			std::cout << "File name: " << fileName << std::endl;
-			std::cout << "Config path: " << configPath << std::endl;
 			if (fileName == "." || fileName == "..")
 				continue;
+			std::string filePath = configPath + "/" + fileName;
 			if (requestUri == "/")
 			{
 				filePath = configPath + "/" + "index.html";
@@ -188,7 +200,7 @@ void Response::handleDir(std::string configPath, std::string requestUri)
 		}
 		closedir(directoryPtr);
 	}
-}
+};
 void Response::processServerBlock(Configuration &config, Request &req)
 {
 	std::vector<ServerBlock>::iterator it;
@@ -205,14 +217,16 @@ void Response::processServerBlock(Configuration &config, Request &req)
 		if (it->host == hostName && it->port == port)
 		{
 			std::string uri = req.getUri();
-			std::string path = getPath(it, uri);
-			if (path.size() == 0)
+			LocationBlock location = getLocationBlock(it, uri);
+			// std::string path = getPath(it, uri);
+			// std::cout << "Location path: " << location.path << std::endl;
+			if (location.path.size() == 0)
 			{
 				std::cout << "Path not found" << std::endl;
 				statusCode = 404;
 				return;
 			}
-			handleDir(path, uri);
+			handleLocation(location.root, location.path);
 		}
 	}
 }
