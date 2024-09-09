@@ -122,6 +122,19 @@ std::string Response::getPath(std::vector<ServerBlock>::iterator it, std::string
 	return "";
 }
 
+bool Response::locationBlockExists(std::vector<ServerBlock>::iterator it, std::string uri)
+{
+	std::vector<LocationBlock> locationBlocks = it->locationBlocks;
+	for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++)
+	{
+		if (it->path == uri)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 LocationBlock Response::getLocationBlock(std::vector<ServerBlock>::iterator it, std::string uri)
 {
 	LocationBlock *location = NULL;
@@ -135,10 +148,9 @@ LocationBlock Response::getLocationBlock(std::vector<ServerBlock>::iterator it, 
 	}
 	return *location;
 }
-void Response::handleLocation(std::string configPath, std::string requestUri)
+
+void Response::handleRoot(std::string configPath, std::string requestUri)
 {
-	std::cout << "Config path: " << configPath << std::endl;
-	std::cout << "Request URI: " << requestUri << std::endl;
 	DIR *directoryPtr = opendir(configPath.c_str());
 	if (directoryPtr == NULL)
 	{
@@ -195,12 +207,13 @@ void Response::handleLocation(std::string configPath, std::string requestUri)
 		}
 		if (this->statusCode == 0)
 		{
-			std::cout << "No index.html file found" << std::endl;
+			std::cout << "404 - not found" << std::endl;
 			this->statusCode = 404;
 		}
 		closedir(directoryPtr);
 	}
 };
+
 void Response::processServerBlock(Configuration &config, Request &req)
 {
 	std::vector<ServerBlock>::iterator it;
@@ -217,16 +230,20 @@ void Response::processServerBlock(Configuration &config, Request &req)
 		if (it->host == hostName && it->port == port)
 		{
 			std::string uri = req.getUri();
-			LocationBlock location = getLocationBlock(it, uri);
-			// std::string path = getPath(it, uri);
-			// std::cout << "Location path: " << location.path << std::endl;
-			if (location.path.size() == 0)
+			if (locationBlockExists(it, uri))
 			{
-				std::cout << "Path not found" << std::endl;
-				statusCode = 404;
-				return;
-			}
-			handleLocation(location.root, location.path);
+				LocationBlock location = getLocationBlock(it, uri);
+				if (location.path.size() == 0)
+				{
+					std::cout << "Path not found" << std::endl;
+					statusCode = 404;
+					return;
+				}
+				handleRoot(location.root, uri);
+			}	
+			else 
+				handleRoot(it->root, uri);
+		
 		}
 	}
 }

@@ -92,7 +92,7 @@ static void	initServerBlock(ServerBlock &serverBlock)
 	serverBlock.port = 8080;
 	serverBlock.host = "localhost";
 	serverBlock.serverNames.clear();
-	serverBlock.root = "/";
+	serverBlock.root = "./www";
 	serverBlock.errorPages.clear();
 	serverBlock.clientMaxBodySize.value = "1";
 	serverBlock.clientMaxBodySize.unit = "M";

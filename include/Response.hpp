@@ -23,8 +23,9 @@ private:
 	void setBody(std::string const &body);
 	void processServerBlock(Configuration &config, Request &req);
 	std::string getPath(std::vector<ServerBlock>::iterator it, std::string uri);
-	void handleLocation(std::string configPath, std::string requestUri);
+	void handleRoot(std::string configPath, std::string requestUri);
 	LocationBlock getLocationBlock(std::vector<ServerBlock>::iterator it, std::string uri);
+	bool locationBlockExists(std::vector<ServerBlock>::iterator it, std::string uri);
 	void handleDirectory(std::string path);
 	void handleFile(std::string path);
 public:
