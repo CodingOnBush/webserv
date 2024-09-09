@@ -52,7 +52,7 @@ void Response::setBody(std::string const &body)
 void Response::setStatusLine()
 {
 	std::stringstream ss;
-	ss << req.getVersion() << " " << statusCode << " " << getStatusMsg(statusCode) << "\n";
+	ss << req.getVersion() << " " << statusCode << " " << getStatusMsg(statusCode) << LF;
 	statusLine = ss.str();
 }
 
@@ -61,7 +61,7 @@ void Response::createResponseStr()
 	std::stringstream ss;
 	setStatusLine();
 	setHeaders();
-	ss << statusLine << headers << body << "\n";
+	ss << statusLine << headers << body << LF;
 	response = ss.str();
 }
 void Response::setMimeType(std::string const &fileName)
@@ -109,8 +109,8 @@ void Response::setMimeType(std::string const &fileName)
 void Response::setHeaders()
 {
 	std::stringstream ss;
-	ss << "Content-Type: " << mimeType << "\r\n"
-	   << "Content-Length: " << body.size() << "\r\n\r\n";
+	ss << "Content-Type: " << mimeType << CRLF
+	   << "Content-Length: " << body.size() << CRLF << CRLF;
 	headers = ss.str();
 }
 
