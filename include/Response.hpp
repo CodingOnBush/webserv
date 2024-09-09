@@ -19,6 +19,7 @@ private:
 	std::string headers;
 	std::string body;
 	std::string response;
+	std::string mimeType;
 	std::string getStatusMsg(int code);
 	void setBody(std::string const &body);
 	void processServerBlock(Configuration &config, Request &req);
@@ -39,6 +40,7 @@ public:
 	void handlePostRequest(Configuration &config);
 	void handleDeleteRequest(Configuration &config);
 	void setHeaders();
+	void setMimeType(std::string const &fileName);
 };
 
 
