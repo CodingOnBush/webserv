@@ -66,45 +66,45 @@ void Response::createResponseStr()
 }
 void Response::setMimeType(std::string const &fileName)
 {
-    std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
-    if (extension == "html")
-        mimeType = "text/html";
-    else if (extension == "css")
-        mimeType = "text/css";
-    else if (extension == "js")
-        mimeType = "text/javascript";
-    else if (extension == "jpg")
-        mimeType = "image/jpeg";
-    else if (extension == "jpeg")
-        mimeType = "image/jpeg";
-    else if (extension == "png")
-        mimeType = "image/png";
-    else if (extension == "gif")
-        mimeType = "image/gif";
-    else if (extension == "bmp")
-        mimeType = "image/bmp";
-    else if (extension == "ico")
-        mimeType = "image/x-icon";
-    else if (extension == "svg")
-        mimeType = "image/svg+xml";
-    else if (extension == "mp3")
-        mimeType = "audio/mpeg";
-    else if (extension == "mp4")
-        mimeType = "video/mp4";
-    else if (extension == "webm")
-        mimeType = "video/webm";
-    else if (extension == "ogg")
-        mimeType = "audio/ogg";
-    else if (extension == "wav")
-        mimeType = "audio/wav";
-    else if (extension == "avi")
-        mimeType = "video/x-msvideo";
-    else if (extension == "mpeg")
-        mimeType = "video/mpeg";
-    else if (extension == "txt")
-        mimeType = "text/plain";
-    else
-        mimeType = "application/octet-stream";
+	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
+	if (extension == "html")
+		mimeType = "text/html";
+	else if (extension == "css")
+		mimeType = "text/css";
+	else if (extension == "js")
+		mimeType = "text/javascript";
+	else if (extension == "jpg")
+		mimeType = "image/jpeg";
+	else if (extension == "jpeg")
+		mimeType = "image/jpeg";
+	else if (extension == "png")
+		mimeType = "image/png";
+	else if (extension == "gif")
+		mimeType = "image/gif";
+	else if (extension == "bmp")
+		mimeType = "image/bmp";
+	else if (extension == "ico")
+		mimeType = "image/x-icon";
+	else if (extension == "svg")
+		mimeType = "image/svg+xml";
+	else if (extension == "mp3")
+		mimeType = "audio/mpeg";
+	else if (extension == "mp4")
+		mimeType = "video/mp4";
+	else if (extension == "webm")
+		mimeType = "video/webm";
+	else if (extension == "ogg")
+		mimeType = "audio/ogg";
+	else if (extension == "wav")
+		mimeType = "audio/wav";
+	else if (extension == "avi")
+		mimeType = "video/x-msvideo";
+	else if (extension == "mpeg")
+		mimeType = "video/mpeg";
+	else if (extension == "txt")
+		mimeType = "text/plain";
+	else
+		mimeType = "application/octet-stream";
 }
 void Response::setHeaders()
 {
@@ -291,10 +291,58 @@ void Response::processServerBlock(Configuration &config, Request &req)
 					return;
 				}
 				handleRoot(location.root, uri);
-			}	
-			else 
+			}
+			else
 				handleRoot(it->root, uri);
-		
 		}
 	}
 }
+
+// void Response::processServerBlock(Configuration &config, Request &req)
+// {
+// 	std::vector<ServerBlock>::iterator it;
+// 	std::vector<ServerBlock> serverBlocks = config.getServerBlocks();
+// 	std::string host = req.getHeaders()["Host"];
+// 	size_t pos = host.find(':');
+// 	std::string hostName = host.substr(0, pos);
+// 	std::string portValue = host.substr(pos + 1);
+// 	int port;
+// 	std::stringstream ss(portValue);
+// 	ss >> port;
+// 	for (std::vector<ServerBlock>::iterator it = serverBlocks.begin(); it != serverBlocks.end(); it++)
+// 	{
+// 		if (it->host == hostName && it->port == port)
+// 		{
+// 			// create default serverBlock here
+// 			struct ServerBlock defaultServerBlock;
+// 			memcpy(&defaultServerBlock, &(*it), sizeof(ServerBlock));
+// 			for (std::vector<std::string>::iterator serverName = it->serverNames.begin(); serverName != it->serverNames.end(); serverName++)
+// 			{
+// 				std::cout << "Server Name: " << *serverName << std::endl;
+// 				if (*serverName == hostName)
+// 				{
+// 					std::string uri = req.getUri();
+// 					if (locationBlockExists(it, uri))
+// 					{
+// 						LocationBlock location = getLocationBlock(it, uri);
+// 						if (location.path.size() == 0)
+// 						{
+// 							std::cout << "Path not found" << std::endl;
+// 							statusCode = 404;
+// 							return;
+// 						}
+// 						handleRoot(location.root, uri);
+// 					}
+// 					else
+// 						handleRoot(it->root, uri);
+// 				}
+// 				else
+// 				{
+// 					//use default server block
+// 					std::cout << "Using default server block" << std::endl;
+// 					std::cout << "Default Server host: " << defaultServerBlock.host << std::endl;
+// 				}
+// 			}
+// 		}
+// 	}
+// }

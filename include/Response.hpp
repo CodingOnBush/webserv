@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <unistd.h> 
 #include <sys/stat.h>
+#include <string.h>
 
 class Configuration;
 class Request;
