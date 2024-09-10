@@ -26,10 +26,7 @@ private:
 	void processServerBlock(Configuration &config, Request &req);
 	std::string getPath(std::vector<ServerBlock>::iterator it, std::string uri);
 	void handleRoot(std::string configPath, std::string requestUri);
-	LocationBlock getLocationBlock(std::vector<ServerBlock>::iterator it, std::string uri);
-	bool locationBlockExists(std::vector<ServerBlock>::iterator it, std::string uri);
-	void handleDirectory(std::string path);
-	void handleFile(std::string path);
+	
 public:
 	Response();
 	Response(Request &req);
@@ -51,3 +48,5 @@ int serverBlocksCount(Configuration &config, std::string host, int port);
 ServerBlock getDefaultServerBlock(Configuration &config, std::string host, int port);
 bool matchExists(Configuration &config, std::string host, int port);
 ServerBlock getMatchingServerBlock(Configuration &config, std::string host, int port);
+bool locationBlockExists(ServerBlock serverBlock, std::string uri);
+LocationBlock getMatchingLocationBlock(ServerBlock ServerBlock, std::string uri);

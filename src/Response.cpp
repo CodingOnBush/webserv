@@ -163,33 +163,6 @@ std::string Response::getPath(std::vector<ServerBlock>::iterator it, std::string
 	return "";
 }
 
-bool Response::locationBlockExists(std::vector<ServerBlock>::iterator it, std::string uri)
-{
-	std::vector<LocationBlock> locationBlocks = it->locationBlocks;
-	for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++)
-	{
-		if (it->path == uri)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-LocationBlock Response::getLocationBlock(std::vector<ServerBlock>::iterator it, std::string uri)
-{
-	LocationBlock *location = NULL;
-	std::vector<LocationBlock> locationBlocks = it->locationBlocks;
-	for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++)
-	{
-		if (it->path == uri)
-		{
-			return *it;
-		}
-	}
-	return *location;
-}
-
 void Response::handleRoot(std::string configPath, std::string requestUri)
 {
 	DIR *directoryPtr = opendir(configPath.c_str());
@@ -267,89 +240,36 @@ void Response::handleRoot(std::string configPath, std::string requestUri)
 
 void Response::processServerBlock(Configuration &config, Request &req)
 {
-	std::vector<ServerBlock>::iterator it;
 	std::vector<ServerBlock> serverBlocks = config.getServerBlocks();
+	ServerBlock serverBlock;
+	LocationBlock location;
 	std::string hostName = req.getHost();
 	int port = req.getPort();
-
 	int serverBlockCount = serverBlocksCount(config, hostName, port);
-	std::cout << "Server Block Count: " << serverBlockCount << std::endl;
 	if (serverBlockCount == 0)
 		return;
 	else if (serverBlockCount > 1 && matchExists(config, hostName, port))
+		serverBlock = getMatchingServerBlock(config, hostName, port);
+	else
 	{
-		ServerBlock serverBlock = getMatchingServerBlock(config, hostName, port);
+		serverBlock = getDefaultServerBlock(config, hostName, port);
+	}
+	std::string uri = req.getUri();
+	if (locationBlockExists(serverBlock, uri))
+	{
+		location = getMatchingLocationBlock(serverBlock, uri);
+		if (location.path.size() == 0)
+		{
+			statusCode = 404;
+			return;
+		}
+		handleRoot(location.root, uri);
 	}
 	else
 	{
-		ServerBlock serverBlock = getDefaultServerBlock(config, hostName, port);
-
+		location = getMatchingLocationBlock(serverBlock, "/");
+		// std::cout << "Location Path2: " << location.path << std::endl;
+		handleRoot(serverBlock.root, uri);
 	}
-
-	// for (std::vector<ServerBlock>::iterator it = serverBlocks.begin(); it != serverBlocks.end(); it++)
-	// {
-	// 		std::string uri = req.getUri();
-	// 		if (locationBlockExists(it, uri))
-	// 		{
-	// 			LocationBlock location = getLocationBlock(it, uri);
-	// 			if (location.path.size() == 0)
-	// 			{
-	// 				std::cout << "Path not found" << std::endl;
-	// 				statusCode = 404;
-	// 				return;
-	// 			}
-	// 			handleRoot(location.root, uri);
-	// 		}
-	// 		else
-	// 			handleRoot(it->root, uri);
-	// 	}
-	}
-
-// void Response::processServerBlock(Configuration &config, Request &req)
-// {
-// 	std::vector<ServerBlock>::iterator it;
-// 	std::vector<ServerBlock> serverBlocks = config.getServerBlocks();
-// 	std::string host = req.getHeaders()["Host"];
-// 	size_t pos = host.find(':');
-// 	std::string hostName = host.substr(0, pos);
-// 	std::string portValue = host.substr(pos + 1);
-// 	int port;
-// 	std::stringstream ss(portValue);
-// 	ss >> port;
-// 	for (std::vector<ServerBlock>::iterator it = serverBlocks.begin(); it != serverBlocks.end(); it++)
-// 	{
-// 		if (it->host == hostName && it->port == port)
-// 		{
-// 			// create default serverBlock here
-// 			struct ServerBlock defaultServerBlock;
-// 			memcpy(&defaultServerBlock, &(*it), sizeof(ServerBlock));
-// 			for (std::vector<std::string>::iterator serverName = it->serverNames.begin(); serverName != it->serverNames.end(); serverName++)
-// 			{
-// 				std::cout << "Server Name: " << *serverName << std::endl;
-// 				if (*serverName == hostName)
-// 				{
-// 					std::string uri = req.getUri();
-// 					if (locationBlockExists(it, uri))
-// 					{
-// 						LocationBlock location = getLocationBlock(it, uri);
-// 						if (location.path.size() == 0)
-// 						{
-// 							std::cout << "Path not found" << std::endl;
-// 							statusCode = 404;
-// 							return;
-// 						}
-// 						handleRoot(location.root, uri);
-// 					}
-// 					else
-// 						handleRoot(it->root, uri);
-// 				}
-// 				else
-// 				{
-// 					//use default server block
-// 					std::cout << "Using default server block" << std::endl;
-// 					std::cout << "Default Server host: " << defaultServerBlock.host << std::endl;
-// 				}
-// 			}
-// 		}
-// 	}
-// }
+	
+}
