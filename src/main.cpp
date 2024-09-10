@@ -17,8 +17,8 @@ int	main(int ac, char **av)
 		{
 			Configuration config(av[1]);
 			config.printConfig();
-			initiateWebServer(config);
-			runWebserver(config);
+			// initiateWebServer(config);
+			// runWebserver(config);
 		}
 		catch (std::exception &e)
 		{
@@ -32,8 +32,8 @@ int	main(int ac, char **av)
 		{
 			Configuration config;
 			config.printConfig();
-			initiateWebServer(config);
-			runWebserver(config);
+			// initiateWebServer(config);
+			// runWebserver(config);
 		}
 		catch (std::exception &e)
 		{
@@ -50,7 +50,7 @@ TODO :
 ./webserv config.txt
 	celui ou on a un servername qui fini pas par un ;
 body size only in bytes - changer pour juste avoir un int et pas une struct
-servername directive alone - si toute seule comme ca : "server_name" sans le ;
+`servername directive alone - si toute seule comme ca : "server_name" sans le ;
 test getLocationPath method
 
 */

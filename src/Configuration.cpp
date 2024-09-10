@@ -3,27 +3,15 @@
 
 static std::string	getLocationPath(std::string const &line)
 {
-	// std::string	res = line;
-
-	// if (res.compare(" {") == 0)
-	// 	throw std::runtime_error("Invalid location path");
-	// res = res.substr(res.find_first_not_of(" \t"));
-	// res[res.size() - 1] = '\0';
-	// res[res.size() - 2] = '\0';
-	// if (res.empty() || res[0] == '\0')
-	// 	throw std::runtime_error("Invalid location path");
-	// if (res.find(' ') != std::string::npos)
-	// 	throw std::runtime_error("Invalid location path");
-	// return res;
-	//Chat generated this code:
 	std::string res = line;
-    res.erase(0, res.find_first_not_of(" \t"));
-    res.erase(res.find_last_not_of(" \t") - 1);
-    if (res.empty() || res == "{" || res.find(' ') != std::string::npos)
-    {
-        throw std::runtime_error("Invalid location path");
-    }
-    return res;
+
+	res.erase(0, res.find_first_not_of(" \t"));
+	if (res.find_first_of(" ") == std::string::npos)// we need to find a space at the end of the path before the '{'
+		throw std::runtime_error("Invalid location path");
+	res.erase(res.find_first_of(" \t"), res.size());
+	if (res.empty() || res == "{" || res.find(' ') != std::string::npos)
+		throw std::runtime_error("Invalid location path");
+	return res;
 }
 
 static bool	isEmptyLine(std::string line)
@@ -44,25 +32,47 @@ static bool	isOnOrOff(std::string const &value)
 	return (value == "on");
 }
 
+static std::string	getKey(std::string const &value)
+{
+	std::string	key;
+
+	key = value.substr(0, value.find_first_of(" \t"));
+	// if (key.find_first_not_of("0123456789") != std::string::npos)
+	// 	throw std::runtime_error("error_page code must be a number.");
+	return key;
+}
+
+static std::string	getValue(std::string const &value)
+{
+	std::string	val;
+
+	val = value.substr(value.find_first_not_of(" \t", getKey(value).size()));
+	if (val.empty() || val.at(0) == '\0')
+		throw std::runtime_error("error_page uri is empty.");
+	if (val.find_first_of(" \t") != std::string::npos)
+		throw std::runtime_error("error_page uri must be a single value.");
+	return val;
+}
+
 static BodySize	createBodySize(std::string const &value)
 {
 	BodySize	bodySize;
 	std::string	unit;
 	std::string	number;
 
-	if (value.empty() || value[0] == '\0')
+	if (value.empty() || value.at(0) == '\0')
 		throw std::runtime_error("client_max_body_size no value");
 	number = value.substr(0, value.find_first_not_of("0123456789"));
-	if (number.empty() || number[0] == '\0')
+	if (number.empty() || number.at(0) == '\0')
 		throw std::runtime_error("client_max_body_size no number found");
 	unit = value.substr(value.find_first_not_of("0123456789"));
 	if (unit.size() != 1)
 		throw std::runtime_error("client_max_body_size invalid unit size");
-	if (unit[0] == 'K' || unit[0] == 'k')
+	if (unit.at(0) == 'K' || unit.at(0) == 'k')
 		unit = "K";
-	else if (unit[0] == 'M' || unit[0] == 'm')
+	else if (unit.at(0) == 'M' || unit.at(0) == 'm')
 		unit = "M";
-	else if (unit[0] == 'G' || unit[0] == 'g')
+	else if (unit.at(0) == 'G' || unit.at(0) == 'g')
 		unit = "G";
 	else
 		throw std::runtime_error("client_max_body_size invalid unit (k/K, m/M, g/G)");
@@ -112,16 +122,33 @@ static void	setLocationDefaultValues(ServerBlock &serverBlock, LocationBlock &lo
 
 void Configuration::setListen(std::string const &value, ServerBlock &serverBlock)
 {
-	// TODO : listen localhost; but I have port at 0.
+	std::stringstream	ss;
+	std::string 		port;
+
 	if (value.empty() || value.find(' ') != std::string::npos)
-		throw std::runtime_error("[setListen]Invalid value'" + value + "'");
+		throw std::runtime_error("Invalid value'" + value + "'");
+	if (value.at(0) == ':')
+		throw std::runtime_error("wrong format for listen directive");
+	if (value.find_first_of(':') != std::string::npos)
+	{
+		if (value.find_first_of(':') != value.find_last_of(':'))
+			throw std::runtime_error("Invalid value '" + value + "'");
+	}
 	if (value.find_first_of(':') != std::string::npos)
 	{
 		serverBlock.host = value.substr(0, value.find(':'));
-		serverBlock.port = std::atoi(value.substr(value.find(':') + 1).c_str());
+		ss << value.substr(value.find(':') + 1);
+		if (ss.str().find_first_not_of("0123456789") != std::string::npos)
+			throw std::runtime_error("Port must be a number.");
+		ss >> serverBlock.port;
 	}
 	else
-		serverBlock.port = std::atoi(value.c_str());
+	{
+		ss << value;
+		if (ss.str().find_first_not_of("0123456789") != std::string::npos)
+			throw std::runtime_error("Port must be a number.");
+		ss >> serverBlock.port;
+	}
 }
 
 void Configuration::addErrorPage(std::string const &value, ServerBlock &serverBlock)
@@ -136,7 +163,7 @@ void Configuration::addErrorPage(std::string const &value, ServerBlock &serverBl
 		throw std::runtime_error("error_page code must be a number.");
 	// TODO : check if code is a valid http code
 	uri = value.substr(value.find_first_not_of(" \t", code.size()));
-	if (uri.empty() || uri[0] == '\0')
+	if (uri.empty() || uri.at(0) == '\0')
 		throw std::runtime_error("error_page uri is empty.");
 	if (uri.find_first_of(" \t") != std::string::npos)
 		throw std::runtime_error("error_page uri must be a single value.");
@@ -145,16 +172,56 @@ void Configuration::addErrorPage(std::string const &value, ServerBlock &serverBl
 
 void	Configuration::setRedirect(std::string const &value, LocationBlock &locationBlock)
 {
-	std::cout << "return value : [" << value << "]" << std::endl;
+	// std::cout << "return value : [" << value << "]" << std::endl;
+	std::string	code;
+	std::string	path;
+
+	if (value.empty() || value.find_first_of(" \t") == std::string::npos)
+		throw std::runtime_error("return wrong format.");
+	code = value.substr(0, value.find_first_of(" \t"));
+	if (code.find_first_not_of("0123456789") != std::string::npos)
+		throw std::runtime_error("return code must be a number.");
+	// TODO : check if code is a valid http code
+	path = value.substr(value.find_first_not_of(" \t", code.size()));
+	if (path.empty() || path.at(0) == '\0')
+		throw std::runtime_error("return path is empty.");
+	if (path.find_first_of(" \t") != std::string::npos)
+		throw std::runtime_error("return path must be a single value.");
+	locationBlock.redirects[code] = path;
 }
 
 void	Configuration::setCgi(std::string const &value, LocationBlock &locationBlock)
 {
+	std::cout << "cgi value : [" << value << "]" << std::endl;
+	// std::cout << "return value : [" << value << "]" << std::endl;
+	std::string	ext;
+	std::string	path;
+
+	if (value.empty())
+		throw std::runtime_error("cgi wrong format.");
+	if (value.find_first_of(" \t") == std::string::npos)
+		throw std::runtime_error("cgi wrong format.");
+	if (value.find_first_of(" \t") != value.find_last_of(" \t"))
+		throw std::runtime_error("cgi wrong format.");
+	ext = value.substr(0, value.find_first_of(" \t"));
+	if (ext != ".py" && ext != ".php" && ext != ".rb")
+		throw std::runtime_error("cgi ext must be .py or .php or .rb");
+	// TODO : check if cgi is a valid http ext
+	path = value.substr(value.find_first_not_of(" \t"));
+	std::cout << "path : [" << path << "]" << std::endl;
+	if (path.empty() || path.at(0) == '\0')
+		throw std::runtime_error("cgi path is empty.");
+	// if (path.find_first_of(" \t") != std::string::npos)
+	// 	throw std::runtime_error("cgi path must be a single value.");
+	if (locationBlock.cgiParams.find(ext) != locationBlock.cgiParams.end())
+		throw std::runtime_error("double cgi directive for the same extension : " + ext);
+	locationBlock.cgiParams[ext] = path;
 }
 
 
 void	Configuration::setMethod(std::string const &value, LocationBlock &locationBlock)
 {
+	std::cout << "method value : [" << value << "]" << std::endl;
 }
 
 static void	parseNames(std::string const &value, std::vector<std::string> &names)
@@ -180,7 +247,12 @@ void	Configuration::setServerValues(std::string const &key, std::string const &v
 	else if (key == "root")
 		serverBlock.root = value;
 	else if (key == "error_page")
-		addErrorPage(value, serverBlock);
+	{
+		if (serverBlock.errorPages.find(getKey(value)) != serverBlock.errorPages.end())
+			throw std::runtime_error("double error_page directive for the same code : " + getKey(value));
+		serverBlock.errorPages[getKey(value)] = getValue(value);
+		// addErrorPage(value, serverBlock);
+	}
 	else if (key == "client_max_body_size")
 		serverBlock.clientMaxBodySize = createBodySize(value);
 	else
@@ -202,11 +274,21 @@ void	Configuration::setLocationValues(std::string const &key, std::string const 
 	else if (key == "index")
 		parseNames(value, locationBlock.indexes);
 	else if (key == "return")
-		setRedirect(value, locationBlock);
+	{
+		if (locationBlock.redirects.find(getKey(value)) != locationBlock.redirects.end())
+			throw std::runtime_error("double return directive for the same code : " + getKey(value));
+		locationBlock.redirects[getKey(value)] = getValue(value);
+		// setRedirect(value, locationBlock);
+	}
 	else if (key == "path_info")
 		locationBlock.pathInfo = isOnOrOff(value);
 	else if (key == "cgi")
-		setCgi(value, locationBlock);
+	{
+		if (locationBlock.cgiParams.find(getKey(value)) != locationBlock.cgiParams.end())
+			throw std::runtime_error("double cgi directive for the same extension : " + getKey(value));
+		locationBlock.cgiParams[getKey(value)] = getValue(value);
+		// setCgi(value, locationBlock);
+	}
 	else if (key == "upload_location")
 		locationBlock.uploadLocation = value;
 	else if (key == "set_method")
@@ -247,8 +329,10 @@ void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &
 	std::string		directive;
 	std::string		value;
 
-	if (line[line.size() - 1] != '{' || line[line.size() - 2] != ' ')
-		throw std::runtime_error("Location block must end with a ' {'");
+	if (line.at(0) == '{')
+		throw std::runtime_error("Location block must have a path");
+	if (line.at(line.size() - 1) != '{')
+		throw std::runtime_error("Location block must end with a '{'");
 	initLocationBlock(locationBlock);
 	locationBlock.path = getLocationPath(line);
 	while (std::getline(content, row))
@@ -311,6 +395,15 @@ void	Configuration::parseServerBlock(std::stringstream &content)
 	}
 	if (server.serverNames.empty())
 		server.serverNames.push_back("webserv");
+	if (server.locationBlocks.empty())
+	{
+		LocationBlock	locationBlock;
+
+		initLocationBlock(locationBlock);
+		locationBlock.path = "/";
+		setLocationDefaultValues(server, locationBlock);
+		server.locationBlocks.push_back(locationBlock);
+	}
 	m_serverBlocks.push_back(server);
 }
 

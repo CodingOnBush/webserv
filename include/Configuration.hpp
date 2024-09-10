@@ -1,11 +1,11 @@
 #pragma once
 
-#include <iostream>
 #include <fstream>
-#include <string>
 #include <vector>
 #include <map>
 #include <cstddef>
+#include <iostream>
+#include <string>
 #include <sstream>
 #include <cstdlib>// for std::atoi
 
@@ -32,6 +32,7 @@ struct LocationBlock {
 	BodySize							clientMaxBodySize;
 	bool								autoindex;
 	std::vector<std::string>			indexes;
+	bool                                redirection;
 	std::map<std::string, std::string>	redirects;// {code, address}
 	bool								pathInfo;
 	std::map<std::string, std::string>	cgiParams;// {extension, file}
