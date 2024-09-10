@@ -47,3 +47,7 @@ public:
 
 bool isDirectory( const std::string & path );
 bool isFile( const std::string & path );
+int serverBlocksCount(Configuration &config, std::string host, int port);
+ServerBlock getDefaultServerBlock(Configuration &config, std::string host, int port);
+bool matchExists(Configuration &config, std::string host, int port);
+ServerBlock getMatchingServerBlock(Configuration &config, std::string host, int port);

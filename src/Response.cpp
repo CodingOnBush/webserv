@@ -271,29 +271,39 @@ void Response::processServerBlock(Configuration &config, Request &req)
 	std::vector<ServerBlock> serverBlocks = config.getServerBlocks();
 	std::string hostName = req.getHost();
 	int port = req.getPort();
-	std::cout << "Host: " << hostName << std::endl;
-	std::cout << "Port: " << port << std::endl;
-	for (std::vector<ServerBlock>::iterator it = serverBlocks.begin(); it != serverBlocks.end(); it++)
+
+	int serverBlockCount = serverBlocksCount(config, hostName, port);
+	std::cout << "Server Block Count: " << serverBlockCount << std::endl;
+	if (serverBlockCount == 0)
+		return;
+	else if (serverBlockCount > 1 && matchExists(config, hostName, port))
 	{
-		if (it->host == hostName && it->port == port)
-		{
-			std::string uri = req.getUri();
-			if (locationBlockExists(it, uri))
-			{
-				LocationBlock location = getLocationBlock(it, uri);
-				if (location.path.size() == 0)
-				{
-					std::cout << "Path not found" << std::endl;
-					statusCode = 404;
-					return;
-				}
-				handleRoot(location.root, uri);
-			}
-			else
-				handleRoot(it->root, uri);
-		}
+		ServerBlock serverBlock = getMatchingServerBlock(config, hostName, port);
 	}
-}
+	else
+	{
+		ServerBlock serverBlock = getDefaultServerBlock(config, hostName, port);
+
+	}
+
+	// for (std::vector<ServerBlock>::iterator it = serverBlocks.begin(); it != serverBlocks.end(); it++)
+	// {
+	// 		std::string uri = req.getUri();
+	// 		if (locationBlockExists(it, uri))
+	// 		{
+	// 			LocationBlock location = getLocationBlock(it, uri);
+	// 			if (location.path.size() == 0)
+	// 			{
+	// 				std::cout << "Path not found" << std::endl;
+	// 				statusCode = 404;
+	// 				return;
+	// 			}
+	// 			handleRoot(location.root, uri);
+	// 		}
+	// 		else
+	// 			handleRoot(it->root, uri);
+	// 	}
+	}
 
 // void Response::processServerBlock(Configuration &config, Request &req)
 // {
