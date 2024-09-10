@@ -3,18 +3,27 @@
 
 static std::string	getLocationPath(std::string const &line)
 {
-	std::string	res = line;
+	// std::string	res = line;
 
-	if (res.compare(" {") == 0)
-		throw std::runtime_error("Invalid location path");
-	res = res.substr(res.find_first_not_of(" \t"));
-	res[res.size() - 1] = '\0';
-	res[res.size() - 2] = '\0';
-	if (res.empty() || res[0] == '\0')
-		throw std::runtime_error("Invalid location path");
-	if (res.find(' ') != std::string::npos)
-		throw std::runtime_error("Invalid location path");
-	return res;
+	// if (res.compare(" {") == 0)
+	// 	throw std::runtime_error("Invalid location path");
+	// res = res.substr(res.find_first_not_of(" \t"));
+	// res[res.size() - 1] = '\0';
+	// res[res.size() - 2] = '\0';
+	// if (res.empty() || res[0] == '\0')
+	// 	throw std::runtime_error("Invalid location path");
+	// if (res.find(' ') != std::string::npos)
+	// 	throw std::runtime_error("Invalid location path");
+	// return res;
+	//Chat generated this code:
+	std::string res = line;
+    res.erase(0, res.find_first_not_of(" \t"));
+    res.erase(res.find_last_not_of(" \t") - 1);
+    if (res.empty() || res == "{" || res.find(' ') != std::string::npos)
+    {
+        throw std::runtime_error("Invalid location path");
+    }
+    return res;
 }
 
 static bool	isEmptyLine(std::string line)
@@ -30,7 +39,7 @@ static bool	isEmptyLine(std::string line)
 
 static bool	isOnOrOff(std::string const &value)
 {
-	if (!value.compare("on") || !value.compare("off"))
+	if (value != "on" && value != "off")
 		throw std::runtime_error("Invalid value '" + value + "'");
 	return (value == "on");
 }
@@ -47,7 +56,7 @@ static BodySize	createBodySize(std::string const &value)
 	if (number.empty() || number[0] == '\0')
 		throw std::runtime_error("client_max_body_size no number found");
 	unit = value.substr(value.find_first_not_of("0123456789"));
-	if (unit.size() != 2)
+	if (unit.size() != 1)
 		throw std::runtime_error("client_max_body_size invalid unit size");
 	if (unit[0] == 'K' || unit[0] == 'k')
 		unit = "K";
@@ -83,7 +92,7 @@ static void	initServerBlock(ServerBlock &serverBlock)
 	serverBlock.port = 8080;
 	serverBlock.host = "localhost";
 	serverBlock.serverNames.clear();
-	serverBlock.root = "/";
+	serverBlock.root = "./www";
 	serverBlock.errorPages.clear();
 	serverBlock.clientMaxBodySize.value = "1";
 	serverBlock.clientMaxBodySize.unit = "M";
@@ -106,7 +115,6 @@ void Configuration::setListen(std::string const &value, ServerBlock &serverBlock
 	// TODO : listen localhost; but I have port at 0.
 	if (value.empty() || value.find(' ') != std::string::npos)
 		throw std::runtime_error("[setListen]Invalid value'" + value + "'");
-	// std::cout << "value : [" << value << "]" << std::endl;
 	if (value.find_first_of(':') != std::string::npos)
 	{
 		serverBlock.host = value.substr(0, value.find(':'));
@@ -154,7 +162,7 @@ static void	parseNames(std::string const &value, std::vector<std::string> &names
 	std::istringstream	iss(value);
 	std::string			word;
 
-	while (iss >> word && word [0] != '\0')
+	while (iss >> word && !word.empty())
 		names.push_back(word);
 }
 
@@ -225,7 +233,7 @@ void	Configuration::parseLocationDirective(std::string &line, LocationBlock &loc
 			value = value.substr(value.find_first_not_of(" \t"));
 			if (value[value.size() - 1] != ';')
 				throw std::runtime_error("[parseLocationDirective]Directive '" + dir + "' must end with a semicolon");
-			value[value.size() - 1] = '\0';
+			value = value.substr(0, value.size() - 1);
 			setLocationValues(keys[i], value, locationBlock);
 			return;
 		}
@@ -274,7 +282,7 @@ void	Configuration::parseServerDirective(std::string const &line, ServerBlock &s
 			value = value.substr(value.find_first_not_of(" \t"));
 			if (value[value.size() - 1] != ';')
 				throw std::runtime_error("[parseServerDirective]Directive '" + dir + "' must end with a semicolon");
-			value[value.size() - 1] = '\0';
+			value = value.substr(0, value.size() - 1);
 			setServerValues(keys[i], value, serverBlock);
 			return;
 		}

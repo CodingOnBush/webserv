@@ -1,18 +1,13 @@
 #include "Request.hpp"
 
-Request::Request(const std::string &buffer) : buffer(buffer)
+Request::Request()
 {
-    parseRequest();
+    this->parsingState = REQUEST_LINE;
 };
 
 Request::~Request() {};
 
-std::string Request::getBuffer() const
-{
-    return buffer;
-}
-
-std::string Request::getMethod() const
+int Request::getMethod() const
 {
     return method;
 }
@@ -42,20 +37,23 @@ void Request::setUri(const std::string &str)
     for (size_t i = 0; i < str.size(); ++i)
     {
         if (std::isspace(str[i]))
-            throw std::logic_error("Invalid URI: " + str);
+            throw std::logic_error("Invalid URI");
         this->uri += str[i];
     }
 }
 
 void Request::setMethod(const std::string &str)
 {
-    if (str == "GET" || str == "DELETE" || str == "POST")
-    {
-        this->method = str;
-    }
+    if (str == "GET")
+        this->method = GET;
+    else if (str == "POST")
+        this->method = POST;
+    else if (str == "DELETE")
+        this->method = DELETE;
     else
     {
-        throw std::logic_error("Invalid method: " + str);
+        this->method = UNKNOWN; // should result in 400 Bad Request response ?
+        throw std::logic_error("Method is not supported");
     }
 }
 
@@ -64,24 +62,39 @@ void Request::setVersion(const std::string &str)
     if (str.find("HTTP/") == 0)
     {
         this->version = str;
-        this->version.erase(0, 5);
+        // this->version.erase(0, 5);
     }
     else
     {
-        throw std::logic_error("Invalid version: " + str);
+        throw std::logic_error("Invalid HTTP version");
     }
 }
 
-void Request::setHeaders(std::istringstream &stream)
+void Request::setHeaders(std::stringstream &stream)
 {
     std::string line;
-
     while (std::getline(stream, line))
     {
-        std::string name, value;
-        if (!isValidHeader(line, name, value) || line.empty())
+        if (!line.empty() && line[line.size() - 1] == CR)
+        {
+            line.erase(line.size() - 1);
+        }
+
+        if (line.empty())
+        {
+            setParsingState(BODY);
             break;
-        headers[name] = value;
+        }
+        std::string name, value;
+        if (isValidHeader(line, name, value))
+        {
+            headers[name] = value;
+        }
+    }
+
+    if (parsingState != BODY)
+    {
+        setParsingState(HEADERS);
     }
 }
 
@@ -90,10 +103,8 @@ bool Request::isValidHeader(const std::string &line, std::string &name, std::str
     size_t pos = line.find(':');
     if (pos == std::string::npos)
         return false;
-
     std::string header_name = line.substr(0, pos);
-    std::string header_value = line.substr(pos + 1);
-
+    std::string header_value = line.substr(pos + 2);
     try
     {
         parseHeaderName(header_name, name);
@@ -117,8 +128,8 @@ void Request::parseHeaderName(const std::string &str, std::string &name)
 {
     for (size_t i = 0; i < str.size(); ++i)
     {
-        if (str[i] == '\n' || str[i] == ':')
-            throw std::logic_error("Invalid header: " + str);
+        if (str[i] == LF || str[i] == ':')
+            throw std::logic_error("Invalid header");
         name += str[i];
     }
 }
@@ -127,30 +138,35 @@ void Request::parseHeaderValue(const std::string &str, std::string &value)
 {
     for (size_t i = 0; i < str.size(); ++i)
     {
-        if (str[i] == '\n')
-            throw std::logic_error("Invalid header value: " + str);
+        if (str[i] == LF)
+            throw std::logic_error("Invalid header value");
         value += str[i];
     }
 }
 
-bool Request::parseBody(std::string &body)
+void Request::parseBody(std::stringstream &stream)
 {
-    (void)body;
-    // unchunking body logic
-    // if (body.empty())
-    //     return true;
-    // std::string newBody = "";
-    // size_t clen = atoi((*this)["Content-Length"].c_str());
-    // if (!((*this)["Transfer-Encoding"] == "chunked")) return;
-    // while (newBody.length() < clen) {
-    //   int position = body.find("\r\n");
-    //   int len = std::strtol(body.substr(0, position).c_str(), NULL, 16);
-    //   body = body.substr(position + 2, body.length());
-    //   newBody.append(this->body.substr(0, len));
-    //   body = body.substr(len + 1, body.length());
-    // }
-    // this->body = newBody;
-    return true;
+    if (!hasBody())
+    {
+        setParsingState(PARSING_DONE);
+        return;
+    }
+    std::string content_length = headers["Content-Length"];
+    std::stringstream ss(content_length);
+    int len;
+    ss >> len;
+    std::string new_body;
+    for (int i = 0; i < len; i++)
+    {
+        char c;
+        stream.get(c);
+        if (stream.eof())
+            break;
+        new_body += c;
+    }
+    this->body += new_body;
+    if (this->body.size() == len)
+        setParsingState(PARSING_DONE);
 }
 void Request::parseRequestLine(const std::string &line)
 {
@@ -187,24 +203,62 @@ void Request::parseRequestLine(const std::string &line)
         std::cerr << e.what() << std::endl;
     }
 }
-
-void Request::parseRequest()
+bool Request::hasBody()
 {
-    std::string line;
-    std::istringstream stream(buffer);
-
-    // check if buffer is empty and protect
-    std::getline(stream, line);
-    parseRequestLine(line);
-    setHeaders(stream);
-    body = buffer.substr(buffer.find("\r\n\r\n") + 4, buffer.length());
-    // parseBody(body);
+    return headers.find("Content-Length") != headers.end();
 }
 
-void Request::printRequest(Request &req)
+void Request::setParsingState(int state)
 {
-    std::cout << "Request buffer:" << std::endl;
-    std::cout << req.getBuffer() << std::endl;
+    this->parsingState = state;
+}
+
+int Request::getParsingState()
+{
+    return this->parsingState;
+}
+void Request::parseRequest(std::stringstream &stream)
+{
+    std::string line;
+    // if (parsingState == BODY)
+    // {
+    //     parseBody(stream);
+    //     return;
+    // }
+    if (parsingState == REQUEST_LINE)
+    {
+        std::getline(stream, line);
+        parseRequestLine(line);
+        setParsingState(HEADERS);
+    }
+    if (parsingState == HEADERS)
+        setHeaders(stream);
+    if (parsingState == BODY)
+    {
+        parseBody(stream);
+    }
+}
+
+void Request::setRequestState(int state)
+{
+    this->state = state;
+}
+
+int Request::getRequestState()
+{
+    return state;
+}
+
+void Request::clearRequest(void)
+{
+    this->method = 0;
+    this->uri.clear();
+    this->headers.clear();
+    this->state = 0;
+    this->body.clear();
+}
+void printRequest(Request &req)
+{
     std::cout << std::string(21, '*') << std::endl;
     std::cout << "Method: " << req.getMethod() << std::endl;
     std::cout << "URI: " << req.getUri() << std::endl;

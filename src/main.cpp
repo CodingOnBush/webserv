@@ -1,6 +1,4 @@
-
-// #include "Server.hpp"
-#include "Configuration.hpp"
+#include "Webserv.hpp"
 
 #define MAX_EV 4096
 
@@ -19,6 +17,8 @@ int	main(int ac, char **av)
 		{
 			Configuration config(av[1]);
 			config.printConfig();
+			initiateWebServer(config);
+			runWebserver(config);
 		}
 		catch (std::exception &e)
 		{
@@ -32,6 +32,8 @@ int	main(int ac, char **av)
 		{
 			Configuration config;
 			config.printConfig();
+			initiateWebServer(config);
+			runWebserver(config);
 		}
 		catch (std::exception &e)
 		{

@@ -1,5 +1,4 @@
-#ifndef CONFIGURATION_HPP
-#define CONFIGURATION_HPP
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -10,10 +9,15 @@
 #include <sstream>
 #include <cstdlib>// for std::atoi
 
+#define CRLF "\r\n" // carriage return line feed
+#define LF '\n'
+#define CR '\r'
+
 enum http_method {
 	GET,
 	POST,
-	DELETE
+	DELETE,
+	UNKNOWN
 };
 
 struct BodySize {
@@ -76,6 +80,7 @@ class Configuration
 		void		setMethod(std::string const &value, LocationBlock &locationBlock);
 
 	public:
+		// std::vector<ServerBlock>			m_serverBlocks;
 		Configuration();
 		Configuration(std::string const &t_configFile);
 		~Configuration();
@@ -93,4 +98,3 @@ class Configuration
 		//...
 };
 
-#endif // CONFIGURATION_HPP
