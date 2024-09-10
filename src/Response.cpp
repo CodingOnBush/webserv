@@ -269,13 +269,10 @@ void Response::processServerBlock(Configuration &config, Request &req)
 {
 	std::vector<ServerBlock>::iterator it;
 	std::vector<ServerBlock> serverBlocks = config.getServerBlocks();
-	std::string host = req.getHeaders()["Host"];
-	size_t pos = host.find(':');
-	std::string hostName = host.substr(0, pos);
-	std::string portValue = host.substr(pos + 1);
-	int port;
-	std::stringstream ss(portValue);
-	ss >> port;
+	std::string hostName = req.getHost();
+	int port = req.getPort();
+	std::cout << "Host: " << hostName << std::endl;
+	std::cout << "Port: " << port << std::endl;
 	for (std::vector<ServerBlock>::iterator it = serverBlocks.begin(); it != serverBlocks.end(); it++)
 	{
 		if (it->host == hostName && it->port == port)

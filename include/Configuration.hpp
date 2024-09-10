@@ -30,13 +30,15 @@ struct LocationBlock {
 	std::string							root;
 	std::string							alias;
 	BodySize							clientMaxBodySize;
-	bool								autoindex;
-	std::vector<std::string>			indexes;
+	bool								autoindex; // directory listing
+	std::vector<std::string>			indexes; 
+	bool								redirection;
 	std::map<std::string, std::string>	redirects;// {code, address}
 	bool								pathInfo;
 	std::map<std::string, std::string>	cgiParams;// {extension, file}
 	std::string							uploadLocation;
 	std::vector<http_method>			methods;// GET, POST, DELETE by default
+	std::map<std::string, std::string>	errorPages;
 };
 
 struct ServerBlock {

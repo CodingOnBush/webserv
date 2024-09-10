@@ -27,6 +27,35 @@ std::map<std::string, std::string> Request::getHeaders() const
     return headers;
 }
 
+std::string Request::getHost() const
+{
+    std::map<std::string, std::string>::const_iterator it = headers.find("Host");
+    if (it != headers.end())
+    {
+        std::string host = it->second.substr(0, it->second.find(':'));
+        return host;
+    }
+    return "";
+}
+
+int Request::getPort() const
+{
+    std::map<std::string, std::string>::const_iterator it = headers.find("Host");
+    if (it != headers.end())
+    {
+        size_t pos = it->second.find(':');
+        if (pos != std::string::npos)
+        {
+            std::string portValue = it->second.substr(pos + 1);
+            int port;
+	        std::stringstream ss(portValue);
+	        ss >> port;
+            return (port);
+        }
+    }
+    return 80;
+}
+
 std::string Request::getBody() const
 {
     return body;

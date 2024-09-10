@@ -17,13 +17,16 @@ Todo List - Webserv
 - correctly rename all vars and functions
 
 NEW TODOS:
-- Set headers dynamically
+- <s>Set headers dynamically</s>
 - Proper status code everywhere (all requests)
-- Setup the server_names or not, check how does server_name work (add check ?)
-- Setup default error pages (add check)
-- Limit client body size (add check)
-- HTTP methods (add check)
-- Turn on or off directory listing
+- Check host, port and server_names and have server block
+- Inside server block check for location path and return either corrponding location or default location
+
+- Limit client body size (add to the whole process)
+- HTTP methods (add to the whole process)
+- Turn on or off directory listing (add to the whole process)
+
+- Setup default error pages (add a file with them)
 - Decide which files we want to serve to demonstrate functionality of webserv
 - CGI part with dynamic content
 
@@ -31,6 +34,6 @@ NEW TODOS:
 Project parts:
 
 1. Server logic
-2.  HTTP response and request
-3.  Configuration file (parsing)
-4.  CGI
+2. HTTP response and request
+3. Configuration file (parsing)
+4. CGI

@@ -65,6 +65,8 @@ public:
 	int getParsingState();
 	void clearRequest();
 	void parseRequest(std::stringstream &stream);
+	std::string getHost() const;
+	int getPort() const;
 };
 
 void printRequest(Request &req);
