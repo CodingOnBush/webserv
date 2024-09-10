@@ -270,7 +270,7 @@ void Response::processServerBlock(Configuration &config, Request &req)
 	}
 	else
 	{
-		location = getMatchingLocationBlock(serverBlock, "/");
+		// location = getMatchingLocationBlock(serverBlock, "");
 		// std::cout << "Location Path2: " << location.path << std::endl;
 		handleRoot(serverBlock.root, uri);
 	}
