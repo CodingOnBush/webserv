@@ -106,7 +106,7 @@ void Configuration::setListen(std::string const &value, ServerBlock &serverBlock
 	// TODO : listen localhost; but I have port at 0.
 	if (value.empty() || value.find(' ') != std::string::npos)
 		throw std::runtime_error("[setListen]Invalid value'" + value + "'");
-	std::cout << "value : [" << value << "]" << std::endl;
+	// std::cout << "value : [" << value << "]" << std::endl;
 	if (value.find_first_of(':') != std::string::npos)
 	{
 		serverBlock.host = value.substr(0, value.find(':'));
@@ -137,6 +137,7 @@ void Configuration::addErrorPage(std::string const &value, ServerBlock &serverBl
 
 void	Configuration::setRedirect(std::string const &value, LocationBlock &locationBlock)
 {
+	std::cout << "return value : [" << value << "]" << std::endl;
 }
 
 void	Configuration::setCgi(std::string const &value, LocationBlock &locationBlock)
@@ -259,6 +260,8 @@ void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &
 
 void	Configuration::parseServerDirective(std::string const &line, ServerBlock &serverBlock)
 {
+	if (line[line.size() - 1] != ';')
+		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
 	std::string	dir = line.substr(line.find_first_not_of(" \t"), line.size());
 	std::string	keys[5] = {"listen", "server_name", "root", "error_page", "client_max_body_size"};
 	std::string	value;

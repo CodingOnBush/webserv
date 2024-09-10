@@ -1,8 +1,8 @@
 			
 
 server {
-	listen 1313;
-	server_name
+	listen oqinwdoiqnw:1313;
+	server_name;
 
 	location / {
 		root ./web/pages;
