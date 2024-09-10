@@ -219,11 +219,14 @@ void Response::handleRoot(std::string configPath, std::string requestUri)
 					{
 						this->setMimeType(fileName);
 					}
+					
 					this->statusCode = 200;
 					break;
 				}
 				else
 				{
+					body << http_error_403_page << std::endl;
+					this->body = body.str();
 					this->statusCode = 403;
 					break;
 				}
