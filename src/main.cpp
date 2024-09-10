@@ -49,4 +49,6 @@ TODO :
 	celui ou on a un servername qui fini pas par un ;
 body size only in bytes - changer pour juste avoir un int et pas une struct
 servername directive alone - si toute seule comme ca : "server_name" sans le ;
+test getLocationPath method
+
 */
