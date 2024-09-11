@@ -24,7 +24,7 @@ private:
 	std::string mimeType;
 	std::string getStatusMsg(int code);
 	void setBody(std::string const &body);
-	void processServerBlock(Configuration &config, Request &req);
+	LocationBlock getLocationFromServer(Configuration &config, Request &req);
 	std::string getPath(std::vector<ServerBlock>::iterator it, std::string uri);
 	void handleRoot(std::string configPath, std::string requestUri);
 	
@@ -35,7 +35,7 @@ public:
 	std::string getResponse(Configuration &config);
 	void setStatusLine();
 	void createResponseStr();
-	void handleGetRequest(Configuration &config);
+	void handleGetRequest(Configuration &config, LocationBlock location);
 	void handlePostRequest(Configuration &config);
 	void handleDeleteRequest(Configuration &config);
 	void setHeaders();

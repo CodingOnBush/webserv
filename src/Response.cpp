@@ -114,8 +114,9 @@ void Response::setHeaders()
 	headers = ss.str();
 }
 
-void Response::handleGetRequest(Configuration &config)
+void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
+	handleRoot(location.root, req.getUri());
 	createResponseStr();
 }
 
@@ -132,12 +133,12 @@ std::string Response::getResponse(Configuration &config)
 {
 	if (serverBlockExists(config, this->req))
 	{
-		processServerBlock(config, this->req);
+		LocationBlock location = getLocationFromServer(config, this->req);
 		// checks methods, bodysize, etc
 		switch (req.getMethod())
 		{
 		case GET:
-			handleGetRequest(config);
+			handleGetRequest(config, location);
 			break;
 		case POST:
 			handlePostRequest(config);
@@ -243,7 +244,7 @@ void Response::handleRoot(std::string configPath, std::string requestUri)
 	}
 };
 
-void Response::processServerBlock(Configuration &config, Request &req)
+LocationBlock Response::getLocationFromServer(Configuration &config, Request &req)
 {
 	ServerBlock serverBlock;
 	LocationBlock location;
@@ -255,19 +256,11 @@ void Response::processServerBlock(Configuration &config, Request &req)
 	else
 		serverBlock = getDefaultServerBlock(config, hostName, port);
 	std::string uri = req.getUri();
-	std::string root;
 	if (locationBlockExists(serverBlock, uri))
-	{
 		location = getMatchingLocationBlock(serverBlock, uri);
-		root = location.root;
-	}
 	else if (serverBlock.locationBlocks.size() == 0)
-		root = serverBlock.root;
+		location = serverBlock.locationBlocks[0];
 	else
-	{
 		location = getMatchingLocationBlock(serverBlock, "/");
-		root = location.root;
-	}
-
-	handleRoot(root, uri); // move to handleGetRequest
+	return location;
 }
