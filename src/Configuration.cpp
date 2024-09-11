@@ -346,6 +346,7 @@ void	Configuration::parseLocationDirective(std::string &line, LocationBlock &loc
 			return;
 		}
 	}
+	throw std::runtime_error("Unknown directive '" + dir + "'");
 }
 
 static void	pushLocationBlock(std::vector<LocationBlock> &locationBlocks, LocationBlock &locationBlock)
@@ -373,11 +374,11 @@ void	Configuration::parseLocationBlock(ServerBlock &serverBlock, std::string con
 	{
 		if (isLineToIgnore(row))
 			continue;
-		if (row == "\t}")
+		else if (row == "\t}")
 			break;
-		parseLocationDirective(row, locationBlock);
+		else
+			parseLocationDirective(row, locationBlock);
 	}
-	std::cout << "method size: " << locationBlock.methods.size() << std::endl;
 	pushLocationBlock(serverBlock.locationBlocks, locationBlock);
 }
 
@@ -429,15 +430,16 @@ void	Configuration::parseServerBlock(std::string const &line)
 	std::string	str;
 
 	initServerBlock(server);
-	if (line != " {")
-		throw std::runtime_error("A server block must start with this exact line 'server {'");
+	// if (line != " {")
+	// 	throw std::runtime_error("A server block must start with this exact line 'server {'");
 	while (std::getline(m_content, str))
 	{
+		std::cout << "parseServerBlock line : [" << str << "]" << std::endl;
 		if (isLineToIgnore(str))
 			continue;
-		if (str == "}")
+		else if (str == "}")
 			break;
-		if (!str.rfind("\tlocation", 0))
+		else if (!str.rfind("\tlocation", 0))
 			parseLocationBlock(server, str.substr(9));
 		else
 			parseServerDirective(str, server);
@@ -467,16 +469,17 @@ Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_c
 
 	if (!file)
 		throw std::runtime_error("Cannot open file " + m_configFile);
-	this->m_content << file.rdbuf();
+	m_content << file.rdbuf();
 	file.close();
-	while (std::getline(this->m_content, line))
+	while (std::getline(m_content, line))
 	{
 		if (isLineToIgnore(line))
 			continue;
-		if (!line.rfind("server", 0))
-			parseServerBlock(line.substr(6));
+		else if (!line.rfind("server {", 0))
+			parseServerBlock(line.substr(8));
 		else
 			throw std::runtime_error("Unknown directive '" + line + "'");
+
 	}
 	if (m_serverBlocks.empty())
 		throw std::runtime_error("No server block found");
