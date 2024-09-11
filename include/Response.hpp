@@ -51,3 +51,4 @@ bool matchExists(Configuration &config, std::string host, int port);
 ServerBlock getMatchingServerBlock(Configuration &config, std::string host, int port);
 bool locationBlockExists(ServerBlock serverBlock, std::string uri);
 LocationBlock getMatchingLocationBlock(ServerBlock ServerBlock, std::string uri);
+bool serverBlockExists(Configuration &config, Request &req);

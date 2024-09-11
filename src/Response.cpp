@@ -116,7 +116,6 @@ void Response::setHeaders()
 
 void Response::handleGetRequest(Configuration &config)
 {
-	processServerBlock(config, this->req);
 	createResponseStr();
 }
 
@@ -131,19 +130,24 @@ void Response::handleDeleteRequest(Configuration &config)
 }
 std::string Response::getResponse(Configuration &config)
 {
-	switch (req.getMethod())
+	if (serverBlockExists(config, this->req))
 	{
-	case GET:
-		handleGetRequest(config);
-		break;
-	case POST:
-		handlePostRequest(config);
-		break;
-	case DELETE:
-		handleDeleteRequest(config);
-		// case UNKNOWN:
-		// 	handleUnknownRequest();
-		break;
+		processServerBlock(config, this->req);
+		// checks methods, bodysize, etc
+		switch (req.getMethod())
+		{
+		case GET:
+			handleGetRequest(config);
+			break;
+		case POST:
+			handlePostRequest(config);
+			break;
+		case DELETE:
+			handleDeleteRequest(config);
+			// case UNKNOWN:
+			// 	handleUnknownRequest();
+			break;
+		}
 	}
 	return response;
 }
@@ -153,8 +157,6 @@ std::string Response::getPath(std::vector<ServerBlock>::iterator it, std::string
 	std::vector<LocationBlock> locationBlocks = it->locationBlocks;
 	for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++)
 	{
-		std::cout << "PATH: " << it->path << std::endl;
-		std::cout << "URI: " << it->root << std::endl;
 		if (it->path == uri)
 		{
 			return it->root;
@@ -219,7 +221,7 @@ void Response::handleRoot(std::string configPath, std::string requestUri)
 					{
 						this->setMimeType(fileName);
 					}
-					
+
 					this->statusCode = 200;
 					break;
 				}
@@ -243,39 +245,29 @@ void Response::handleRoot(std::string configPath, std::string requestUri)
 
 void Response::processServerBlock(Configuration &config, Request &req)
 {
-	std::vector<ServerBlock> serverBlocks = config.getServerBlocks();
 	ServerBlock serverBlock;
 	LocationBlock location;
 	std::string hostName = req.getHost();
 	int port = req.getPort();
 	int serverBlockCount = serverBlocksCount(config, hostName, port);
-	if (serverBlockCount == 0)
-		return;
-	else if (serverBlockCount > 1 && matchExists(config, hostName, port))
+	if (serverBlockCount > 1 && matchExists(config, hostName, port))
 		serverBlock = getMatchingServerBlock(config, hostName, port);
 	else
-	{
 		serverBlock = getDefaultServerBlock(config, hostName, port);
-	}
 	std::string uri = req.getUri();
+	std::string root;
 	if (locationBlockExists(serverBlock, uri))
 	{
 		location = getMatchingLocationBlock(serverBlock, uri);
-		if (location.path.size() == 0)
-		{
-			statusCode = 404;
-			return;
-		}
-		handleRoot(location.root, uri);
+		root = location.root;
 	}
 	else if (serverBlock.locationBlocks.size() == 0)
-	{
-		handleRoot(serverBlock.root, uri);
-	}
+		root = serverBlock.root;
 	else
 	{
 		location = getMatchingLocationBlock(serverBlock, "/");
-		handleRoot(location.root, uri);
+		root = location.root;
 	}
-	
+
+	handleRoot(root, uri); // move to handleGetRequest
 }

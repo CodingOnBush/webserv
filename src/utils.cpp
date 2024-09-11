@@ -22,7 +22,18 @@ bool	isFile( const std::string & path )
 	}
 	return false;
 }
-
+bool serverBlockExists(Configuration &config, Request &req)
+{
+	std::vector<ServerBlock> serverBlocks = config.getServerBlocks();
+	std::string host = req.getHost();
+	int port = req.getPort();
+	for (std::vector<ServerBlock>::iterator it = serverBlocks.begin(); it != serverBlocks.end(); it++)
+	{
+		if (it->host == host && it->port == port)
+			return true;
+	}
+	return false;
+}
 int serverBlocksCount(Configuration &config, std::string host, int port)
 {
 	size_t count = 0;
@@ -79,7 +90,6 @@ ServerBlock getMatchingServerBlock(Configuration &config, std::string host, int 
 bool locationBlockExists(ServerBlock serverBlock, std::string uri)
 {
 	std::vector<LocationBlock> locationBlocks = serverBlock.locationBlocks;
-	std::cout << "Location blocks size: " << locationBlocks.size() << std::endl;
 	for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++)
 	{
 		if (it->path == uri)
