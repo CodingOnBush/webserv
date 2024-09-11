@@ -27,7 +27,7 @@ private:
 	LocationBlock getLocationFromServer(Configuration &config, Request &req);
 	std::string getPath(std::vector<ServerBlock>::iterator it, std::string uri);
 	void handleRoot(std::string configPath, std::string requestUri);
-	
+	void bodySizeCheck(Configuration &config, LocationBlock &location);
 public:
 	Response();
 	Response(Request &req);

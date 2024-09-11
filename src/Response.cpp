@@ -129,12 +129,24 @@ void Response::handleDeleteRequest(Configuration &config)
 {
 	return;
 }
+
+void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
+{
+	int maxBodySize = config.getClientMaxBodySize(location.clientMaxBodySize);
+	if (maxBodySize == 0)
+		return;
+	if (req.getBody().size() > maxBodySize)
+	{
+		std::cout << "Payload too large" << std::endl;
+		this->statusCode = 413;
+	}
+}
 std::string Response::getResponse(Configuration &config)
 {
 	if (serverBlockExists(config, this->req))
 	{
 		LocationBlock location = getLocationFromServer(config, this->req);
-		// checks methods, bodysize, etc
+		bodySizeCheck(config, location); // update the code with proper config (during the merge with M)
 		switch (req.getMethod())
 		{
 		case GET:
