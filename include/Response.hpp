@@ -22,8 +22,6 @@ private:
 	std::string body;
 	std::string response;
 	std::string mimeType;
-	std::string getStatusMsg(int code);
-	void setBody(std::string const &body);
 	LocationBlock getLocationFromServer(Configuration &config, Request &req);
 	void handleRoot(std::string configPath, std::string requestUri);
 	void bodySizeCheck(Configuration &config, LocationBlock &location);

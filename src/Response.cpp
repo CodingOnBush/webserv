@@ -6,45 +6,6 @@ Response::Response(Request &req) : req(req), statusCode(0) {};
 
 Response::~Response() {};
 
-std::string Response::getStatusMsg(int code)
-{
-	switch (code)
-	{
-	case 200:
-		return "OK";
-	case 201:
-		return "Created";
-	case 202:
-		return "Accepted";
-	case 204:
-		return "No Content";
-	case 400:
-		return "Bad Request";
-	case 401:
-		return "Unauthorized";
-	case 403:
-		return "Forbidden";
-	case 404:
-		return "Not Found";
-	case 405:
-		return "Method Not Allowed";
-	case 409:
-		return "Conflict";
-	case 411:
-		return "Length Required";
-	case 413:
-		return "Payload Too Large";
-	case 415:
-		return "Unsupported Media Type";
-	case 500:
-		return "Internal Server Error";
-	case 501:
-		return "Not Implemented";
-	case 505:
-		return "HTTP Version Not Supported";
-	}
-	return "Internal Server Error";
-}
 // change this to setErrorBody ?
 void Response::setBody(LocationBlock location)
 {

@@ -4,6 +4,7 @@
 #include <string>
 
 std::map<int, std::string> create_error_pages_map();
+std::string getStatusMsg(int code);
 
 const std::map<int, std::string> http_error_pages = create_error_pages_map();
 
