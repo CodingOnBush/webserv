@@ -16,9 +16,9 @@ int	main(int ac, char **av)
 		try
 		{
 			Configuration config(av[1]);
-			config.printConfig();
-			initiateWebServer(config);
-			runWebserver(config);
+			// config.printConfig();
+			// initiateWebServer(config);
+			// runWebserver(config);
 		}
 		catch (std::exception &e)
 		{

@@ -1,6 +1,17 @@
 #include "../include/Configuration.hpp"
 #include "Configuration.hpp"
 
+static bool	isBlock(std::string const &line, std::string const &blockName)
+{
+	std::string	str;
+
+	std::cout << "isBlock line : [" << line << "]" << std::endl;
+	if (line.empty() || line.find(blockName) == std::string::npos)
+		return false;
+	str = line.substr(line.find_first_not_of(" \t"), blockName.size());
+	return (true);
+}
+
 static bool	isLineToIgnore(std::string line)
 {
 	if (line.empty())
@@ -430,8 +441,8 @@ void	Configuration::parseServerBlock(std::string const &line)
 	std::string	str;
 
 	initServerBlock(server);
-	// if (line != " {")
-	// 	throw std::runtime_error("A server block must start with this exact line 'server {'");
+	if (line != " {")
+		throw std::runtime_error("A server block must start with this exact line 'server {'");
 	while (std::getline(m_content, str))
 	{
 		std::cout << "parseServerBlock line : [" << str << "]" << std::endl;
@@ -473,10 +484,11 @@ Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_c
 	file.close();
 	while (std::getline(m_content, line))
 	{
+		isBlock(line, "server");
 		if (isLineToIgnore(line))
 			continue;
-		else if (!line.rfind("server {", 0))
-			parseServerBlock(line.substr(8));
+		else if (!line.rfind("server", 0))
+			parseServerBlock(line.substr(6));
 		else
 			throw std::runtime_error("Unknown directive '" + line + "'");
 

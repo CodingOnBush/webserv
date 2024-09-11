@@ -1,6 +1,6 @@
 *.o
 *.d
-bin
+bin/
 .vscode
 webserv
 *.hpp.gch
