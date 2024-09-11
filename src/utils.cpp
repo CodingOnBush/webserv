@@ -1,6 +1,12 @@
 #include "Webserv.hpp"
 #include "Response.hpp"
 
+std::string intToString(int value) {
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
+
 bool	isDirectory( const std::string & path )
 {
 	struct stat s;
@@ -121,5 +127,5 @@ std::string getDefaultErrorBody(int statusCode)
 		if (it->first == statusCode)
 			return it->second;
 	}
-	return "";
+	return http_error_500_page;
 }

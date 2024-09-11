@@ -2,7 +2,7 @@
 
 Response::Response() {};
 
-Response::Response(Request &req) : req(req) {};
+Response::Response(Request &req) : req(req), statusCode(0) {};
 
 Response::~Response() {};
 
@@ -45,9 +45,10 @@ std::string Response::getStatusMsg(int code)
 	}
 	return "Internal Server Error";
 }
+// change this to setErrorBody ?
 void Response::setBody(LocationBlock location)
 {
-	if (this->statusCode != 200)
+	if (this->statusCode >= 400)
 	{
 		if (location.errorPages.empty())
 		{
@@ -55,14 +56,34 @@ void Response::setBody(LocationBlock location)
 		}
 		else
 		{
-			// body = readFromFile(location.errorPages[std::to_string(this->statusCode)]);
+			body = getBodyFromFile(location.errorPages[intToString(this->statusCode)]);
 		}
+	}
+}
+
+std::string Response::getBodyFromFile(std::string filePath)
+{
+	std::ifstream file(filePath.c_str());
+	std::stringstream body;
+	std::string fileName = filePath.substr(filePath.find_last_of("/") + 1);
+	if (file.is_open())
+	{
+		std::string line;
+		while (std::getline(file, line))
+		{
+			body << line << std::endl;
+		}
+		file.close();
+		this->setMimeType(fileName);
+		return body.str();
 	}
 	else
 	{
-		// body = readFromFile(location.root);
-	}	
+		this->statusCode = 500;
+		return http_error_500_page;
+	}
 }
+
 void Response::setStatusLine()
 {
 	std::stringstream ss;
@@ -152,7 +173,6 @@ void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 		return;
 	if (req.getBody().size() > maxBodySize)
 	{
-		std::cout << "Payload too large" << std::endl;
 		this->statusCode = 413;
 	}
 }
@@ -163,7 +183,6 @@ std::string Response::getResponse(Configuration &config)
 	{
 		location = getLocationFromServer(config, this->req);
 		bodySizeCheck(config, location); // update the code with proper config (during the merge with M)
-		
 		if (this->statusCode == 0)
 		{
 			switch (req.getMethod())
@@ -176,27 +195,14 @@ std::string Response::getResponse(Configuration &config)
 				break;
 			case DELETE:
 				handleDeleteRequest(config);
-				// case UNKNOWN:
-				// 	handleUnknownRequest();
+			// case UNKNOWN:
+			// 	handleUnknownRequest();
 				break;
 			}
 		}
 	}
 	createResponseStr(location);
 	return response;
-}
-
-std::string Response::getPath(std::vector<ServerBlock>::iterator it, std::string uri)
-{
-	std::vector<LocationBlock> locationBlocks = it->locationBlocks;
-	for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++)
-	{
-		if (it->path == uri)
-		{
-			return it->root;
-		}
-	}
-	return "";
 }
 
 void Response::handleRoot(std::string configPath, std::string requestUri)
@@ -206,7 +212,6 @@ void Response::handleRoot(std::string configPath, std::string requestUri)
 	{
 		if (errno == ENOENT)
 		{
-			std::cout << "Directory does not exist" << std::endl;
 			this->statusCode = 404;
 			return;
 		}
@@ -255,14 +260,11 @@ void Response::handleRoot(std::string configPath, std::string requestUri)
 					{
 						this->setMimeType(fileName);
 					}
-
 					this->statusCode = 200;
 					break;
 				}
 				else
 				{
-					body << http_error_403_page << std::endl;
-					this->body = body.str();
 					this->statusCode = 403;
 					break;
 				}
@@ -270,7 +272,6 @@ void Response::handleRoot(std::string configPath, std::string requestUri)
 		}
 		if (this->statusCode == 0)
 		{
-			std::cout << "404 - not found" << std::endl;
 			this->statusCode = 404;
 		}
 		closedir(directoryPtr);

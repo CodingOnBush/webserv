@@ -25,10 +25,10 @@ private:
 	std::string getStatusMsg(int code);
 	void setBody(std::string const &body);
 	LocationBlock getLocationFromServer(Configuration &config, Request &req);
-	std::string getPath(std::vector<ServerBlock>::iterator it, std::string uri);
 	void handleRoot(std::string configPath, std::string requestUri);
 	void bodySizeCheck(Configuration &config, LocationBlock &location);
 	void setBody(LocationBlock location);
+	std::string getBodyFromFile(std::string path);
 public:
 	Response();
 	Response(Request &req);
@@ -43,7 +43,7 @@ public:
 	void setMimeType(std::string const &fileName);
 };
 
-
+std::string intToString(int value);
 bool isDirectory( const std::string & path );
 bool isFile( const std::string & path );
 int serverBlocksCount(Configuration &config, std::string host, int port);
