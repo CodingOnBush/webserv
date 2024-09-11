@@ -268,11 +268,14 @@ void Response::processServerBlock(Configuration &config, Request &req)
 		}
 		handleRoot(location.root, uri);
 	}
+	else if (serverBlock.locationBlocks.size() == 0)
+	{
+		handleRoot(serverBlock.root, uri);
+	}
 	else
 	{
-		// location = getMatchingLocationBlock(serverBlock, "");
-		// std::cout << "Location Path2: " << location.path << std::endl;
-		handleRoot(serverBlock.root, uri);
+		location = getMatchingLocationBlock(serverBlock, "/");
+		handleRoot(location.root, uri);
 	}
 	
 }
