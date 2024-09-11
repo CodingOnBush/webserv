@@ -50,9 +50,9 @@ const std::string http_error_404_page =
 
 const std::string http_error_405_page =
 "<html>" CRLF
-"<head><title>405 Not Allowed</title></head>" CRLF
+"<head><title>405 Method Not Allowed</title></head>" CRLF
 "<body>" CRLF
-"<center><h1>405 Not Allowed</h1></center>" CRLF
+"<center><h1>405 Method Not Allowed</h1></center>" CRLF
 "</body>" CRLF
 "</html>" CRLF;
 

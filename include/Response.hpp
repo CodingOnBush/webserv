@@ -25,6 +25,7 @@ private:
 	LocationBlock getLocationFromServer(Configuration &config, Request &req);
 	void handleRoot(std::string configPath, std::string requestUri);
 	void bodySizeCheck(Configuration &config, LocationBlock &location);
+	void methodCheck(LocationBlock location);
 	void setBody(LocationBlock location);
 	std::string getBodyFromFile(std::string path);
 public:

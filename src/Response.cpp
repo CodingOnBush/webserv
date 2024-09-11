@@ -126,6 +126,19 @@ void Response::handleDeleteRequest(Configuration &config)
 {
 	return;
 }
+void Response::methodCheck(LocationBlock location)
+{
+	if (req.getMethod() == UNKNOWN)
+	{
+		this->statusCode = 405;
+		return;
+	}
+	if (location.methods.size() > 0)
+	{
+		if (std::find(location.methods.begin(), location.methods.end(), req.getMethod()) == location.methods.end())
+			this->statusCode = 405;
+	}
+}
 
 void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 {
@@ -134,16 +147,20 @@ void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 		return;
 	if (req.getBody().size() > maxBodySize)
 	{
-		this->statusCode = 413;
+		if (this->statusCode == 0)
+			this->statusCode = 413;
 	}
 }
+
 std::string Response::getResponse(Configuration &config)
 {
 	LocationBlock location;
 	if (serverBlockExists(config, this->req))
 	{
 		location = getLocationFromServer(config, this->req);
+		methodCheck(location);
 		bodySizeCheck(config, location); // update the code with proper config (during the merge with M)
+		std::cout << "Status code: " << this->statusCode << std::endl;
 		if (this->statusCode == 0)
 		{
 			switch (req.getMethod())
@@ -156,8 +173,6 @@ std::string Response::getResponse(Configuration &config)
 				break;
 			case DELETE:
 				handleDeleteRequest(config);
-			// case UNKNOWN:
-			// 	handleUnknownRequest();
 				break;
 			}
 		}
