@@ -65,7 +65,7 @@ class Configuration
 		// std::vector<int>			_ports; // for vic's part
 		// and more
 
-		void		parseServerBlock(std::stringstream &content);
+		void		parseServerBlock(std::stringstream &content, std::string const &line);
 		void		parseLocationBlock(std::stringstream &content, ServerBlock &serverBlock, std::string const &line);
 
 		void		parseServerDirective(std::string const &line, ServerBlock &serverBlock);

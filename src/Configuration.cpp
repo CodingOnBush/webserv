@@ -14,13 +14,13 @@ static std::string	getLocationPath(std::string const &line)
 	return res;
 }
 
-static bool	isEmptyLine(std::string line)
+static bool	isLineToIgnore(std::string line)
 {
 	if (line.empty())
 		return true;
 	if (line.find_first_not_of(" \t\r") == std::string::npos)
 		return true;
-	if (line[0] == '#')
+	if (line.at(0) == '#')
 		return true;
 	return false;
 }
@@ -337,7 +337,7 @@ void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &
 	locationBlock.path = getLocationPath(line);
 	while (std::getline(content, row))
 	{
-		if (isEmptyLine(row))
+		if (isLineToIgnore(row))
 			continue;
 		if (row == "\t}")
 			break;
@@ -352,8 +352,11 @@ void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &
 
 void	Configuration::parseServerDirective(std::string const &line, ServerBlock &serverBlock)
 {
-	if (line[line.size() - 1] != ';')
+	if (line.at(line.size() - 1) != ';')
 		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
+
+	std::cout << "line : [" << line << "]" << std::endl;
+
 	std::string	dir = line.substr(line.find_first_not_of(" \t"), line.size());
 	std::string	keys[5] = {"listen", "server_name", "root", "error_page", "client_max_body_size"};
 	std::string	value;
@@ -374,24 +377,24 @@ void	Configuration::parseServerDirective(std::string const &line, ServerBlock &s
 	throw std::runtime_error("[parseServerDirective]Unknown directive '" + dir + "'");
 }
 
-void	Configuration::parseServerBlock(std::stringstream &content)
+void	Configuration::parseServerBlock(std::stringstream &content, std::string const &line)
 {
 	ServerBlock	server;
-	std::string	line;
-	std::string	directive;
-	std::string	value;
+	std::string	str;
 
 	initServerBlock(server);
-	while (std::getline(content, line))
+	if (line != " {")
+		throw std::runtime_error("A server block must start with this exact line 'server {'");
+	while (std::getline(content, str))
 	{
-		if (isEmptyLine(line))
+		if (isLineToIgnore(str))
 			continue;
-		else if (line == "}")
+		else if (str == "}")
 			break;
-		else if (line.rfind("\tlocation", 0) == 0)
-			parseLocationBlock(content, server, line.substr(9));
+		else if (str.rfind("\tlocation", 0) == 0)
+			parseLocationBlock(content, server, str.substr(9));
 		else
-			parseServerDirective(line, server);
+			parseServerDirective(str, server);
 	}
 	if (server.serverNames.empty())
 		server.serverNames.push_back("webserv");
@@ -426,10 +429,10 @@ Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_c
 	file.close();
 	while (std::getline(this->m_content, line))
 	{
-		if (isEmptyLine(line))
+		if (isLineToIgnore(line))
 			continue;
-		else if (line == "server {")
-			parseServerBlock(this->m_content);
+		else if (line.rfind("server", 0) == 0)
+			parseServerBlock(this->m_content, line.substr(6));
 		else
 			throw std::runtime_error("Unknown directive '" + line + "'");
 	}
