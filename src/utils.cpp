@@ -113,3 +113,13 @@ LocationBlock getMatchingLocationBlock(ServerBlock serverBlock, std::string uri)
 	}
 	return *location;
 }
+
+std::string getDefaultErrorBody(int statusCode)
+{
+	for (std::map<int, std::string>::const_iterator it = http_error_pages.begin(); it != http_error_pages.end(); it++)
+	{
+		if (it->first == statusCode)
+			return it->second;
+	}
+	return "";
+}

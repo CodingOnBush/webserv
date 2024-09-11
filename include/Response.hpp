@@ -28,13 +28,14 @@ private:
 	std::string getPath(std::vector<ServerBlock>::iterator it, std::string uri);
 	void handleRoot(std::string configPath, std::string requestUri);
 	void bodySizeCheck(Configuration &config, LocationBlock &location);
+	void setBody(LocationBlock location);
 public:
 	Response();
 	Response(Request &req);
 	~Response();
 	std::string getResponse(Configuration &config);
 	void setStatusLine();
-	void createResponseStr();
+	void createResponseStr(LocationBlock location);
 	void handleGetRequest(Configuration &config, LocationBlock location);
 	void handlePostRequest(Configuration &config);
 	void handleDeleteRequest(Configuration &config);
@@ -52,3 +53,4 @@ ServerBlock getMatchingServerBlock(Configuration &config, std::string host, int 
 bool locationBlockExists(ServerBlock serverBlock, std::string uri);
 LocationBlock getMatchingLocationBlock(ServerBlock ServerBlock, std::string uri);
 bool serverBlockExists(Configuration &config, Request &req);
+std::string getDefaultErrorBody(int statusCode);

@@ -1,7 +1,11 @@
 #pragma once
 #include "Response.hpp"
-#include "Configuration.hpp" // Include this header to define CRLF
+#include "Configuration.hpp"
 #include <string>
+
+std::map<int, std::string> create_error_pages_map();
+
+const std::map<int, std::string> http_error_pages = create_error_pages_map();
 
 const std::string http_error_400_page =
 "<html>" CRLF

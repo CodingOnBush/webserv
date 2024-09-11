@@ -45,9 +45,23 @@ std::string Response::getStatusMsg(int code)
 	}
 	return "Internal Server Error";
 }
-void Response::setBody(std::string const &body)
+void Response::setBody(LocationBlock location)
 {
-	this->body = body;
+	if (this->statusCode != 200)
+	{
+		if (location.errorPages.empty())
+		{
+			body = getDefaultErrorBody(this->statusCode);
+		}
+		else
+		{
+			// body = readFromFile(location.errorPages[std::to_string(this->statusCode)]);
+		}
+	}
+	else
+	{
+		// body = readFromFile(location.root);
+	}	
 }
 void Response::setStatusLine()
 {
@@ -56,10 +70,11 @@ void Response::setStatusLine()
 	statusLine = ss.str();
 }
 
-void Response::createResponseStr()
+void Response::createResponseStr(LocationBlock location)
 {
 	std::stringstream ss;
 	setStatusLine();
+	setBody(location);
 	setHeaders();
 	ss << statusLine << headers << body << LF;
 	response = ss.str();
@@ -109,6 +124,7 @@ void Response::setMimeType(std::string const &fileName)
 void Response::setHeaders()
 {
 	std::stringstream ss;
+	// add text/html as a default mime type (for default errors) ?
 	ss << "Content-Type: " << mimeType << CRLF
 	   << "Content-Length: " << body.size() << CRLF << CRLF;
 	headers = ss.str();
@@ -117,7 +133,6 @@ void Response::setHeaders()
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
 	handleRoot(location.root, req.getUri());
-	createResponseStr();
 }
 
 void Response::handlePostRequest(Configuration &config)
@@ -143,25 +158,31 @@ void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 }
 std::string Response::getResponse(Configuration &config)
 {
+	LocationBlock location;
 	if (serverBlockExists(config, this->req))
 	{
-		LocationBlock location = getLocationFromServer(config, this->req);
+		location = getLocationFromServer(config, this->req);
 		bodySizeCheck(config, location); // update the code with proper config (during the merge with M)
-		switch (req.getMethod())
+		
+		if (this->statusCode == 0)
 		{
-		case GET:
-			handleGetRequest(config, location);
-			break;
-		case POST:
-			handlePostRequest(config);
-			break;
-		case DELETE:
-			handleDeleteRequest(config);
-			// case UNKNOWN:
-			// 	handleUnknownRequest();
-			break;
+			switch (req.getMethod())
+			{
+			case GET:
+				handleGetRequest(config, location);
+				break;
+			case POST:
+				handlePostRequest(config);
+				break;
+			case DELETE:
+				handleDeleteRequest(config);
+				// case UNKNOWN:
+				// 	handleUnknownRequest();
+				break;
+			}
 		}
 	}
+	createResponseStr(location);
 	return response;
 }
 
