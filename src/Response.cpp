@@ -133,16 +133,15 @@ void Response::methodCheck(LocationBlock location)
 		this->statusCode = 405;
 		return;
 	}
-	if (location.methods.size() > 0)
+	if (location.methods.empty() || std::find(location.methods.begin(), location.methods.end(), req.getMethod()) == location.methods.end())
 	{
-		if (std::find(location.methods.begin(), location.methods.end(), req.getMethod()) == location.methods.end())
 			this->statusCode = 405;
 	}
 }
 
 void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 {
-	int maxBodySize = config.getClientMaxBodySize(location.clientMaxBodySize);
+	int maxBodySize = config.getBodySize(location.clientMaxBodySize);
 	if (maxBodySize == 0)
 		return;
 	if (req.getBody().size() > maxBodySize)
@@ -160,7 +159,6 @@ std::string Response::getResponse(Configuration &config)
 		location = getLocationFromServer(config, this->req);
 		methodCheck(location);
 		bodySizeCheck(config, location); // update the code with proper config (during the merge with M)
-		std::cout << "Status code: " << this->statusCode << std::endl;
 		if (this->statusCode == 0)
 		{
 			switch (req.getMethod())

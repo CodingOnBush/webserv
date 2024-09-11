@@ -22,7 +22,7 @@ int	main(int ac, char **av)
 		}
 		catch (std::exception &e)
 		{
-			std::cerr << "Error: " << e.what() << std::endl;
+			std::cerr << "Error : " << e.what() << std::endl;
 			return (1);
 		}
 	}
@@ -50,5 +50,7 @@ TODO :
 ./webserv config.txt
 	celui ou on a un servername qui fini pas par un ;
 body size only in bytes - changer pour juste avoir un int et pas une struct
-servername directive alone - si toute seule comme ca : "server_name" sans le ;
+`servername directive alone - si toute seule comme ca : "server_name" sans le ;
+test getLocationPath method
+
 */
