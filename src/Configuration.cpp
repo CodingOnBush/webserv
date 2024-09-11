@@ -1,19 +1,6 @@
 #include "../include/Configuration.hpp"
 #include "Configuration.hpp"
 
-static std::string	getLocationPath(std::string const &line)
-{
-	std::string res = line;
-
-	res.erase(0, res.find_first_not_of(" \t"));
-	if (res.find_first_of(" ") == std::string::npos)// we need to find a space at the end of the path before the '{'
-		throw std::runtime_error("Invalid location path");
-	res.erase(res.find_first_of(" \t"), res.size());
-	if (res.empty() || res == "{" || res.find(' ') != std::string::npos)
-		throw std::runtime_error("Invalid location path");
-	return res;
-}
-
 static bool	isLineToIgnore(std::string line)
 {
 	if (line.empty())
@@ -32,13 +19,116 @@ static bool	isOnOrOff(std::string const &value)
 	return (value == "on");
 }
 
+static void	checkDirectivePairsWithSingleValue(std::string const &key, std::string const &value)
+{
+	std::string	keysWithOneValue[7] = {
+		"listen", "root", "alias", "client_max_body_size", 
+		"autoindex", "path_info", "upload_location"
+	};
+	
+	for (int i = 0; i < 7; i++)
+	{
+		if (key == keysWithOneValue[i])
+		{
+			if (value.find_first_of(" \t\n\v\f\r") != std::string::npos)
+				throw std::runtime_error("Directive '" + key + "' must have only one value");
+		}
+	}
+}
+
+static void	addUniqueNewValueToMap(std::map<std::string, std::string> &map, std::string const &key, std::string const &value)
+{
+	if (map.find(key) != map.end())
+		throw std::runtime_error("double error_page directive for the same code : " + key);
+	map[key] = value;
+}
+
+static void	initLocationBlock(LocationBlock &locationBlock)
+{
+	locationBlock.path = "/";
+	locationBlock.root = "";
+	locationBlock.alias = "";
+	locationBlock.clientMaxBodySize.value = "";
+	locationBlock.clientMaxBodySize.unit = "";
+	locationBlock.autoindex = false;
+	locationBlock.indexes.clear();
+	locationBlock.redirects.clear();
+	locationBlock.pathInfo = false;
+	locationBlock.cgiParams.clear();
+	locationBlock.uploadLocation = "";
+	locationBlock.errorPages.clear();
+	locationBlock.methods.clear();
+}
+
+static void	initServerBlock(ServerBlock &serverBlock)
+{
+	serverBlock.port = 8080;
+	serverBlock.host = "localhost";
+	serverBlock.serverNames.clear();
+	serverBlock.root = "./www";
+	serverBlock.errorPages.clear();
+	serverBlock.clientMaxBodySize.value = "1";
+	serverBlock.clientMaxBodySize.unit = "M";
+	serverBlock.locationBlocks.clear();
+}
+
+
+
+static void	parseAllLocationBlocks(std::vector<ServerBlock> &m_serverBlocks)
+{
+	for (std::vector<ServerBlock>::iterator it = m_serverBlocks.begin(); it != m_serverBlocks.end(); ++it)
+	{
+		for (std::vector<LocationBlock>::iterator it2 = it->locationBlocks.begin(); it2 != it->locationBlocks.end(); ++it2)
+		{
+			if (it2->root.empty())
+				it2->root = it->root;
+			if (it2->clientMaxBodySize.value.empty())
+			{
+				it2->clientMaxBodySize.value = it->clientMaxBodySize.value;
+				it2->clientMaxBodySize.unit = it->clientMaxBodySize.unit;
+			}
+			if (it2->indexes.empty())
+				it2->indexes.push_back("default.html");
+			if (it2->errorPages.empty())
+				it2->errorPages = it->errorPages;
+			if (it2->methods.empty())
+			{
+				it2->methods.push_back(GET);
+				it2->methods.push_back(POST);
+				it2->methods.push_back(DELETE);
+			}
+			if (it2->errorPages.empty())
+				it2->errorPages = it->errorPages;
+		}
+	}
+}
+
+
+
+static std::string	getLocationPath(std::string const &line)
+{
+	std::string res = line;
+
+	if (res.empty())
+		throw std::runtime_error("Location block must end with a '{'");
+	res.erase(res.find_last_not_of(" \t") + 1);
+	if (res.at(res.size() - 1) != '{')
+		throw std::runtime_error("Location block must end with a '{'");
+	if (res.at(0) == '{')
+		throw std::runtime_error("Location block need a space before the '{'");
+	res.erase(res.size() - 1);
+	res.erase(0, res.find_first_not_of(" \t"));
+	res.erase(res.find_last_not_of(" \t") + 1);
+	if (res.empty())
+		throw std::runtime_error("Each location block need a path");
+	return res;
+}
+
 static std::string	getKey(std::string const &value)
 {
 	std::string	key;
 
 	key = value.substr(0, value.find_first_of(" \t"));
-	// if (key.find_first_not_of("0123456789") != std::string::npos)
-	// 	throw std::runtime_error("error_page code must be a number.");
 	return key;
 }
 
@@ -81,46 +171,7 @@ static BodySize	createBodySize(std::string const &value)
 	return bodySize;
 }
 
-static void	initLocationBlock(LocationBlock &locationBlock)
-{
-	locationBlock.path = "";
-	locationBlock.root = "";
-	locationBlock.alias = "";
-	locationBlock.clientMaxBodySize.value = "";
-	locationBlock.clientMaxBodySize.unit = "";
-	locationBlock.autoindex = false;
-	locationBlock.indexes.clear();
-	locationBlock.redirects.clear();
-	locationBlock.pathInfo = false;
-	locationBlock.cgiParams.clear();
-	locationBlock.uploadLocation = "";
-	locationBlock.methods.clear();
-}
-
-static void	initServerBlock(ServerBlock &serverBlock)
-{
-	serverBlock.port = 8080;
-	serverBlock.host = "localhost";
-	serverBlock.serverNames.clear();
-	serverBlock.root = "./www";
-	serverBlock.errorPages.clear();
-	serverBlock.clientMaxBodySize.value = "1";
-	serverBlock.clientMaxBodySize.unit = "M";
-	serverBlock.locationBlocks.clear();
-}
-
-static void	setLocationDefaultValues(ServerBlock &serverBlock, LocationBlock &locationBlock)
-{
-	if (locationBlock.root.empty())
-		locationBlock.root = serverBlock.root;
-	if (locationBlock.clientMaxBodySize.value.empty())
-	{
-		locationBlock.clientMaxBodySize.value = serverBlock.clientMaxBodySize.value;
-		locationBlock.clientMaxBodySize.unit = serverBlock.clientMaxBodySize.unit;
-	}
-}
-
-void Configuration::setListen(std::string const &value, ServerBlock &serverBlock)
+static void	setListen(std::string const &value, ServerBlock &serverBlock)
 {
 	std::stringstream	ss;
 	std::string 		port;
@@ -151,80 +202,43 @@ void Configuration::setListen(std::string const &value, ServerBlock &serverBlock
 	}
 }
 
-void Configuration::addErrorPage(std::string const &value, ServerBlock &serverBlock)
+static void	setMethod(std::string const &value, LocationBlock &locationBlock)
 {
-	std::string	code;
-	std::string	uri;
+	std::string	split;
+	std::stringstream	ss(value);
+	int			get = 0;
+	int			post = 0;
+	int			del = 0;
 
-	if (value.empty() || value.find_first_of(" \t") == std::string::npos)
-		throw std::runtime_error("error_page wrong format.");
-	code = value.substr(0, value.find_first_of(" \t"));
-	if (code.find_first_not_of("0123456789") != std::string::npos)
-		throw std::runtime_error("error_page code must be a number.");
-	// TODO : check if code is a valid http code
-	uri = value.substr(value.find_first_not_of(" \t", code.size()));
-	if (uri.empty() || uri.at(0) == '\0')
-		throw std::runtime_error("error_page uri is empty.");
-	if (uri.find_first_of(" \t") != std::string::npos)
-		throw std::runtime_error("error_page uri must be a single value.");
-	serverBlock.errorPages[code] = uri;
+	while(std::getline(ss, split, '|'))
+	{
+		if (split == "GET" && get == 0)
+		{
+			locationBlock.methods.push_back(GET);
+			get++;
+		}
+		else if (split == "POST" && post == 0)
+		{
+			locationBlock.methods.push_back(POST);
+			post++;
+		}
+		else if (split == "DELETE" && del == 0)
+		{
+			locationBlock.methods.push_back(DELETE);
+			del++;
+		}
+		else
+			throw std::runtime_error("Method directive not conform");
+	}
+	if (locationBlock.methods.empty())
+	{
+		locationBlock.methods.push_back(GET);
+		locationBlock.methods.push_back(POST);
+		locationBlock.methods.push_back(DELETE);
+	}
 }
 
-void	Configuration::setRedirect(std::string const &value, LocationBlock &locationBlock)
-{
-	// std::cout << "return value : [" << value << "]" << std::endl;
-	std::string	code;
-	std::string	path;
-
-	if (value.empty() || value.find_first_of(" \t") == std::string::npos)
-		throw std::runtime_error("return wrong format.");
-	code = value.substr(0, value.find_first_of(" \t"));
-	if (code.find_first_not_of("0123456789") != std::string::npos)
-		throw std::runtime_error("return code must be a number.");
-	// TODO : check if code is a valid http code
-	path = value.substr(value.find_first_not_of(" \t", code.size()));
-	if (path.empty() || path.at(0) == '\0')
-		throw std::runtime_error("return path is empty.");
-	if (path.find_first_of(" \t") != std::string::npos)
-		throw std::runtime_error("return path must be a single value.");
-	locationBlock.redirects[code] = path;
-}
-
-void	Configuration::setCgi(std::string const &value, LocationBlock &locationBlock)
-{
-	std::cout << "cgi value : [" << value << "]" << std::endl;
-	// std::cout << "return value : [" << value << "]" << std::endl;
-	std::string	ext;
-	std::string	path;
-
-	if (value.empty())
-		throw std::runtime_error("cgi wrong format.");
-	if (value.find_first_of(" \t") == std::string::npos)
-		throw std::runtime_error("cgi wrong format.");
-	if (value.find_first_of(" \t") != value.find_last_of(" \t"))
-		throw std::runtime_error("cgi wrong format.");
-	ext = value.substr(0, value.find_first_of(" \t"));
-	if (ext != ".py" && ext != ".php" && ext != ".rb")
-		throw std::runtime_error("cgi ext must be .py or .php or .rb");
-	// TODO : check if cgi is a valid http ext
-	path = value.substr(value.find_first_not_of(" \t"));
-	std::cout << "path : [" << path << "]" << std::endl;
-	if (path.empty() || path.at(0) == '\0')
-		throw std::runtime_error("cgi path is empty.");
-	// if (path.find_first_of(" \t") != std::string::npos)
-	// 	throw std::runtime_error("cgi path must be a single value.");
-	if (locationBlock.cgiParams.find(ext) != locationBlock.cgiParams.end())
-		throw std::runtime_error("double cgi directive for the same extension : " + ext);
-	locationBlock.cgiParams[ext] = path;
-}
-
-
-void	Configuration::setMethod(std::string const &value, LocationBlock &locationBlock)
-{
-	std::cout << "method value : [" << value << "]" << std::endl;
-}
-
-static void	parseNames(std::string const &value, std::vector<std::string> &names)
+static void	parseListOfWords(std::string const &value, std::vector<std::string> &names)
 {
 	std::istringstream	iss(value);
 	std::string			word;
@@ -235,62 +249,71 @@ static void	parseNames(std::string const &value, std::vector<std::string> &names
 
 void	Configuration::setServerValues(std::string const &key, std::string const &value, ServerBlock &serverBlock)
 {
-	if ((key == "root" || key == "listen" || key == "client_max_body_size") && value.find_first_of(" \t\n\v\f\r") != std::string::npos)
-		throw std::runtime_error("Directive '" + key + "' must have only one value");
+	std::string	code;
+
+	checkDirectivePairsWithSingleValue(key, value);
 	if (key == "listen")
-	{
-		
 		setListen(value, serverBlock);
-	}
 	else if (key == "server_name")
-		parseNames(value, serverBlock.serverNames);
+		parseListOfWords(value, serverBlock.serverNames);
 	else if (key == "root")
 		serverBlock.root = value;
 	else if (key == "error_page")
 	{
-		if (serverBlock.errorPages.find(getKey(value)) != serverBlock.errorPages.end())
-			throw std::runtime_error("double error_page directive for the same code : " + getKey(value));
-		serverBlock.errorPages[getKey(value)] = getValue(value);
-		// addErrorPage(value, serverBlock);
+		code = getKey(value);
+		if (code.find_first_not_of("0123456789") != std::string::npos)
+			throw std::runtime_error("error_page code must be a number");
+		if (serverBlock.errorPages.find(key) == serverBlock.errorPages.end())
+			serverBlock.errorPages[code] = getValue(value);
+		// addUniqueNewValueToMap(serverBlock.errorPages, code, getValue(value));
 	}
 	else if (key == "client_max_body_size")
+	{
 		serverBlock.clientMaxBodySize = createBodySize(value);
+		serverBlock.bodySize = getBodySize(serverBlock.clientMaxBodySize);
+	}
 	else
-		throw std::runtime_error("[setServerValues]Unknown directive '" + key + "'");
+		throw std::runtime_error("Unknown directive '" + key + "'");
 }
 
 void	Configuration::setLocationValues(std::string const &key, std::string const &value, LocationBlock &locationBlock)
 {
-	if ((key == "root" || key == "alias" || key == "client_max_body_size" || key == "autoindex" || key == "path_info" || key == "upload_location") && value.find_first_of(" \t\n\v\f\r") != std::string::npos)
-		throw std::runtime_error("Directive '" + key + "' must have only one value");
+	checkDirectivePairsWithSingleValue(key, value);
 	if (key == "root")
 		locationBlock.root = value;
 	else if (key == "alias")
 		locationBlock.alias = value;
 	else if (key == "client_max_body_size")
+	{
 		locationBlock.clientMaxBodySize = createBodySize(value);
+		locationBlock.bodySize = getBodySize(locationBlock.clientMaxBodySize);
+	}
 	else if (key == "autoindex")
 		locationBlock.autoindex = isOnOrOff(value);
 	else if (key == "index")
-		parseNames(value, locationBlock.indexes);
+		parseListOfWords(value, locationBlock.indexes);
 	else if (key == "return")
 	{
-		if (locationBlock.redirects.find(getKey(value)) != locationBlock.redirects.end())
-			throw std::runtime_error("double return directive for the same code : " + getKey(value));
-		locationBlock.redirects[getKey(value)] = getValue(value);
-		// setRedirect(value, locationBlock);
+		std::string	code = getKey(value);
+		if (code.find_first_not_of("0123456789") != std::string::npos)
+			throw std::runtime_error("return code must be a number");
+		addUniqueNewValueToMap(locationBlock.redirects, code, getValue(value));
 	}
 	else if (key == "path_info")
 		locationBlock.pathInfo = isOnOrOff(value);
 	else if (key == "cgi")
-	{
-		if (locationBlock.cgiParams.find(getKey(value)) != locationBlock.cgiParams.end())
-			throw std::runtime_error("double cgi directive for the same extension : " + getKey(value));
-		locationBlock.cgiParams[getKey(value)] = getValue(value);
-		// setCgi(value, locationBlock);
-	}
+		addUniqueNewValueToMap(locationBlock.cgiParams, getKey(value), getValue(value));
 	else if (key == "upload_location")
 		locationBlock.uploadLocation = value;
+	else if (key == "error_page")
+	{
+		std::string	code = getKey(value);
+		if (code.find_first_not_of("0123456789") != std::string::npos)
+			throw std::runtime_error("error_page code must be a number");
+		if (locationBlock.errorPages.find(code) == locationBlock.errorPages.end())
+			locationBlock.errorPages[code] = getValue(value);
+		// addUniqueNewValueToMap(locationBlock.errorPages, code, getValue(value));
+	}
 	else if (key == "set_method")
 		setMethod(value, locationBlock);
 	else
@@ -299,22 +322,24 @@ void	Configuration::setLocationValues(std::string const &key, std::string const 
 
 void	Configuration::parseLocationDirective(std::string &line, LocationBlock &locationBlock)
 {
-	std::string	dir = line.substr(line.find_first_not_of(" \t"), line.size());
-	std::string	keys[11] = {
+	std::string	keys[12] = {
 		"root", "alias", "client_max_body_size", 
 		"autoindex", "index", "return", "path_info", 
-		"cgi", "upload_location", "set_method"
+		"cgi", "upload_location", "set_method", "error_page"
 	};
 	std::string	value;
+	std::string	dir;
 
+	dir = line.substr(line.find_first_not_of(" \t"), line.size());
 	for (int i = 0; i < 11; i++)
 	{
 		if (!dir.rfind(keys[i], 0))
 		{
 			value = dir.substr(keys[i].size());
 			value = value.substr(value.find_first_not_of(" \t"));
+			value.erase(value.find_last_not_of(" \t") + 1);
 			if (value[value.size() - 1] != ';')
-				throw std::runtime_error("[parseLocationDirective]Directive '" + dir + "' must end with a semicolon");
+				throw std::runtime_error("Directive '" + dir + "' must end with a semicolon");
 			value = value.substr(0, value.size() - 1);
 			setLocationValues(keys[i], value, locationBlock);
 			return;
@@ -322,62 +347,81 @@ void	Configuration::parseLocationDirective(std::string &line, LocationBlock &loc
 	}
 }
 
-void	Configuration::parseLocationBlock(std::stringstream &content, ServerBlock &serverBlock, std::string const &line)
+static void	pushLocationBlock(std::vector<LocationBlock> &locationBlocks, LocationBlock &locationBlock)
+{
+	if (locationBlock.root.empty())
+		locationBlock.root = "./www";
+	if (locationBlock.clientMaxBodySize.value.empty())
+	{
+		locationBlock.clientMaxBodySize.value = "1";
+		locationBlock.clientMaxBodySize.unit = "M";
+	}
+	if (locationBlock.indexes.empty())
+		locationBlock.indexes.push_back("default.html");
+	locationBlocks.push_back(locationBlock);
+}
+
+void	Configuration::parseLocationBlock(ServerBlock &serverBlock, std::string const &line)
 {
 	LocationBlock	locationBlock;
 	std::string		row;
-	std::string		directive;
-	std::string		value;
 
-	if (line.at(0) == '{')
-		throw std::runtime_error("Location block must have a path");
-	if (line.at(line.size() - 1) != '{')
-		throw std::runtime_error("Location block must end with a '{'");
 	initLocationBlock(locationBlock);
 	locationBlock.path = getLocationPath(line);
-	while (std::getline(content, row))
+	while (std::getline(m_content, row))
 	{
 		if (isLineToIgnore(row))
 			continue;
 		if (row == "\t}")
 			break;
-		else
-			parseLocationDirective(row, locationBlock);
+		parseLocationDirective(row, locationBlock);
 	}
-	setLocationDefaultValues(serverBlock, locationBlock);
-	if (locationBlock.indexes.empty())
-		locationBlock.indexes.push_back("default.html");
-	serverBlock.locationBlocks.push_back(locationBlock);
+	pushLocationBlock(serverBlock.locationBlocks, locationBlock);
 }
 
 void	Configuration::parseServerDirective(std::string const &line, ServerBlock &serverBlock)
 {
-	if (line.at(line.size() - 1) != ';')
-		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
-
-	std::cout << "line : [" << line << "]" << std::endl;
-
-	std::string	dir = line.substr(line.find_first_not_of(" \t"), line.size());
 	std::string	keys[5] = {"listen", "server_name", "root", "error_page", "client_max_body_size"};
 	std::string	value;
+	std::string	dir;
 
+	dir = line.substr(line.find_first_not_of(" \t"), line.size());
+	dir.erase(dir.find_last_not_of(" \t") + 1);
+	if (dir.at(dir.size() - 1) != ';')
+		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
 	for (int i = 0; i < 5; i++)
 	{
 		if (!dir.rfind(keys[i], 0))
 		{
 			value = dir.substr(keys[i].size());
 			value = value.substr(value.find_first_not_of(" \t"));
-			if (value[value.size() - 1] != ';')
-				throw std::runtime_error("[parseServerDirective]Directive '" + dir + "' must end with a semicolon");
 			value = value.substr(0, value.size() - 1);
 			setServerValues(keys[i], value, serverBlock);
 			return;
 		}
 	}
-	throw std::runtime_error("[parseServerDirective]Unknown directive '" + dir + "'");
+	throw std::runtime_error("Unknown directive '" + dir + "'");
 }
 
-void	Configuration::parseServerBlock(std::stringstream &content, std::string const &line)
+static void	pushServerBlock(std::vector<ServerBlock> &serverBlocks, ServerBlock &serverBlock)
+{
+	if (serverBlock.serverNames.empty())
+		serverBlock.serverNames.push_back("webserv");
+	if (serverBlock.locationBlocks.empty())
+	{
+		LocationBlock	locationBlock;
+
+		initLocationBlock(locationBlock);
+		locationBlock.root = serverBlock.root;
+		locationBlock.errorPages = serverBlock.errorPages;
+		locationBlock.clientMaxBodySize.value = serverBlock.clientMaxBodySize.value;
+		locationBlock.clientMaxBodySize.unit = serverBlock.clientMaxBodySize.unit;
+		serverBlock.locationBlocks.push_back(locationBlock);
+	}
+	serverBlocks.push_back(serverBlock);
+}
+
+void	Configuration::parseServerBlock(std::string const &line)
 {
 	ServerBlock	server;
 	std::string	str;
@@ -385,30 +429,26 @@ void	Configuration::parseServerBlock(std::stringstream &content, std::string con
 	initServerBlock(server);
 	if (line != " {")
 		throw std::runtime_error("A server block must start with this exact line 'server {'");
-	while (std::getline(content, str))
+	while (std::getline(m_content, str))
 	{
 		if (isLineToIgnore(str))
 			continue;
-		else if (str == "}")
+		if (str == "}")
 			break;
-		else if (str.rfind("\tlocation", 0) == 0)
-			parseLocationBlock(content, server, str.substr(9));
+		if (!str.rfind("\tlocation", 0))
+			parseLocationBlock(server, str.substr(9));
 		else
 			parseServerDirective(str, server);
 	}
-	if (server.serverNames.empty())
-		server.serverNames.push_back("webserv");
-	if (server.locationBlocks.empty())
-	{
-		LocationBlock	locationBlock;
-
-		initLocationBlock(locationBlock);
-		locationBlock.path = "/";
-		setLocationDefaultValues(server, locationBlock);
-		server.locationBlocks.push_back(locationBlock);
-	}
-	m_serverBlocks.push_back(server);
+	pushServerBlock(m_serverBlocks, server);
 }
+
+
+
+
+// ////// //
+// PUBLIC
+// ///// //
 
 Configuration::Configuration()
 {
@@ -431,11 +471,14 @@ Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_c
 	{
 		if (isLineToIgnore(line))
 			continue;
-		else if (line.rfind("server", 0) == 0)
-			parseServerBlock(this->m_content, line.substr(6));
+		if (!line.rfind("server", 0))
+			parseServerBlock(line.substr(6));
 		else
 			throw std::runtime_error("Unknown directive '" + line + "'");
 	}
+	if (m_serverBlocks.empty())
+		throw std::runtime_error("No server block found");
+	parseAllLocationBlocks(m_serverBlocks);
 }
 
 Configuration::~Configuration()
@@ -447,12 +490,13 @@ std::vector<ServerBlock> const &Configuration::getServerBlocks() const
 	return m_serverBlocks;
 }
 
-
-// This function can be used to get the body size in bytes
-const int	Configuration::getBodySize(BodySize const &bodySize) const
+const int	Configuration::getBodySize(BodySize const &bodySize)
 {
-	int	weight = std::atoi(bodySize.value.c_str());
+	std::stringstream	ss;
+	int					weight;
 
+	ss << bodySize.value;
+	ss >> weight;
 	if (bodySize.unit == "K")
 		weight *= 1024;
 	else if (bodySize.unit == "M")
@@ -495,7 +539,7 @@ void	Configuration::printConfig() const
 			std::cout << "  root: " << it2->root << std::endl;
 			std::cout << "  alias: " << it2->alias << std::endl;
 			std::cout << "  clientMaxBodySize: " << it2->clientMaxBodySize.value << " " << it2->clientMaxBodySize.unit << std::endl;
-			std::cout << "  autoindex: " << it2->autoindex << std::endl;
+			std::cout << "  autoindex: " << (it2->autoindex ? "on" : "off") << std::endl;
 			std::cout << "  indexes: ";
 			for (std::vector<std::string>::const_iterator it3 = it2->indexes.begin(); it3 != it2->indexes.end(); ++it3)
 				std::cout << *it3 << " ";
@@ -504,12 +548,16 @@ void	Configuration::printConfig() const
 			for (std::map<std::string, std::string>::const_iterator it3 = it2->redirects.begin(); it3 != it2->redirects.end(); ++it3)
 				std::cout << it3->first << " " << it3->second << " ";
 			std::cout << std::endl;
-			std::cout << "  pathInfo: " << it2->pathInfo << std::endl;
+			std::cout << "  pathInfo: " << (it2->pathInfo ? "on" : "off") << std::endl;
 			std::cout << "  cgiParams: ";
 			for (std::map<std::string, std::string>::const_iterator it3 = it2->cgiParams.begin(); it3 != it2->cgiParams.end(); ++it3)
 				std::cout << it3->first << " " << it3->second << " ";
 			std::cout << std::endl;
 			std::cout << "  uploadLocation: " << it2->uploadLocation << std::endl;
+			std::cout << "  errorPages: ";
+			for (std::map<std::string, std::string>::const_iterator it3 = it2->errorPages.begin(); it3 != it2->errorPages.end(); ++it3)
+				std::cout << it3->first << ":" << it3->second << " ";
+			std::cout << std::endl;
 			std::cout << "  methods: ";
 			for (std::vector<http_method>::const_iterator it3 = it2->methods.begin(); it3 != it2-> methods.end(); ++it3)
 				std::cout << *it3 << " ";

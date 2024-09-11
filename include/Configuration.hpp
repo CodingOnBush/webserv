@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bits/stdc++.h> // for std::stringstream
 #include <fstream>
 #include <vector>
 #include <map>
@@ -30,13 +31,15 @@ struct LocationBlock {
 	std::string							root;
 	std::string							alias;
 	BodySize							clientMaxBodySize;
+	int									bodySize;
 	bool								autoindex;
 	std::vector<std::string>			indexes;
-	bool                                redirection;
+	bool                               	redirection;
 	std::map<std::string, std::string>	redirects;// {code, address}
 	bool								pathInfo;
 	std::map<std::string, std::string>	cgiParams;// {extension, file}
 	std::string							uploadLocation;
+	std::map<std::string, std::string>	errorPages;
 	std::vector<http_method>			methods;// GET, POST, DELETE by default
 };
 
@@ -47,6 +50,7 @@ struct ServerBlock {
 	std::string							root;
 	std::map<std::string, std::string>	errorPages;// {error code, uri}
 	BodySize							clientMaxBodySize;
+	int									bodySize;
 	std::vector<LocationBlock>			locationBlocks;
 };
 
@@ -65,20 +69,14 @@ class Configuration
 		// std::vector<int>			_ports; // for vic's part
 		// and more
 
-		void		parseServerBlock(std::stringstream &content, std::string const &line);
-		void		parseLocationBlock(std::stringstream &content, ServerBlock &serverBlock, std::string const &line);
-
+		void		parseServerBlock(std::string const &line);
+		void		parseLocationBlock(ServerBlock &serverBlock, std::string const &line);
+		
 		void		parseServerDirective(std::string const &line, ServerBlock &serverBlock);
 		void		parseLocationDirective(std::string &line, LocationBlock &locationBlock);
-
+		
 		void		setLocationValues(std::string const &key, std::string const &value, LocationBlock &locationBlock);
 		void		setServerValues(std::string const &key, std::string const &value, ServerBlock &serverBlock);
-
-		void		setListen(std::string const &value, ServerBlock &serverBlock);
-		void		addErrorPage(std::string const &value, ServerBlock &serverBlock);
-		void		setRedirect(std::string const &value, LocationBlock &locationBlock);
-		void		setCgi(std::string const &value, LocationBlock &locationBlock);
-		void		setMethod(std::string const &value, LocationBlock &locationBlock);
 
 	public:
 		// std::vector<ServerBlock>			m_serverBlocks;
@@ -93,7 +91,7 @@ class Configuration
 		//...
 		
 		// tools
-		const int			getBodySize(BodySize const &bodySize) const;
+		static const int	getBodySize(BodySize const &bodySize);
 		std::vector<int>	getPorts() const;
 		void				printConfig() const;
 		//...
