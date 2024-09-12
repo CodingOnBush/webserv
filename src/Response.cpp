@@ -144,6 +144,7 @@ void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 	int maxBodySize = config.getBodySize(location.clientMaxBodySize);
 	if (maxBodySize == 0)
 		return;
+	// compare with content length header!!!
 	if (req.getBody().size() > maxBodySize)
 	{
 		if (this->statusCode == 0)
@@ -158,7 +159,7 @@ std::string Response::getResponse(Configuration &config)
 	{
 		location = getLocationFromServer(config, this->req);
 		methodCheck(location);
-		bodySizeCheck(config, location); // update the code with proper config (during the merge with M)
+		bodySizeCheck(config, location);
 		if (this->statusCode == 0)
 		{
 			switch (req.getMethod())
