@@ -42,6 +42,8 @@ NEW TODOS:
 	- Set required headers dynamically for all requests
 	- Verify that the correct body is set
 
+- Signals to handle + valgrind checks to add
+
 - Decide which files we want to serve to demonstrate functionality of webserv:
 	- a fully static website
 	- upload files functionality
