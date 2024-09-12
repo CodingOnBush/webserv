@@ -19,6 +19,7 @@ Todo List - Webserv
 NEW TODOS:
 - Parsing:
 	- client_max_body_size can be set to 0, check the syntax how it can be defined in nginx config (Sets the maximum allowed size of the client request body. If the size in a request exceeds the configured value, the 413 (Request Entity Too Large) error is returned to the client. Please be aware that browsers cannot correctly display this error. Setting size to 0 disables checking of client request body size. )
+	- add the first (default) location block if there's no "location /" block set in the config
 - Errors handling:
 	- Proper status code everywhere (all requests) and verify that correct error pages are returned (default or custom)
 	- <s>Setup default error pages (add a file with them)</s>
