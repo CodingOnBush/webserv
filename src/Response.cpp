@@ -114,12 +114,10 @@ void Response::setHeaders()
 
 void Response::getBody(std::string rootPath, std::string uri, LocationBlock location)
 {
-	std::cout << "rootPath: " << rootPath << std::endl;
-	std::cout << "uri: " << uri << std::endl;
 	std::string path = rootPath;
 	if (uri != "/")
 		path = rootPath + uri;
-	std::cout << "path: " << path << std::endl;
+	std::cout << "Path: " << path << std::endl;
 	if (isDirectory(path))
 	{
 		std::cout << "We get in here" << std::endl;
@@ -128,6 +126,7 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 		{
 			if (errno == ENOENT)
 			{
+				std::cout << "ENOENT" << std::endl;
 				this->statusCode = 404;
 				return;
 			}
@@ -144,33 +143,73 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 		}
 		else
 		{
-			std::cout << "We get in there" << std::endl;
 			struct dirent *dir;
 			while ((dir = readdir(directoryPtr)) != NULL)
 			{
 				std::string fileName = dir->d_name;
-				std::cout << "fileName: " << fileName << std::endl;
-				if (fileName == "index.html")
-					std::cout << "This is a file" << std::endl;
-				for (std::vector<std::string>::iterator it = location.indexes.begin(); it != location.indexes.end(); it++)
+				if (fileName == "." || fileName == "..")
+					continue;
+				if (hasDefaultFile(fileName, location))
 				{
-					if (fileName == *it)
-						std::cout << "This is a file" << std::endl;
+					std::cout << "Path: " << path << std::endl;
+					std::cout << "fileName: " << fileName << std::endl;
+					std::cout << "Uri" << uri << std::endl;
+					std::cout << "Location path" << location.path << std::endl;
+					if (path[path.size() - 1] != '/')
+						path += "/";
+					std::string filePath = path + fileName;
+					std::cout << "filePath: " << filePath << std::endl;
+					std::ifstream file(filePath.c_str());
+					std::stringstream body;
+					if (file.is_open())
+					{
+						std::string line;
+						while (std::getline(file, line))
+						{
+							body << line << std::endl;
+						}
+						std::cout << "BODY: " << body.str() << std::endl;
+						this->body = body.str();
+						this->setMimeType(fileName);
+						this->statusCode = 200;
+						file.close();
+					}
+					else 
+					{
+						this->statusCode = 403;
+					}
+					break;
 				}
-				// if there's index.html in the directory, open it
-				// if no index.html, check for autoindex
-				// if autoindex is on then -> directory listing
-				// if off -> 403
+				if (location.autoindex)
+				{
+					// directory listing
+					std::ifstream file("./www/listing.html");
+					std::stringstream body;
+					if (file.is_open())
+					{
+						std::string line;
+						while (std::getline(file, line))
+						{
+							body << line << std::endl;
+						}
+						this->body = body.str();
+						this->setMimeType(fileName);
+						this->statusCode = 200;
+						file.close();
+						break;
+					}
+					else 
+					{
+						this->statusCode = 403;
+						break;
+					}
+				}
+				else
+				{
+					std::cout << "We get in THERE" << std::endl;
+					this->statusCode = 403;
+				}
 
-				// if (fileName == "." || fileName == "..")
-				// 	continue;
-				// std::string filePath = configPath + "/" + fileName;
-				// if (requestUri == "/")
-				// {
-				// 	filePath = configPath + "/" + "index.html";
-				// }
-				// if (requestUri == "/" || requestUri == "/" + fileName)
-				// {
 				// 	std::ifstream file(filePath.c_str());
 				// 	std::stringstream body;
 				// 	if (file.is_open())
@@ -200,6 +239,7 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 				// 	}
 				// }
 			}
+			std::cout << "STATUS CODE: " << this->statusCode << std::endl;
 			if (this->statusCode == 0)
 			{
 				this->statusCode = 404;
@@ -209,7 +249,13 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 	}
 	else if (isFile(path))
 	{
+		std::cout << "FILE handler" << std::endl;
 		// open dirs to find the one with the fileand then read from file
+	}
+	else 
+	{
+		std::cout << "NOT A FILE OR DIRECTORY" << std::endl;
+		this->statusCode = 404;
 	}
 };
 

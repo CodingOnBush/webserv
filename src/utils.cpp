@@ -146,3 +146,16 @@ std::string getDefaultErrorBody(int statusCode)
 //         // Handle error case here
 //     }
 // }
+
+bool hasDefaultFile(std::string fileName, LocationBlock location)
+{
+	std::cout << "CHECK fileName: " << fileName << std::endl;
+	if (fileName == "index.html")
+		return true;
+	for(std::vector<std::string>::iterator it = location.indexes.begin(); it != location.indexes.end(); it++)
+	{
+		if (fileName == *it)
+			return true;
+	}
+	return false;
+}
