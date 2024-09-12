@@ -434,7 +434,7 @@ void	Configuration::parseServerBlock(std::string const &line)
 	// 	throw std::runtime_error("A server block must start with this exact line 'server {'");
 	while (std::getline(m_content, str))
 	{
-		std::cout << "parseServerBlock line : [" << str << "]" << std::endl;
+		// std::cout << "parseServerBlock line : [" << str << "]" << std::endl;
 		if (isLineToIgnore(str))
 			continue;
 		else if (str == "}")

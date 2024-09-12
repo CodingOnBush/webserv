@@ -112,9 +112,111 @@ void Response::setHeaders()
 	headers = ss.str();
 }
 
+void Response::getBody(std::string rootPath, std::string uri, LocationBlock location)
+{
+	std::cout << "rootPath: " << rootPath << std::endl;
+	std::cout << "uri: " << uri << std::endl;
+	std::string path = rootPath;
+	if (uri != "/")
+		path = rootPath + uri;
+	std::cout << "path: " << path << std::endl;
+	if (isDirectory(path))
+	{
+		std::cout << "We get in here" << std::endl;
+		DIR *directoryPtr = opendir(path.c_str());
+		if (directoryPtr == NULL)
+		{
+			if (errno == ENOENT)
+			{
+				this->statusCode = 404;
+				return;
+			}
+			else if (errno == EACCES)
+			{
+				this->statusCode = 403;
+				return;
+			}
+			else
+			{
+				this->statusCode = 500;
+				return;
+			}
+		}
+		else
+		{
+			std::cout << "We get in there" << std::endl;
+			struct dirent *dir;
+			while ((dir = readdir(directoryPtr)) != NULL)
+			{
+				std::string fileName = dir->d_name;
+				std::cout << "fileName: " << fileName << std::endl;
+				if (fileName == "index.html")
+					std::cout << "This is a file" << std::endl;
+				for (std::vector<std::string>::iterator it = location.indexes.begin(); it != location.indexes.end(); it++)
+				{
+					if (fileName == *it)
+						std::cout << "This is a file" << std::endl;
+				}
+				// if there's index.html in the directory, open it
+				// if no index.html, check for autoindex
+				// if autoindex is on then -> directory listing
+				// if off -> 403
+
+				// if (fileName == "." || fileName == "..")
+				// 	continue;
+				// std::string filePath = configPath + "/" + fileName;
+				// if (requestUri == "/")
+				// {
+				// 	filePath = configPath + "/" + "index.html";
+				// }
+				// if (requestUri == "/" || requestUri == "/" + fileName)
+				// {
+				// 	std::ifstream file(filePath.c_str());
+				// 	std::stringstream body;
+				// 	if (file.is_open())
+				// 	{
+				// 		std::string line;
+				// 		while (std::getline(file, line))
+				// 		{
+				// 			body << line << std::endl;
+				// 		}
+				// 		file.close();
+				// 		this->body = body.str();
+				// 		if (requestUri == "/")
+				// 		{
+				// 			this->setMimeType("index.html");
+				// 		}
+				// 		else
+				// 		{
+				// 			this->setMimeType(fileName);
+				// 		}
+				// 		this->statusCode = 200;
+				// 		break;
+				// 	}
+				// 	else
+				// 	{
+				// 		this->statusCode = 403;
+				// 		break;
+				// 	}
+				// }
+			}
+			if (this->statusCode == 0)
+			{
+				this->statusCode = 404;
+			}
+			closedir(directoryPtr);
+		}
+	}
+	else if (isFile(path))
+	{
+		// open dirs to find the one with the fileand then read from file
+	}
+};
+
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
-	handleRoot(location.root, req.getUri());
+	// handleRoot(location.root, req.getUri());
+	getBody(location.root, req.getUri(), location);
 }
 
 void Response::handlePostRequest(Configuration &config)
@@ -135,7 +237,7 @@ void Response::methodCheck(LocationBlock location)
 	}
 	if (location.methods.empty() || std::find(location.methods.begin(), location.methods.end(), req.getMethod()) == location.methods.end())
 	{
-			this->statusCode = 405;
+		this->statusCode = 405;
 	}
 }
 
@@ -207,6 +309,7 @@ void Response::handleRoot(std::string configPath, std::string requestUri)
 		while ((dir = readdir(directoryPtr)) != NULL)
 		{
 			std::string fileName = dir->d_name;
+			std::cout << "fileName: " << fileName << std::endl;
 			if (fileName == "." || fileName == "..")
 				continue;
 			std::string filePath = configPath + "/" + fileName;
