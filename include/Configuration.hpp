@@ -58,25 +58,20 @@ struct ServerBlock {
 
 class Configuration
 {
-private:
-	// maybe remove it later
-	std::string m_configFile;
+	private:
+		// maybe remove it later
+		std::string 				m_configFile;
+		// all the content of the config file
+		std::stringstream 			m_content;
+		// all the server blocks parsed from the config file
+		std::vector<ServerBlock>	m_serverBlocks;
+		// std::vector<int>			_ports; // for vic's part
+		// and more
 
-	// all the content of the config file
-	std::stringstream m_content;
-
-	// all the server blocks parsed from the config file
-	std::vector<ServerBlock> m_serverBlocks;
-
-	// std::vector<int>			_ports; // for vic's part
-	// and more
-
-		void		parseServerBlock(std::string const &line);
-		void		parseLocationBlock(ServerBlock &serverBlock, std::string const &line);
-		
+		void		parseServerBlock(std::stringstream &ss);
+		void		parseLocationBlock(ServerBlock &serverBlock, std::string const &locationLine, std::stringstream &ss);
 		void		parseServerDirective(std::string const &line, ServerBlock &serverBlock);
 		void		parseLocationDirective(std::string &line, LocationBlock &locationBlock);
-		
 		void		setLocationValues(std::string const &key, std::string const &value, LocationBlock &locationBlock);
 		void		setServerValues(std::string const &key, std::string const &value, ServerBlock &serverBlock);
 
@@ -86,7 +81,6 @@ private:
 		Configuration(std::string const &t_configFile);
 		~Configuration();
 		// std::vector<int>			getPorts() const;
-
 
 		// getters (We need getter for server_names, ports, etc)
 		std::vector<ServerBlock> const &getServerBlocks() const;
