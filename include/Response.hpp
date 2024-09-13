@@ -37,8 +37,8 @@ public:
 	void setStatusLine();
 	void createResponseStr(LocationBlock location);
 	void handleGetRequest(Configuration &config, LocationBlock location);
-	void handlePostRequest(Configuration &config);
-	void handleDeleteRequest(Configuration &config);
+	void handlePostRequest(Configuration &config, LocationBlock location);
+	void handleDeleteRequest(Configuration &config, LocationBlock location);
 	void setHeaders();
 	void setMimeType(std::string const &fileName);
 };

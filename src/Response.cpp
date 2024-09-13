@@ -208,18 +208,36 @@ void Response::getBody(std::string uri, LocationBlock location)
 
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
-	getBody(req.getUri(), location);
+	if (location.cgiParams.empty())
+	{
+		getBody(req.getUri(), location);
+		return;
+	}
+	// handle cgi
 }
 
-void Response::handlePostRequest(Configuration &config)
+void Response::handlePostRequest(Configuration &config, LocationBlock locaion)
 {
+	if (locaion.cgiParams.empty())
+	{
+		this->statusCode = 405;
+		return;
+	}
+	// handle cgi
 	return;
 }
 
-void Response::handleDeleteRequest(Configuration &config)
+void Response::handleDeleteRequest(Configuration &config, LocationBlock location)
 {
+	if (location.cgiParams.empty())
+	{
+		this->statusCode = 405;
+		return;
+	}
+	// handle delete
 	return;
 }
+
 void Response::methodCheck(LocationBlock location)
 {
 	if (req.getMethod() == UNKNOWN)
@@ -262,10 +280,10 @@ std::string Response::getResponse(Configuration &config)
 				handleGetRequest(config, location);
 				break;
 			case POST:
-				handlePostRequest(config);
+				handlePostRequest(config, location);
 				break;
 			case DELETE:
-				handleDeleteRequest(config);
+				handleDeleteRequest(config, location);
 				break;
 			}
 		}
