@@ -202,14 +202,14 @@ std::string generateDirectoryListingHTML(const std::string &directoryPath, const
 
 	std::stringstream html;
 	html << "<html><head><title>Directory Listing</title></head><body>";
-	html << "<h1>Directory Listing for " << directoryPath << "</h1>";
+	html << "<h1>Index of " << directoryPath.substr(rootPath.size()) << "</h1>";
 	html << "<ul>";
 
 	struct dirent *dir;
 	while ((dir = readdir(directoryPtr)) != NULL)
 	{
 		std::string fileName = dir->d_name;
-		if (fileName == "." || fileName == "..")
+		if (fileName == ".")
 			continue;
 		std::string fullPath;
 		std::size_t pos = directoryPath.find(rootPath);
