@@ -7,18 +7,15 @@ Response::Response(Request &req) : req(req), statusCode(0) {};
 Response::~Response() {};
 
 // change this to setErrorBody ?
-void Response::setBody(LocationBlock location)
+void Response::setErrorBody(LocationBlock location)
 {
-	if (this->statusCode >= 400)
+	if (location.errorPages.empty())
 	{
-		if (location.errorPages.empty())
-		{
-			body = getDefaultErrorBody(this->statusCode);
-		}
-		else
-		{
-			body = getBodyFromFile(location.errorPages[intToString(this->statusCode)]);
-		}
+		body = getDefaultErrorBody(this->statusCode);
+	}
+	else
+	{
+		body = getBodyFromFile(location.errorPages[intToString(this->statusCode)]);
 	}
 }
 
@@ -56,7 +53,8 @@ void Response::createResponseStr(LocationBlock location)
 {
 	std::stringstream ss;
 	setStatusLine();
-	setBody(location);
+	if (this->statusCode >= 400)
+		setErrorBody(location);
 	setHeaders();
 	ss << statusLine << headers << body << LF;
 	response = ss.str();
@@ -112,8 +110,6 @@ void Response::setHeaders()
 	headers = ss.str();
 }
 
-
-
 void Response::getBody(std::string rootPath, std::string uri, LocationBlock location)
 {
 	std::string path = rootPath;
@@ -149,7 +145,7 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 				if (fileName == "." || fileName == "..")
 					continue;
 				if (hasDefaultFile(path, fileName, location))
-				{	
+				{
 					if (!isInIndex(fileName, location))
 						continue;
 					std::ifstream file(getFilePath(path, uri, fileName).c_str());
@@ -164,7 +160,7 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 						this->statusCode = 200;
 						file.close();
 					}
-					else 
+					else
 						this->statusCode = 403;
 					break;
 				}
@@ -185,7 +181,7 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 						file.close();
 						break;
 					}
-					else 
+					else
 					{
 						this->statusCode = 403;
 						break;
@@ -204,7 +200,7 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 		std::cout << "FILE handler" << std::endl;
 		// open dirs to find the one with the fileand then read from file
 	}
-	else 
+	else
 	{
 		std::cout << "NOT A FILE OR DIRECTORY" << std::endl;
 		this->statusCode = 404;

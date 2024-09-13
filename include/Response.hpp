@@ -26,7 +26,7 @@ private:
 	void handleRoot(std::string configPath, std::string requestUri);
 	void bodySizeCheck(Configuration &config, LocationBlock &location);
 	void methodCheck(LocationBlock location);
-	void setBody(LocationBlock location);
+	void setErrorBody(LocationBlock location);
 	std::string getBodyFromFile(std::string path);
 	void getBody(std::string rootPath, std::string uri, LocationBlock location);
 public:
