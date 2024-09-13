@@ -115,9 +115,9 @@ void Response::setHeaders()
 	headers = ss.str();
 }
 
-void Response::getBody(std::string rootPath, std::string uri, LocationBlock location)
+void Response::getBody(std::string uri, LocationBlock location)
 {
-	std::string path = setPath(rootPath, uri);
+	std::string path = setPath(location, uri);
 	if (isDirectory(path))
 	{
 		DIR *directoryPtr = opendir(path.c_str());
@@ -208,8 +208,7 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
-	// handleRoot(location.root, req.getUri());
-	getBody(location.root, req.getUri(), location);
+	getBody(req.getUri(), location);
 }
 
 void Response::handlePostRequest(Configuration &config)

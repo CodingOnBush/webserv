@@ -28,7 +28,7 @@ private:
 	void methodCheck(LocationBlock location);
 	void setErrorBody(LocationBlock location);
 	std::string getBodyFromFile(std::string path);
-	void getBody(std::string rootPath, std::string uri, LocationBlock location);
+	void getBody(std::string uri, LocationBlock location);
 public:
 	Response();
 	Response(Request &req);
@@ -57,5 +57,5 @@ std::string getDefaultErrorBody(int statusCode);
 bool isInIndex(std::string fileName, LocationBlock location);
 std::string getFilePath(std::string path, std::string uri, std::string fileName);
 bool hasDefaultFile(const std::string& directoryPath, std::string fileName, LocationBlock location);
-std::string setPath(std::string rootPath, std::string uri);
+std::string setPath(LocationBlock location, std::string uri);
 std::string generateDirectoryListingHTML(const std::string& directoryPath, const std::string &rootPath);

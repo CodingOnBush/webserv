@@ -94,30 +94,38 @@ ServerBlock getMatchingServerBlock(Configuration &config, std::string host, int 
 	return *serverBlock;
 }
 
-bool locationBlockExists(ServerBlock serverBlock, std::string uri)
-{
-	std::vector<LocationBlock> locationBlocks = serverBlock.locationBlocks;
-	for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++)
-	{
-		if (it->path == uri)
-		{
-			return true;
-		}
-	}
-	return false;
+bool locationBlockExists(ServerBlock serverBlock, std::string uri) {
+    std::vector<LocationBlock> locationBlocks = serverBlock.locationBlocks;
+    for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++) {
+        if (it->path == uri) {
+            return true;
+        }
+    }
+
+    // If no match is found, remove the last part after the last '/' and check again
+    std::size_t pos = uri.find_last_of('/');
+    if (pos != std::string::npos && pos != 0) {
+        return locationBlockExists(serverBlock, uri.substr(0, pos));
+    }
+
+    return false;
 }
 
 LocationBlock getMatchingLocationBlock(ServerBlock serverBlock, std::string uri)
-{
+{	
 	LocationBlock *location = NULL;
-	std::vector<LocationBlock> locationBlocks = serverBlock.locationBlocks;
-	for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++)
-	{
-		if (it->path == uri)
-		{
-			return *it;
-		}
-	}
+    std::vector<LocationBlock> locationBlocks = serverBlock.locationBlocks;
+    for (std::vector<LocationBlock>::iterator it = locationBlocks.begin(); it != locationBlocks.end(); it++) {
+        if (it->path == uri) {
+            return *it;
+        }
+    }
+
+    // If no match is found, remove the last part after the last '/' and check again
+    std::size_t pos = uri.find_last_of('/');
+    if (pos != std::string::npos && pos != 0) {
+        return getMatchingLocationBlock(serverBlock, uri.substr(0, pos));
+    }
 	return *location;
 }
 
@@ -171,7 +179,7 @@ bool hasDefaultFile(const std::string &directoryPath, std::string fileName, Loca
 	return false;
 }
 
-std::string getFilePath(std::string path, std::string uri, std::string fileName)	
+std::string getFilePath(std::string path, std::string uri, std::string fileName)
 {
 	std::string filePath;
 	if (path[path.size() - 1] != '/')
@@ -183,54 +191,73 @@ std::string getFilePath(std::string path, std::string uri, std::string fileName)
 	return filePath;
 }
 
-std::string generateDirectoryListingHTML(const std::string& directoryPath, const std::string &rootPath) {
-   DIR *directoryPtr = opendir(directoryPath.c_str());
-    if (directoryPtr == NULL) {
-        std::cerr << "opendir failed for path: " << directoryPath << " with error: " << strerror(errno) << std::endl;
-        return "<html><body><h1>Failed to open directory</h1></body></html>";
-    }
+std::string generateDirectoryListingHTML(const std::string &directoryPath, const std::string &rootPath)
+{
+	DIR *directoryPtr = opendir(directoryPath.c_str());
+	if (directoryPtr == NULL)
+	{
+		std::cerr << "opendir failed for path: " << directoryPath << " with error: " << strerror(errno) << std::endl;
+		return "<html><body><h1>Failed to open directory</h1></body></html>";
+	}
 
-    std::stringstream html;
-    html << "<html><head><title>Directory Listing</title></head><body>";
-    html << "<h1>Directory Listing for " << directoryPath << "</h1>";
-    html << "<ul>";
+	std::stringstream html;
+	html << "<html><head><title>Directory Listing</title></head><body>";
+	html << "<h1>Directory Listing for " << directoryPath << "</h1>";
+	html << "<ul>";
 
-    struct dirent *dir;
-    while ((dir = readdir(directoryPtr)) != NULL) {
-        std::string fileName = dir->d_name;
-        if (fileName == "." || fileName == "..")
-            continue;
+	struct dirent *dir;
+	while ((dir = readdir(directoryPtr)) != NULL)
+	{
+		std::string fileName = dir->d_name;
+		if (fileName == "." || fileName == "..")
+			continue;
 		std::string fullPath;
 		std::size_t pos = directoryPath.find(rootPath);
 		std::string updatedDirectoryPath;
-    	if (pos != std::string::npos) {
-        	updatedDirectoryPath = directoryPath.substr(pos + rootPath.size());
-   		 }
+		if (pos != std::string::npos)
+		{
+			updatedDirectoryPath = directoryPath.substr(pos + rootPath.size());
+		}
 		if (directoryPath[directoryPath.size() - 1] != '/')
-        	fullPath = updatedDirectoryPath + "/" + fileName;
+			fullPath = updatedDirectoryPath + "/" + fileName;
 		else
 			fullPath = updatedDirectoryPath + fileName;
-        struct stat statbuf;
-        if (stat(fullPath.c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
-            html << "<li><a href=\"" << fullPath << "/index.html\">" << fileName << "/</a></li>";
-        } else {
-            html << "<li><a href=\"" << fullPath << "\">" << fileName << "</a></li>";
-        }
-    }
-    html << "</ul>";
-    html << "</body></html>";
+		struct stat statbuf;
+		if (stat(fullPath.c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode))
+		{
+			html << "<li><a href=\"" << fullPath << "/index.html\">" << fileName << "/</a></li>";
+		}
+		else
+		{
+			html << "<li><a href=\"" << fullPath << "\">" << fileName << "</a></li>";
+		}
+	}
+	html << "</ul>";
+	html << "</body></html>";
 
-    closedir(directoryPtr);
-    return html.str();
+	closedir(directoryPtr);
+	return html.str();
 }
 
-std::string setPath(std::string rootPath, std::string uri)
+std::string setPath(LocationBlock location, std::string uri)
 {
 	std::string path;
-	if (uri == "/") {
-        path = rootPath;
-    } else  {
-		path = rootPath + uri;
+	if (location.alias != "")
+	{
+		path = location.root + location.alias;
+		if (uri != "/")
+			path += uri.substr(location.path.size());
+	}
+	else
+	{
+		if (uri == "/")
+		{
+			path = location.root;
+		}
+		else
+		{
+			path = location.root + uri;
+		}
 	}
 	return path;
 }
