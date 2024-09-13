@@ -61,6 +61,11 @@ void Response::createResponseStr(LocationBlock location)
 }
 void Response::setMimeType(std::string const &fileName)
 {
+	if (fileName == "html")
+	{
+		mimeType = "text/html";
+		return;
+	}
 	std::string extension = fileName.substr(fileName.find_last_of(".") + 1);
 	if (extension == "html")
 		mimeType = "text/html";
@@ -147,9 +152,9 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 					if (!isInIndex(fileName, location))
 						continue;
 					std::ifstream file(getFilePath(path, uri, fileName).c_str());
-					std::stringstream body;
 					if (file.is_open())
 					{
+						std::stringstream body;
 						std::string line;
 						while (std::getline(file, line))
 							body << line << std::endl;
@@ -165,7 +170,7 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 				else if (location.autoindex) // directory listing
 				{
 					this->body = generateDirectoryListingHTML(path, location.root);
-					this->setMimeType("listing.html");
+					this->setMimeType("html");
 					this->statusCode = 200;
 					break;
 				}
@@ -182,14 +187,23 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 	}
 	else if (isFile(path))
 	{
-		std::cout << "FILE handler" << std::endl;
-		// open dirs to find the one with the fileand then read from file
+		std::ifstream file(path.c_str());
+		if (file.is_open())
+		{
+			std::string line;
+			std::stringstream body;
+			while (std::getline(file, line))
+				body << line << std::endl;
+			this->body = body.str();
+			this->setMimeType(path);
+			this->statusCode = 200;
+			file.close();
+		}
+		else
+			this->statusCode = 403;
 	}
 	else
-	{
-		std::cout << "NOT A FILE OR DIRECTORY" << std::endl;
 		this->statusCode = 404;
-	}
 }
 
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
