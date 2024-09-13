@@ -182,3 +182,55 @@ std::string getFilePath(std::string path, std::string uri, std::string fileName)
 		filePath = path + "index.html";
 	return filePath;
 }
+
+std::string generateDirectoryListingHTML(const std::string& directoryPath, const std::string &rootPath) {
+   DIR *directoryPtr = opendir(directoryPath.c_str());
+    if (directoryPtr == NULL) {
+        std::cerr << "opendir failed for path: " << directoryPath << " with error: " << strerror(errno) << std::endl;
+        return "<html><body><h1>Failed to open directory</h1></body></html>";
+    }
+
+    std::stringstream html;
+    html << "<html><head><title>Directory Listing</title></head><body>";
+    html << "<h1>Directory Listing for " << directoryPath << "</h1>";
+    html << "<ul>";
+
+    struct dirent *dir;
+    while ((dir = readdir(directoryPtr)) != NULL) {
+        std::string fileName = dir->d_name;
+        if (fileName == "." || fileName == "..")
+            continue;
+		std::string fullPath;
+		std::size_t pos = directoryPath.find(rootPath);
+		std::string updatedDirectoryPath;
+    	if (pos != std::string::npos) {
+        	updatedDirectoryPath = directoryPath.substr(pos + rootPath.size());
+   		 }
+		if (directoryPath[directoryPath.size() - 1] != '/')
+        	fullPath = updatedDirectoryPath + "/" + fileName;
+		else
+			fullPath = updatedDirectoryPath + fileName;
+        struct stat statbuf;
+        if (stat(fullPath.c_str(), &statbuf) == 0 && S_ISDIR(statbuf.st_mode)) {
+            html << "<li><a href=\"" << fullPath << "/index.html\">" << fileName << "/</a></li>";
+        } else {
+            html << "<li><a href=\"" << fullPath << "\">" << fileName << "</a></li>";
+        }
+    }
+    html << "</ul>";
+    html << "</body></html>";
+
+    closedir(directoryPtr);
+    return html.str();
+}
+
+std::string setPath(std::string rootPath, std::string uri)
+{
+	std::string path;
+	if (uri == "/") {
+        path = rootPath;
+    } else  {
+		path = rootPath + uri;
+	}
+	return path;
+}

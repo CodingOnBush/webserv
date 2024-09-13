@@ -112,9 +112,7 @@ void Response::setHeaders()
 
 void Response::getBody(std::string rootPath, std::string uri, LocationBlock location)
 {
-	std::string path = rootPath;
-	if (uri != "/")
-		path = rootPath + uri;
+	std::string path = setPath(rootPath, uri);
 	if (isDirectory(path))
 	{
 		DIR *directoryPtr = opendir(path.c_str());
@@ -166,34 +164,21 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 				}
 				else if (location.autoindex) // directory listing
 				{
-					std::ifstream file("./www/listing.html");
-					std::stringstream body;
-					if (file.is_open())
-					{
-						std::string line;
-						while (std::getline(file, line))
-						{
-							body << line << std::endl;
-						}
-						this->body = body.str();
-						this->setMimeType(fileName);
-						this->statusCode = 200;
-						file.close();
-						break;
-					}
-					else
-					{
-						this->statusCode = 403;
-						break;
-					}
+					this->body = generateDirectoryListingHTML(path, location.root);
+					this->setMimeType("listing.html");
+					this->statusCode = 200;
+					break;
 				}
 				else
+				{
 					this->statusCode = 403;
+					break;
+				}
 			}
-			if (this->statusCode == 0)
-				this->statusCode = 404;
-			closedir(directoryPtr);
 		}
+		if (this->statusCode == 0)
+			this->statusCode = 404;
+		closedir(directoryPtr);
 	}
 	else if (isFile(path))
 	{
@@ -205,7 +190,7 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 		std::cout << "NOT A FILE OR DIRECTORY" << std::endl;
 		this->statusCode = 404;
 	}
-};
+}
 
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
