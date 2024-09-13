@@ -54,5 +54,6 @@ bool locationBlockExists(ServerBlock serverBlock, std::string uri);
 LocationBlock getMatchingLocationBlock(ServerBlock ServerBlock, std::string uri);
 bool serverBlockExists(Configuration &config, Request &req);
 std::string getDefaultErrorBody(int statusCode);
-// void getBody(std::string rootPath, std::string uri);
-bool hasDefaultFile(std::string fileName, LocationBlock location);
+bool isInIndex(std::string fileName, LocationBlock location);
+std::string getFilePath(std::string path, std::string uri, std::string fileName);
+bool hasDefaultFile(const std::string& directoryPath, std::string fileName, LocationBlock location);

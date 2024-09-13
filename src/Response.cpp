@@ -112,21 +112,20 @@ void Response::setHeaders()
 	headers = ss.str();
 }
 
+
+
 void Response::getBody(std::string rootPath, std::string uri, LocationBlock location)
 {
 	std::string path = rootPath;
 	if (uri != "/")
 		path = rootPath + uri;
-	std::cout << "Path: " << path << std::endl;
 	if (isDirectory(path))
 	{
-		std::cout << "We get in here" << std::endl;
 		DIR *directoryPtr = opendir(path.c_str());
 		if (directoryPtr == NULL)
 		{
 			if (errno == ENOENT)
 			{
-				std::cout << "ENOENT" << std::endl;
 				this->statusCode = 404;
 				return;
 			}
@@ -149,40 +148,28 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 				std::string fileName = dir->d_name;
 				if (fileName == "." || fileName == "..")
 					continue;
-				if (hasDefaultFile(fileName, location))
-				{
-					std::cout << "Path: " << path << std::endl;
-					std::cout << "fileName: " << fileName << std::endl;
-					std::cout << "Uri" << uri << std::endl;
-					std::cout << "Location path" << location.path << std::endl;
-					if (path[path.size() - 1] != '/')
-						path += "/";
-					std::string filePath = path + fileName;
-					std::cout << "filePath: " << filePath << std::endl;
-					std::ifstream file(filePath.c_str());
+				if (hasDefaultFile(path, fileName, location))
+				{	
+					if (!isInIndex(fileName, location))
+						continue;
+					std::ifstream file(getFilePath(path, uri, fileName).c_str());
 					std::stringstream body;
 					if (file.is_open())
 					{
 						std::string line;
 						while (std::getline(file, line))
-						{
 							body << line << std::endl;
-						}
-						std::cout << "BODY: " << body.str() << std::endl;
 						this->body = body.str();
 						this->setMimeType(fileName);
 						this->statusCode = 200;
 						file.close();
 					}
 					else 
-					{
 						this->statusCode = 403;
-					}
 					break;
 				}
-				if (location.autoindex)
+				else if (location.autoindex) // directory listing
 				{
-					// directory listing
 					std::ifstream file("./www/listing.html");
 					std::stringstream body;
 					if (file.is_open())
@@ -205,45 +192,10 @@ void Response::getBody(std::string rootPath, std::string uri, LocationBlock loca
 					}
 				}
 				else
-				{
-					std::cout << "We get in THERE" << std::endl;
 					this->statusCode = 403;
-				}
-
-				// 	std::ifstream file(filePath.c_str());
-				// 	std::stringstream body;
-				// 	if (file.is_open())
-				// 	{
-				// 		std::string line;
-				// 		while (std::getline(file, line))
-				// 		{
-				// 			body << line << std::endl;
-				// 		}
-				// 		file.close();
-				// 		this->body = body.str();
-				// 		if (requestUri == "/")
-				// 		{
-				// 			this->setMimeType("index.html");
-				// 		}
-				// 		else
-				// 		{
-				// 			this->setMimeType(fileName);
-				// 		}
-				// 		this->statusCode = 200;
-				// 		break;
-				// 	}
-				// 	else
-				// 	{
-				// 		this->statusCode = 403;
-				// 		break;
-				// 	}
-				// }
 			}
-			std::cout << "STATUS CODE: " << this->statusCode << std::endl;
 			if (this->statusCode == 0)
-			{
 				this->statusCode = 404;
-			}
 			closedir(directoryPtr);
 		}
 	}
