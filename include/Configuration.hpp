@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bits/stdc++.h> // for std::stringstream
+// #include <bits/stdc++.h> // for std::stringstream
 #include <fstream>
 #include <vector>
 #include <map>
@@ -65,6 +65,7 @@ class Configuration
 		std::stringstream 			m_content;
 		// all the server blocks parsed from the config file
 		std::vector<ServerBlock>	m_serverBlocks;
+		int							curlyBrackets;
 		// std::vector<int>			_ports; // for vic's part
 		// and more
 

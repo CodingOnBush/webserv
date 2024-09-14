@@ -48,13 +48,19 @@ static bool	isDirective(std::string const &line)
 		"path_info", "upload_location"
 	};
 
+	if (isServerBlock(line))
+		throw std::runtime_error("A server block need to be closed before starting new one");
 	if (line.at(line.size() - 1) != ';')
 		throw std::runtime_error("Directive must end with a semicolon");
 	ss >> word;
 	for (int i = 0; i < 13; i++)
 	{
-		if (word == dir[i] || dir[i] == word + ";")
+		// std::cout << "dir[i] = " << dir[i] << std::endl;
+		if (word == dir[i] || word == dir[i] + ";")
+		{
+			// std::cout << "YES" << std::endl;
 			return true;
+		}
 	}
 	return false;
 }
@@ -330,7 +336,6 @@ void	Configuration::setServerValues(std::string const &key, std::string const &v
 			throw std::runtime_error("error_page code must be a number");
 		if (serverBlock.errorPages.find(key) == serverBlock.errorPages.end())
 			serverBlock.errorPages[code] = getValue(value);
-		// addUniqueNewValueToMap(serverBlock.errorPages, code, getValue(value));
 	}
 	else if (key == "client_max_body_size")
 	{
@@ -394,29 +399,19 @@ void	Configuration::parseLocationDirective(std::string &line, LocationBlock &loc
 	};
 	std::vector<std::string>	split = stringSplit(line);
 
+	if (isServerBlock(line))
+		throw std::runtime_error("A server block need to be closed before starting new one");
 	if (line.at(line.size() - 1) != ';')
 		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
 	if (split.size() < 1)
 		throw std::runtime_error("Invalid directive '" + line + "'");
 	for (int i = 0; i < 11; i++)
 	{
-		if (split[0] == keys[i])
+		if (split[0] == keys[i] || split[0] == keys[i] + ";")
 		{
-			if (split.size() < 2)
-				throw std::runtime_error("Directive '" + split[0] + "' must have a value");
-			std::cout << "[" << split[0] << "]" << std::endl;
+			std::cout << "." << std::endl;
 			return;
 		}
-		// {
-		// 	value = dir.substr(keys[i].size());
-		// 	value = value.substr(value.find_first_not_of(" \t"));
-		// 	value.erase(value.find_last_not_of(" \t") + 1);
-		// 	if (value[value.size() - 1] != ';')
-		// 		throw std::runtime_error("Directive '" + dir + "' must end with a semicolon");
-		// 	value = value.substr(0, value.size() - 1);
-		// 	setLocationValues(keys[i], value, locationBlock);
-		// 	return;
-		// }
 	}
 	throw std::runtime_error("Unknown directive '" + split[0] + "'");
 }
@@ -460,34 +455,48 @@ void	Configuration::parseLocationBlock(ServerBlock &serverBlock, std::string con
 
 void	Configuration::parseServerDirective(std::string const &line, ServerBlock &serverBlock)
 {
-	std::string	keys[10] = {
-		"listen", "server_name", "root", "client_max_body_size", 
-		"autoindex", "index", "error_page", "return", "cgi",
-		"allowed_methods"
-	};
-	std::string	value;
-	std::string	dir;
-	std::vector<std::string>	split = stringSplit(line);
+	std::string					single[4] = {"listen", "root", "client_max_body_size", "autoindex"};
+	std::string					listed[2] = {"server_name", "index"};
+	std::string					pairs[2] = {"return", "cgi"};
+	std::vector<std::string>	split;
+	// std::vector<std::string, std::string>	keys;
+	
+	//  = {
+	// 	{"listen", "single"},
+	// 	{"root", "single"},
+	// 	{"client_max_body_size", "single"},
+	// 	{"autoindex", "single"},
+	// 	{"server_name", "listed"},
+	// 	{"index", "listed"},
+	// 	{"return", "pairs"},
+	// 	{"cgi", "pairs"},
+	// 	{"error_page", "error_page"},
+	// 	{"allowed_methods", "allowed_methods"}
+	// };
+	// keys.push_back({"qwd", "qwd"});
 
-	std::cout << "COUCOU" << std::endl;
+
+
+	// std::cout << "COUCOU" << std::endl;
 	if (line.at(line.size() - 1) != ';')
 		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
-	if (split.size() < 2)
+	split = stringSplit(line);
+	if (split.size() < 1)
 		throw std::runtime_error("Invalid directive '" + line + "'");
-	if (split[0].at(split[0].size() - 1) == ';')
-		split[0] = split[0].substr(0, split[0].size() - 1);
-	for (int i = 0; i < 10; i++)
-	{
-		if (split[0] == keys[i])
-		{
-			// value = dir.substr(keys[i].size());
-			// value = value.substr(value.find_first_not_of(" \t"));
-			// value = value.substr(0, value.size() - 1);
-			// setServerValues(keys[i], value, serverBlock);
-			std::cout << "[" << split[0] << "]" << std::endl;
-			return;
-		}
-	}
+	
+	// for (std::vector<std::string, std::string>::const_iterator it = keys.begin(); it != keys.end(); ++it)
+	// {
+	// 	// std::cout << it[0] << std::endl;
+	// }
+	// for (int i = 0; i < 10; i++)
+	// {
+	// 	if (split[0] == keys[i] || split[0] == keys[i] + ";")
+	// 	{
+
+	// 		return;
+	// 	}
+	// }
+	// return ;
 	throw std::runtime_error("Unknown directive '" + split[0] + "'");
 }
 
@@ -515,6 +524,7 @@ void	Configuration::parseServerBlock(std::stringstream &ss)
 	std::string	line;
 
 	std::cout << "SERVER BLOCK" << std::endl;
+	curlyBrackets++;
 	initServerBlock(server);
 	while (std::getline(ss, line))
 	{
@@ -523,6 +533,8 @@ void	Configuration::parseServerBlock(std::stringstream &ss)
 			continue;
 		else if (line == "}")
 			break;
+		else if (isServerBlock(line))
+			throw std::runtime_error("No server blocks are allowed inside another server block");
 		else if (isLocationBlock(line))
 			parseLocationBlock(server, line, ss);
 		else if (isDirective(line))
@@ -531,7 +543,8 @@ void	Configuration::parseServerBlock(std::stringstream &ss)
 			throw std::runtime_error("Unknown directive at this line : [" + line + "]");
 	}
 	pushServerBlock(m_serverBlocks, server);
-	std::cout << std::endl << std::endl;
+	curlyBrackets--;
+	std::cout << "SERVER BLOCK END" << std::endl << std::endl;
 }
 
 
@@ -540,10 +553,10 @@ Configuration::Configuration()
 	ServerBlock	server;
 
 	initServerBlock(server);
-	m_serverBlocks.push_back(server);
+	pushServerBlock(m_serverBlocks, server);
 }
 
-Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_configFile)
+Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_configFile), curlyBrackets(0)
 {
 	std::ifstream		file(m_configFile.c_str());
 	std::string			line;
@@ -551,21 +564,29 @@ Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_c
 
 	if (!file)
 		throw std::runtime_error("Cannot open file " + m_configFile);
-	m_content << file.rdbuf();
+	ss << file.rdbuf();
 	file.close();
-	ss << m_content.str();
 	while (std::getline(ss, line))
 	{
 		trimWhiteSpaces(line);
 		if (line.empty() || line.at(0) == '#')
 			continue;
-		else if (isServerBlock(line))
-			parseServerBlock(ss);
-		else
-			throw std::runtime_error("Unknown directive '" + line + "'");
+		else if (!isServerBlock(line))
+			throw std::runtime_error("You need to start with a server block instead of '" + line + "'");
+		if (curlyBrackets != 0)
+			throw std::runtime_error("A server block need to be closed before opening a new one");
+		parseServerBlock(ss);
 	}
 	if (m_serverBlocks.empty())
+	{
+		// OR : No server block found so let's launch the default one
 		throw std::runtime_error("No server block found");
+	}
+
+	/*
+	this make heritate every location variables with 
+	server values (server variables down to location blocks)
+	*/
 	parseAllLocationBlocks(m_serverBlocks);
 }
 
