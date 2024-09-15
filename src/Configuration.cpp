@@ -392,28 +392,29 @@ void	Configuration::setLocationValues(std::string const &key, std::string const 
 
 void	Configuration::parseLocationDirective(std::string &line, LocationBlock &locationBlock)
 {
-	std::string	keys[11] = {
-		"root", "alias", "client_max_body_size", 
-		"autoindex", "index", "return", "path_info", 
-		"cgi", "upload_location", "allowed_methods", "error_page"
-	};
+	// std::string	keys[11] = {
+	// 	"root", "alias", "client_max_body_size", 
+	// 	"autoindex", "index", "return", "path_info", 
+	// 	"cgi", "upload_location", "allowed_methods", "error_page"
+	// };
 	std::vector<std::string>	split = stringSplit(line);
 
 	if (isServerBlock(line))
 		throw std::runtime_error("A server block need to be closed before starting new one");
 	if (line.at(line.size() - 1) != ';')
 		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
-	if (split.size() < 1)
-		throw std::runtime_error("Invalid directive '" + line + "'");
-	for (int i = 0; i < 11; i++)
-	{
-		if (split[0] == keys[i] || split[0] == keys[i] + ";")
-		{
-			std::cout << "." << std::endl;
-			return;
-		}
-	}
-	throw std::runtime_error("Unknown directive '" + split[0] + "'");
+	line.erase(line.size() - 1);
+	std::cout << "split[0] = " << split[0] << std::endl;
+	// for (int i = 0; i < 11; i++)
+	// {
+	// 	if (split[0] == keys[i] || split[0] == keys[i] + ";")
+	// 	{
+	// 		std::cout << "." << std::endl;
+	// 		return;
+	// 	}
+	// }
+	
+	// throw std::runtime_error("Unknown directive '" + split[0] + "'");
 }
 
 static void	pushLocationBlock(std::vector<LocationBlock> &locationBlocks, LocationBlock &locationBlock)
@@ -447,7 +448,10 @@ void	Configuration::parseLocationBlock(ServerBlock &serverBlock, std::string con
 		else if (line == "}")
 			break;
 		else
+		{
+			std::cout << "line [" << line << "] is a location directive" << std::endl;
 			parseLocationDirective(line, locationBlock);
+		}
 	}
 	pushLocationBlock(serverBlock.locationBlocks, locationBlock);
 	std::cout << "LOCATION BLOCK END" << std::endl;
@@ -459,45 +463,14 @@ void	Configuration::parseServerDirective(std::string const &line, ServerBlock &s
 	std::string					listed[2] = {"server_name", "index"};
 	std::string					pairs[2] = {"return", "cgi"};
 	std::vector<std::string>	split;
-	// std::vector<std::string, std::string>	keys;
-	
-	//  = {
-	// 	{"listen", "single"},
-	// 	{"root", "single"},
-	// 	{"client_max_body_size", "single"},
-	// 	{"autoindex", "single"},
-	// 	{"server_name", "listed"},
-	// 	{"index", "listed"},
-	// 	{"return", "pairs"},
-	// 	{"cgi", "pairs"},
-	// 	{"error_page", "error_page"},
-	// 	{"allowed_methods", "allowed_methods"}
-	// };
-	// keys.push_back({"qwd", "qwd"});
 
-
-
-	// std::cout << "COUCOU" << std::endl;
 	if (line.at(line.size() - 1) != ';')
 		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
 	split = stringSplit(line);
 	if (split.size() < 1)
 		throw std::runtime_error("Invalid directive '" + line + "'");
-	
-	// for (std::vector<std::string, std::string>::const_iterator it = keys.begin(); it != keys.end(); ++it)
-	// {
-	// 	// std::cout << it[0] << std::endl;
-	// }
-	// for (int i = 0; i < 10; i++)
-	// {
-	// 	if (split[0] == keys[i] || split[0] == keys[i] + ";")
-	// 	{
 
-	// 		return;
-	// 	}
-	// }
-	// return ;
-	throw std::runtime_error("Unknown directive '" + split[0] + "'");
+	// throw std::runtime_error("Unknown directive '" + split[0] + "'");
 }
 
 static void	pushServerBlock(std::vector<ServerBlock> &serverBlocks, ServerBlock &serverBlock)
@@ -536,9 +509,15 @@ void	Configuration::parseServerBlock(std::stringstream &ss)
 		else if (isServerBlock(line))
 			throw std::runtime_error("No server blocks are allowed inside another server block");
 		else if (isLocationBlock(line))
+		{
+			std::cout << "line [" << line << "] is a location block" << std::endl;
 			parseLocationBlock(server, line, ss);
+		}
 		else if (isDirective(line))
+		{
+			std::cout << "line [" << line << "] is a server directive" << std::endl;
 			parseServerDirective(line, server);
+		}
 		else
 			throw std::runtime_error("Unknown directive at this line : [" + line + "]");
 	}
@@ -575,6 +554,7 @@ Configuration::Configuration(std::string const &t_configFile) : m_configFile(t_c
 			throw std::runtime_error("You need to start with a server block instead of '" + line + "'");
 		if (curlyBrackets != 0)
 			throw std::runtime_error("A server block need to be closed before opening a new one");
+		std::cout << "line [" << line << "] is a server block" << std::endl;
 		parseServerBlock(ss);
 	}
 	if (m_serverBlocks.empty())
