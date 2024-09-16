@@ -221,7 +221,7 @@ static void	setReturn(std::map<int, std::string> &redirects, bool &redirection, 
 	redirection = false;
 	if (split.size() == 1 && !isHttpCode(split[0]))
 	{
-		redirects[301] = split[0];
+		redirects[307] = split[0];
 		redirection = true;
 	}
 	else if (split.size() == 2 && isHttpCode(split[0]))
@@ -336,9 +336,8 @@ static void	inheritanceServerToLocations(std::vector<ServerBlock> &m_serverBlock
 				it2->clientMaxBodySize.unit = it->clientMaxBodySize.unit;
 				it2->bodySize = it->bodySize;
 			}
-			if (it2->autoindexDone == true)
+			if (it2->autoindexDone == false)
 				it2->autoindex = it->autoindex;
-
 			if (it2->indexes.empty())
 				it2->indexes = it->indexes;
 			if (it2->errorPages.empty())

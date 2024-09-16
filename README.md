@@ -32,9 +32,10 @@ NEW TODOS:
 	- <s>Error pages</s>
 	- <s>Limit client body size</s>
 	- <s>HTTP methods</s>
-	- Autoindex: turn on or off directory listing (add to the whole process)
-	- The index directive (specifies the index file name(s) to be served when a directory is requested. By default, Nginx looks for an index.html file in the root directory)
-	- Alias (Define a directory or a file from where the file should be searched (for example, if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is /tmp/www/pouic/toto/pouet))
+	- HTTP redirection
+	- <s>Autoindex: turn on or off directory listing (add to the whole process)</s>
+	- <s>The index directive (specifies the index file name(s) to be served when a directory is requested. By default, Nginx looks for an index.html file in the root directory)</s>
+	- <s>Alias (Define a directory or a file from where the file should be searched (for example, if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is /tmp/www/pouic/toto/pouet))</s>
 	- CGI (see bellow)
 - CGI part:
 	- add a checkif there's a cgi pass

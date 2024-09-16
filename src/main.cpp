@@ -17,7 +17,7 @@ int	main(int ac, char **av)
 		try
 		{
 			Configuration config(av[1]);
-			// config.printConfig();
+			config.printConfig();
 			initiateWebServer(config);
 			runWebserver(config);
 		}
@@ -32,7 +32,7 @@ int	main(int ac, char **av)
 		try
 		{
 			Configuration config;
-			// config.printConfig();
+			config.printConfig();
 			initiateWebServer(config);
 			runWebserver(config);
 		}
