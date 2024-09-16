@@ -4,6 +4,7 @@
 
 int	main(int ac, char **av)
 {
+	std::cout << std::endl << std::endl;
 	// signal(SIGINT, SIG_DFL);
 	// parse the config file and set the server ports through the vector
 	if (ac > 2)
@@ -16,7 +17,7 @@ int	main(int ac, char **av)
 		try
 		{
 			Configuration config(av[1]);
-			// config.printConfig();
+			config.printConfig();
 			initiateWebServer(config);
 			runWebserver(config);
 		}
@@ -31,7 +32,7 @@ int	main(int ac, char **av)
 		try
 		{
 			Configuration config;
-			// config.printConfig();
+			config.printConfig();
 			initiateWebServer(config);
 			runWebserver(config);
 		}

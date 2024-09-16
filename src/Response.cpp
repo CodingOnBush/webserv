@@ -124,7 +124,7 @@ void Response::setHeaders(LocationBlock location)
 	   << "Content-Length: " << body.size() << CRLF;
 	if (location.redirection)
 	{
-		ss << "Location: " << location.redirects[intToString(statusCode)] << CRLF;
+		ss << "Location: " << location.redirects[statusCode] << CRLF;
 	}
 	ss << CRLF;
 	headers = ss.str();
@@ -133,6 +133,7 @@ void Response::setHeaders(LocationBlock location)
 void Response::getBody(std::string uri, LocationBlock location)
 {
 	std::string path = setPath(location, uri);
+	std::cout << "Path: " << path << std::endl;
 	if (isDirectory(path))
 	{
 		DIR *directoryPtr = opendir(path.c_str());
@@ -285,20 +286,10 @@ std::string Response::handleRedirection(Configuration &config, LocationBlock &lo
 	std::stringstream ss;
 	body = "";
 	setMimeType("html");
-	// statusCode = location.redirects[0].first; uncomment after merge
 	statusCode = 307;
 	setStatusLine();
 	setHeaders(location);
-	std::stringstream ss2;
-	// add text/html as a default mime type (for default errors) ?
-	// ss2 << "Content-Type: " << mimeType << CRLF
-	// << "Content-Length: " << body.size() << CRLF 
-	// << "Location: " << location.redirects[intToString(statusCode)] 
-	// << CRLF << CRLF;
-	// headers = ss2.str();
 	createResponseStr(location);
-	ss << statusLine << headers << body << LF;
-	response = ss.str();
 	return response;
 }
 

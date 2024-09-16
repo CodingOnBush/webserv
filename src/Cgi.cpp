@@ -2,7 +2,15 @@
 
 void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Response &res)
 {
-	
+	//create environment
+	//run script
+	//get output
+	//set output as body
+	//set status code
+	//set mime type
+	//set headers
+	//set status line
+	//set response
 	std::string cgiPathWithArgs = "./www/cgi-bin/test.py";
 	std::string cgiOutput;
 	std::cout << "CGI PATH: " << cgiPathWithArgs << std::endl;
