@@ -129,3 +129,33 @@ std::string getDefaultErrorBody(int statusCode)
 	}
 	return http_error_500_page;
 }
+// void getBody(std::string rootPath, std::string uri) {
+//     std::cout << "rootPath: " << rootPath << std::endl;
+//     std::cout << "uri: " << uri << std::endl;
+//     std::string path = rootPath + uri;
+//     std::cout << "path: " << path << std::endl;
+
+//     if (isDirectory(path)) {
+//         std::cout << "This is a directory" << std::endl;
+//         // Handle directory-specific behavior here
+//     } else if (isFile(path)) {
+//         std::cout << "This is a file" << std::endl;
+//         // Handle file-specific behavior here
+//     } else {
+//         std::cout << "This is not a file or directory" << std::endl;
+//         // Handle error case here
+//     }
+// }
+
+bool hasDefaultFile(std::string fileName, LocationBlock location)
+{
+	std::cout << "CHECK fileName: " << fileName << std::endl;
+	if (fileName == "index.html")
+		return true;
+	for(std::vector<std::string>::iterator it = location.indexes.begin(); it != location.indexes.end(); it++)
+	{
+		if (fileName == *it)
+			return true;
+	}
+	return false;
+}

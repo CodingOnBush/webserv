@@ -28,6 +28,7 @@ private:
 	void methodCheck(LocationBlock location);
 	void setBody(LocationBlock location);
 	std::string getBodyFromFile(std::string path);
+	void getBody(std::string rootPath, std::string uri, LocationBlock location);
 public:
 	Response();
 	Response(Request &req);
@@ -53,3 +54,5 @@ bool locationBlockExists(ServerBlock serverBlock, std::string uri);
 LocationBlock getMatchingLocationBlock(ServerBlock ServerBlock, std::string uri);
 bool serverBlockExists(Configuration &config, Request &req);
 std::string getDefaultErrorBody(int statusCode);
+// void getBody(std::string rootPath, std::string uri);
+bool hasDefaultFile(std::string fileName, LocationBlock location);

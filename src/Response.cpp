@@ -112,9 +112,157 @@ void Response::setHeaders()
 	headers = ss.str();
 }
 
+void Response::getBody(std::string rootPath, std::string uri, LocationBlock location)
+{
+	std::string path = rootPath;
+	if (uri != "/")
+		path = rootPath + uri;
+	std::cout << "Path: " << path << std::endl;
+	if (isDirectory(path))
+	{
+		std::cout << "We get in here" << std::endl;
+		DIR *directoryPtr = opendir(path.c_str());
+		if (directoryPtr == NULL)
+		{
+			if (errno == ENOENT)
+			{
+				std::cout << "ENOENT" << std::endl;
+				this->statusCode = 404;
+				return;
+			}
+			else if (errno == EACCES)
+			{
+				this->statusCode = 403;
+				return;
+			}
+			else
+			{
+				this->statusCode = 500;
+				return;
+			}
+		}
+		else
+		{
+			struct dirent *dir;
+			while ((dir = readdir(directoryPtr)) != NULL)
+			{
+				std::string fileName = dir->d_name;
+				if (fileName == "." || fileName == "..")
+					continue;
+				if (hasDefaultFile(fileName, location))
+				{
+					std::cout << "Path: " << path << std::endl;
+					std::cout << "fileName: " << fileName << std::endl;
+					std::cout << "Uri" << uri << std::endl;
+					std::cout << "Location path" << location.path << std::endl;
+					if (path[path.size() - 1] != '/')
+						path += "/";
+					std::string filePath = path + fileName;
+					std::cout << "filePath: " << filePath << std::endl;
+					std::ifstream file(filePath.c_str());
+					std::stringstream body;
+					if (file.is_open())
+					{
+						std::string line;
+						while (std::getline(file, line))
+						{
+							body << line << std::endl;
+						}
+						std::cout << "BODY: " << body.str() << std::endl;
+						this->body = body.str();
+						this->setMimeType(fileName);
+						this->statusCode = 200;
+						file.close();
+					}
+					else 
+					{
+						this->statusCode = 403;
+					}
+					break;
+				}
+				if (location.autoindex)
+				{
+					// directory listing
+					std::ifstream file("./www/listing.html");
+					std::stringstream body;
+					if (file.is_open())
+					{
+						std::string line;
+						while (std::getline(file, line))
+						{
+							body << line << std::endl;
+						}
+						this->body = body.str();
+						this->setMimeType(fileName);
+						this->statusCode = 200;
+						file.close();
+						break;
+					}
+					else 
+					{
+						this->statusCode = 403;
+						break;
+					}
+				}
+				else
+				{
+					std::cout << "We get in THERE" << std::endl;
+					this->statusCode = 403;
+				}
+
+				// 	std::ifstream file(filePath.c_str());
+				// 	std::stringstream body;
+				// 	if (file.is_open())
+				// 	{
+				// 		std::string line;
+				// 		while (std::getline(file, line))
+				// 		{
+				// 			body << line << std::endl;
+				// 		}
+				// 		file.close();
+				// 		this->body = body.str();
+				// 		if (requestUri == "/")
+				// 		{
+				// 			this->setMimeType("index.html");
+				// 		}
+				// 		else
+				// 		{
+				// 			this->setMimeType(fileName);
+				// 		}
+				// 		this->statusCode = 200;
+				// 		break;
+				// 	}
+				// 	else
+				// 	{
+				// 		this->statusCode = 403;
+				// 		break;
+				// 	}
+				// }
+			}
+			std::cout << "STATUS CODE: " << this->statusCode << std::endl;
+			if (this->statusCode == 0)
+			{
+				this->statusCode = 404;
+			}
+			closedir(directoryPtr);
+		}
+	}
+	else if (isFile(path))
+	{
+		std::cout << "FILE handler" << std::endl;
+		// open dirs to find the one with the fileand then read from file
+	}
+	else 
+	{
+		std::cout << "NOT A FILE OR DIRECTORY" << std::endl;
+		this->statusCode = 404;
+	}
+};
+
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
-	handleRoot(location.root, req.getUri());
+	// handleRoot(location.root, req.getUri());
+	getBody(location.root, req.getUri(), location);
 }
 
 void Response::handlePostRequest(Configuration &config)
@@ -135,7 +283,7 @@ void Response::methodCheck(LocationBlock location)
 	}
 	if (location.methods.empty() || std::find(location.methods.begin(), location.methods.end(), req.getMethod()) == location.methods.end())
 	{
-			this->statusCode = 405;
+		this->statusCode = 405;
 	}
 }
 
@@ -144,6 +292,7 @@ void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 	int maxBodySize = config.getBodySize(location.clientMaxBodySize);
 	if (maxBodySize == 0)
 		return;
+	// compare with content length header!!!
 	if (req.getBody().size() > maxBodySize)
 	{
 		if (this->statusCode == 0)
@@ -158,7 +307,7 @@ std::string Response::getResponse(Configuration &config)
 	{
 		location = getLocationFromServer(config, this->req);
 		methodCheck(location);
-		bodySizeCheck(config, location); // update the code with proper config (during the merge with M)
+		bodySizeCheck(config, location);
 		if (this->statusCode == 0)
 		{
 			switch (req.getMethod())
@@ -206,6 +355,7 @@ void Response::handleRoot(std::string configPath, std::string requestUri)
 		while ((dir = readdir(directoryPtr)) != NULL)
 		{
 			std::string fileName = dir->d_name;
+			std::cout << "fileName: " << fileName << std::endl;
 			if (fileName == "." || fileName == "..")
 				continue;
 			std::string filePath = configPath + "/" + fileName;
