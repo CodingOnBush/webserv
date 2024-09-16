@@ -33,7 +33,6 @@ private:
 	std::string uri;
 	std::string version;
 	std::map<std::string, std::string> headers;
-	// std::map<std::string, std::string> queries;
 	std::string body;
 	int parsingState;
 	int state;
@@ -51,7 +50,6 @@ private:
 	bool hasBody();
 
 public:
-	// bool isDir;
 	Request();
 	~Request();
 	// getters
