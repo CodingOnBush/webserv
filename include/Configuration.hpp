@@ -30,18 +30,18 @@ struct BodySize
 
 struct LocationBlock {
 	std::string							path;// file or directory
-	std::string							root;
 	std::string							alias;
+	std::string							root;
 	BodySize							clientMaxBodySize;
 	int									bodySize;
 	bool								autoindex;
-	std::vector<std::string>			indexes;
-	bool                               	redirection;
-	std::map<std::string, std::string>	redirects;// {code, address}
 	bool								pathInfo;
-	std::map<std::string, std::string>	cgiParams;// {extension, file}
-	std::string							uploadLocation;
+	std::vector<std::string>			indexes;
 	std::map<std::string, std::string>	errorPages;
+	std::string							uploadLocation;
+	std::map<std::string, std::string>	redirects;// {code, address}
+	bool                               	redirection;
+	std::map<std::string, std::string>	cgiParams;// {extension, file}
 	std::vector<http_method>			methods;// GET, POST, DELETE by default
 };
 
@@ -50,9 +50,16 @@ struct ServerBlock {
 	std::string							host;// from listen directive
 	std::vector<std::string>			serverNames;// maybe none or more
 	std::string							root;
-	std::map<std::string, std::string>	errorPages;// {error code, uri}
 	BodySize							clientMaxBodySize;
 	int									bodySize;
+	bool								autoindex;
+	std::vector<std::string>			indexes;
+	std::map<std::string, std::string>	errorPages;// {error code, uri}
+	std::map<std::string, std::string>	redirects;// {code, address}
+	bool                               	redirection;
+	std::map<std::string, std::string>	cgiParams;// {extension, file}
+	std::vector<http_method>			methods;// GET, POST, DELETE by default
+
 	std::vector<LocationBlock>			locationBlocks;
 };
 

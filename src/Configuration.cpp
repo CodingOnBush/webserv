@@ -1,6 +1,16 @@
 #include "../include/Configuration.hpp"
 #include "Configuration.hpp"
 
+static bool	isHttpCode(std::string const &code)
+{
+	if (code.size() != 3)
+		return false;
+	if (code.find_first_not_of("0123456789") != std::string::npos)
+		return false;
+	// maybe check if it is in a range
+	return true;
+}
+
 static std::vector<std::string>	stringSplit(std::string const &line)
 {
 	std::vector<std::string>	res;
@@ -463,14 +473,69 @@ void	Configuration::parseServerDirective(std::string const &line, ServerBlock &s
 	std::string					listed[2] = {"server_name", "index"};
 	std::string					pairs[2] = {"return", "cgi"};
 	std::vector<std::string>	split;
+	std::string					str = line;
+	std::string					key;
 
-	if (line.at(line.size() - 1) != ';')
-		throw std::runtime_error("Directive '" + line + "' must end with a semicolon");
-	split = stringSplit(line);
-	if (split.size() < 1)
-		throw std::runtime_error("Invalid directive '" + line + "'");
-
-	// throw std::runtime_error("Unknown directive '" + split[0] + "'");
+	if (str.at(str.size() - 1) != ';')
+		throw std::runtime_error("Directive '" + str + "' must end with a semicolon");
+	str.erase(str.size() - 1);
+	split = stringSplit(str);
+	if (split.size() == 0)
+		throw std::runtime_error("Invalid directive '" + str + "'");
+	std::cout << "str : [" << str << "]" << std::endl;
+	key = split[0];
+	// remove split[0] from split
+	split.erase(split.begin());
+	std::cout << "split size : " << split.size() << std::endl;
+	if (key == "autoindex" && split.size() == 1)
+		serverBlock.autoindex = isOnOrOff(split[0]);
+	else if (key == "root" && split.size() == 1)
+		serverBlock.root = split[0];
+	else if (key == "client_max_body_size" && split.size() == 1)
+	{
+		serverBlock.clientMaxBodySize = createBodySize(split[0]);
+		serverBlock.bodySize = getBodySize(serverBlock.clientMaxBodySize);
+	}
+	else if (key == "listen" && split.size() == 1)
+		setListen(split[0], serverBlock);
+	else if (key == "server_name")
+		serverBlock.serverNames = split;
+	else if (key == "index" && split.size() == 1)
+		serverBlock.indexes = split;
+	else if (key == "error_page")
+	{
+		if (split.size() < 2)
+			throw std::runtime_error("error_page directive must have a code and an uri");
+		if (isHttpCode(split[split.size() - 1]))
+			throw std::runtime_error("error_page uri is missing at the end of the directive");
+		for (size_t i = 0; (i < split.size() && isHttpCode(split[i])); i++)
+		{
+			if (serverBlock.errorPages.find(split[i]) == serverBlock.errorPages.end())
+				serverBlock.errorPages[split[i]] = split[split.size() - 1];
+		}
+	}
+	else if (key == "return")
+	{
+		if (split.size() != 2)
+			throw std::runtime_error("return directive must have a code and an uri");
+		if (!isHttpCode(split[0]))
+			throw std::runtime_error("return uri is missing at the end of the directive");
+		if (serverBlock.redirects.find(split[0]) == serverBlock.redirects.end())
+			serverBlock.redirects[split[0]] = split[split.size() - 1];
+	}
+	else if (key == "cgi")
+	{
+		if (split.size() != 2)
+			throw std::runtime_error("cgi directive must have an extension and a file");
+		if (split[0] != ".py" && split[0] != ".php" && split[0] != ".pl" && split[0] != ".cgi")
+			throw std::runtime_error("cgi extension must be .py, .php, .pl or .cgi");
+		if (serverBlock.cgiParams.find(split[0]) == serverBlock.cgiParams.end())
+			serverBlock.cgiParams[split[0]] = split[1];
+		else
+			throw std::runtime_error("double cgi directive for the same extension : " + split[0]);
+	}
+	else
+		throw std::runtime_error("Unknown directive '" + key + "'");
 }
 
 static void	pushServerBlock(std::vector<ServerBlock> &serverBlocks, ServerBlock &serverBlock)
