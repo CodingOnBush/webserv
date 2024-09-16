@@ -55,7 +55,7 @@ void Response::createResponseStr(LocationBlock location)
 	setStatusLine();
 	if (this->statusCode >= 400)
 		setErrorBody(location);
-	setHeaders();
+	setHeaders(location);
 	ss << statusLine << headers << body << LF;
 	response = ss.str();
 }
@@ -106,12 +106,17 @@ void Response::setMimeType(std::string const &fileName)
 	else
 		mimeType = "application/octet-stream";
 }
-void Response::setHeaders()
+void Response::setHeaders(LocationBlock location)
 {
 	std::stringstream ss;
 	// add text/html as a default mime type (for default errors) ?
 	ss << "Content-Type: " << mimeType << CRLF
-	   << "Content-Length: " << body.size() << CRLF << CRLF;
+	   << "Content-Length: " << body.size() << CRLF;
+	if (location.redirection)
+	{
+		ss << "Location: " << location.redirects[intToString(statusCode)] << CRLF;
+	}
+	ss << CRLF;
 	headers = ss.str();
 }
 
@@ -264,6 +269,28 @@ void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 	}
 }
 
+std::string Response::handleRedirection(Configuration &config, LocationBlock &location)
+{
+	std::stringstream ss;
+	body = "";
+	setMimeType("html");
+	// statusCode = location.redirects[0].first; uncomment after merge
+	statusCode = 307;
+	setStatusLine();
+	setHeaders(location);
+	std::stringstream ss2;
+	// add text/html as a default mime type (for default errors) ?
+	// ss2 << "Content-Type: " << mimeType << CRLF
+	// << "Content-Length: " << body.size() << CRLF 
+	// << "Location: " << location.redirects[intToString(statusCode)] 
+	// << CRLF << CRLF;
+	// headers = ss2.str();
+	createResponseStr(location);
+	ss << statusLine << headers << body << LF;
+	response = ss.str();
+	return response;
+}
+
 std::string Response::getResponse(Configuration &config)
 {
 	LocationBlock location;
@@ -272,6 +299,8 @@ std::string Response::getResponse(Configuration &config)
 		location = getLocationFromServer(config, this->req);
 		methodCheck(location);
 		bodySizeCheck(config, location);
+		if (location.redirection == true)
+			return (handleRedirection(config, location));
 		if (this->statusCode == 0)
 		{
 			switch (req.getMethod())

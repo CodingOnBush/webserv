@@ -47,6 +47,8 @@ std::string getStatusMsg(int code)
 		return "Accepted";
 	case 204:
 		return "No Content";
+	case 307:
+		return "Temporary Redirect";
 	case 400:
 		return "Bad Request";
 	case 401:
