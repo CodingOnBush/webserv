@@ -6,6 +6,16 @@ Response::Response(Request &req) : req(req), statusCode(0) {};
 
 Response::~Response() {};
 
+void Response::setStatusCode(int code)
+{
+	this->statusCode = code;
+}
+
+void Response::setBody(std::string const &body)
+{
+	this->body = body;
+}
+
 // change this to setErrorBody ?
 void Response::setErrorBody(LocationBlock location)
 {
@@ -213,6 +223,7 @@ void Response::handleGetRequest(Configuration &config, LocationBlock location)
 		getBody(req.getUri(), location);
 		return;
 	}
+	handleCGI(config, location, req, *this);
 	// handle cgi
 }
 

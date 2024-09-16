@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include "DefaultErrors.hpp"
+#include "Cgi.hpp"
 
 class Configuration;
 class Request;
@@ -41,6 +42,8 @@ public:
 	void handleDeleteRequest(Configuration &config, LocationBlock location);
 	void setHeaders();
 	void setMimeType(std::string const &fileName);
+	void setStatusCode(int code);
+	void setBody(std::string const &body);
 };
 
 std::string intToString(int value);
