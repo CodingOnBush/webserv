@@ -9,6 +9,8 @@
 #include <string>
 #include <sstream>
 #include <cstdlib> // for std::atoi
+// std::find
+#include <algorithm>
 
 #define CRLF "\r\n" // carriage return line feed
 #define LF '\n'
@@ -35,11 +37,12 @@ struct LocationBlock {
 	BodySize							clientMaxBodySize;
 	int									bodySize;
 	bool								autoindex;
+	bool								autoindexDone;
 	bool								pathInfo;
 	std::vector<std::string>			indexes;
 	std::map<std::string, std::string>	errorPages;
 	std::string							uploadLocation;
-	std::map<std::string, std::string>	redirects;// {code, address}
+	std::map<int, std::string>			redirects;// {code, address}
 	bool                               	redirection;
 	std::map<std::string, std::string>	cgiParams;// {extension, file}
 	std::vector<http_method>			methods;// GET, POST, DELETE by default
@@ -55,7 +58,7 @@ struct ServerBlock {
 	bool								autoindex;
 	std::vector<std::string>			indexes;
 	std::map<std::string, std::string>	errorPages;// {error code, uri}
-	std::map<std::string, std::string>	redirects;// {code, address}
+	std::map<int, std::string>			redirects;// {code, address}
 	bool                               	redirection;
 	std::map<std::string, std::string>	cgiParams;// {extension, file}
 	std::vector<http_method>			methods;// GET, POST, DELETE by default
