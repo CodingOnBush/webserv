@@ -158,32 +158,40 @@ int findCount(int fd)
 void runWebserver(Configuration &config)
 {
 	int timeout = 1000;
+	int nfds;
 
 	run = true;
 	while (run)
 	{
-		int nfds = poll(&pollFdsList[0], pollFdsList.size(), timeout);
+		nfds = poll(&pollFdsList[0], pollFdsList.size(), timeout);
+
 		if (nfds < 0 && errno == EINTR)
 			break;
 		else if (nfds < 0)
 			throw std::runtime_error("poll() failed");
-		else
 		if (nfds == 0)
-		{
 			std::cout << "Waiting for connection or request..." << (run ? " (still running)" : " (shutting down)") << std::endl;
-		}
+
 		//The variable j serves as a counter to keep track of the number of file 
 		//descriptors that have events (revents) set. This is necessary because 
 		//the poll function returns the number of file descriptors with events, 
 		//and the loop needs to process exactly that many file descriptors.
 		int j = 0;
+		std::cout << "nfds: " << nfds << std::endl;
 		for (size_t i = 0; i < pollFdsList.size() && j < nfds; i++)
 		{
-			int fd = pollFdsList[i].fd;
-
 			if (pollFdsList[i].revents == 0)
 				continue;
 			j++;
+			std::cout << "REVENTS" << pollFdsList[i].revents << std::endl;
+			int fd = pollFdsList[i].fd;
+			if (pollFdsList[i].revents & POLLRDHUP)
+			{
+				std::cout << "Client disconnected" << std::endl;
+				rmFromPollWatchlist(fd);
+				serversToFd.erase(fd);
+				close(fd);
+			}
 			if (pollFdsList[i].revents & POLLIN)
 			{
 				if (findCount(fd) == 1)
@@ -204,15 +212,22 @@ void runWebserver(Configuration &config)
 			}
 			if (requests[fd].getRequestState() == PROCESSED)
 			{
-				rmFromPollWatchlist(fd);
-				serversToFd.erase(fd);
+				// rmFromPollWatchlist(fd);
+				// serversToFd.erase(fd);
 				requests[fd].clearRequest(); // check if it's required
 				requests.erase(fd);
 				// responses[fd].clear();
 				// responses.erase(fd);
-				close(fd);
+				// close(fd);
 			}
 		}
 	}
+
+	// close sockets
+	for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
+	{
+		close(it->first);
+	}
+
 	std::cout << "Server shutting down..." << std::endl;
 }

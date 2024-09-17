@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Webserv!</title>
+
     <style>
         body {
             width: 35em;
@@ -37,6 +38,13 @@
     </style>
 </head>
 <body>
+    <form method="post" enctype="multipart/form-data">
+        <label for="file">File</label>
+        <input id="save_as" name="save_as" type="text" />
+        <input id="file" name="file" type="file" />
+        <button>Upload</button>
+      </form>
+      
     <h1>Welcome to Webserv!</h1>
     <p>If you see this page, the web server created by <a href="https://profile.intra.42.fr/users/atonkopi">atonkopi</a>, <a href="https://profile.intra.42.fr/users/momrane">momrane</a> and <a href="https://profile.intra.42.fr/users/vvaudain">vvaudain</a> is successfully installed and working. Further configuration is required.</p>
 

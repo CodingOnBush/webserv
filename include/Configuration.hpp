@@ -85,8 +85,6 @@ class Configuration
 		void		parseLocationBlock(ServerBlock &serverBlock, std::string const &locationLine, std::stringstream &ss);
 		void		parseServerDirective(std::string const &line, ServerBlock &serverBlock);
 		void		parseLocationDirective(std::string &line, LocationBlock &locationBlock);
-		void		setLocationValues(std::string const &key, std::string const &value, LocationBlock &locationBlock);
-		void		setServerValues(std::string const &key, std::string const &value, ServerBlock &serverBlock);
 
 	public:
 		// std::vector<ServerBlock>			m_serverBlocks;
@@ -100,8 +98,8 @@ class Configuration
 		//...
 		
 		// tools
-		static const int	getBodySize(BodySize const &bodySize);
-		std::vector<int>	getPorts() const;
+		const int			getBodySize(BodySize const &bodySize);
+		std::vector<int>	getPorts() const;// maybe to remove
 		void				printConfig() const;
 		//...
 };
