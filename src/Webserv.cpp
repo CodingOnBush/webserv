@@ -7,6 +7,8 @@ std::vector<struct pollfd> pollFdsList;
 std::map<int, Request> requests;
 std::map<int, Response> responses;
 
+bool run;
+
 void setNonBlocking(int fd)
 {
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
@@ -157,14 +159,18 @@ void runWebserver(Configuration &config)
 {
 	int timeout = 1000;
 
-	while (1)
+	run = true;
+	while (run)
 	{
 		int nfds = poll(&pollFdsList[0], pollFdsList.size(), timeout);
-		if (nfds < 0)
+		if (nfds < 0 && errno == EINTR)
+			break;
+		else if (nfds < 0)
 			throw std::runtime_error("poll() failed");
+		else
 		if (nfds == 0)
 		{
-			std::cout << "Waiting for connection" << std::endl;
+			std::cout << "Waiting for connection or request..." << (run ? " (still running)" : " (shutting down)") << std::endl;
 		}
 		//The variable j serves as a counter to keep track of the number of file 
 		//descriptors that have events (revents) set. This is necessary because 
@@ -208,4 +214,5 @@ void runWebserver(Configuration &config)
 			}
 		}
 	}
+	std::cout << "Server shutting down..." << std::endl;
 }

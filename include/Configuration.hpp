@@ -64,6 +64,8 @@ struct ServerBlock {
 	std::vector<http_method>			methods;// GET, POST, DELETE by default
 
 	std::vector<LocationBlock>			locationBlocks;
+
+	bool								listenHasBeenSet;
 };
 
 class Configuration

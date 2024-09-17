@@ -1,6 +1,15 @@
 #include "../include/Configuration.hpp"
 #include "Configuration.hpp"
 
+static void	printSplit(std::vector<std::string> split)
+{
+	std::cout << "split size : " << split.size() << std::endl;
+	std::cout << "split : ";
+	for (std::vector<std::string>::iterator it = split.begin(); it != split.end(); ++it)
+		std::cout << *it << " ";
+	std::cout << std::endl;
+}
+
 static bool	isValidHost(std::string const &host)
 {
 	size_t	dot = 0;
@@ -45,15 +54,6 @@ static std::vector<std::string>	stringSplit(std::string const &line, char delim)
 	return res;
 }
 
-static void	printSplit(std::vector<std::string> split)
-{
-	std::cout << "split size : " << split.size() << std::endl;
-	std::cout << "split : ";
-	for (std::vector<std::string>::iterator it = split.begin(); it != split.end(); ++it)
-		std::cout << *it << " ";
-	std::cout << std::endl;
-}
-
 static void	initServerBlock(ServerBlock &serverBlock)
 {
 	serverBlock.port = 8080;
@@ -71,6 +71,7 @@ static void	initServerBlock(ServerBlock &serverBlock)
 	serverBlock.cgiParams.clear();
 	serverBlock.methods.clear();
 	serverBlock.locationBlocks.clear();
+	serverBlock.listenHasBeenSet = false;
 }
 
 static void	initLocationBlock(LocationBlock &locationBlock)
@@ -147,7 +148,6 @@ static bool	isHttpCode(std::string const &code)
 		return false;
 	if (code.find_first_not_of("0123456789") != std::string::npos)
 		return false;
-	// maybe check if it is in a range of http codes
 	return true;
 }
 
@@ -184,14 +184,24 @@ static void	setAllowedMethods(std::vector<http_method> &methods, std::vector<std
 		methodsSplit = stringSplit(*it, '|');
 		for (std::vector<std::string>::iterator it2 = methodsSplit.begin(); it2 != methodsSplit.end(); ++it2)
 		{
-			if (*it2 == "GET" && std::find(methods.begin(), methods.end(), GET) == methods.end())
+			if (*it2 == "GET")
+			{
+				if (std::find(methods.begin(), methods.end(), GET) != methods.end())
+					throw std::runtime_error("GET method is already set");
 				methods.push_back(GET);
-			else if (*it2 == "POST" && std::find(methods.begin(), methods.end(), POST) == methods.end())
+			}
+			else if (*it2 == "POST")
+			{
+				if (std::find(methods.begin(), methods.end(), POST) != methods.end())
+					throw std::runtime_error("POST method is already set");
 				methods.push_back(POST);
-			else if (*it2 == "DELETE" && std::find(methods.begin(), methods.end(), DELETE) == methods.end())
+			}
+			else if (*it2 == "DELETE")
+			{
+				if (std::find(methods.begin(), methods.end(), DELETE) != methods.end())
+					throw std::runtime_error("DELETE method is already set");
 				methods.push_back(DELETE);
-			else
-				throw std::runtime_error("allowed_methods directive must have GET, POST and/or DELETE (no duplicates)");
+			}
 		}
 	}
 }
@@ -215,7 +225,6 @@ static void	setReturn(std::map<int, std::string> &redirects, bool &redirection, 
 	std::stringstream	ss;
 	int					code;
 	
-	// printSplit(split);
 	if (!redirects.empty())
 		throw std::runtime_error("return directive must be unique");
 	redirection = false;
@@ -261,7 +270,7 @@ static bool	isLocationBlock(std::string const &line)
 {
 	std::vector<std::string>	split = stringSplit(line, ' ');
 
-	if (line.find("location"))// if no location found
+	if (line.find("location"))
 		return false;
 	if (split.size() != 3)
 		throw std::runtime_error("Location block usage : location PATH {/*directives*/}");
@@ -360,7 +369,8 @@ static void	setListen(std::string const &value, ServerBlock &serverBlock, std::v
 	std::stringstream	ss;
 	std::string 		port;
 
-	// printSplit(split);
+	if (serverBlock.listenHasBeenSet)
+		throw std::runtime_error("Listen directive must be unique inside a server block");
 	if (split.size() != 1)
 		throw std::runtime_error("Listen directive need only one value");
 	if (value.empty() || value.find(' ') != std::string::npos)
@@ -389,6 +399,7 @@ static void	setListen(std::string const &value, ServerBlock &serverBlock, std::v
 			throw std::runtime_error("Port must be a number.");
 		ss >> serverBlock.port;
 	}
+	serverBlock.listenHasBeenSet = true;
 }
 
 static void	setStringValue(std::string const &key, std::string &valueToSet, std::vector<std::string> split)
@@ -526,7 +537,10 @@ void	Configuration::parseServerBlock(std::stringstream &ss)
 		else if (isServerBlock(line))
 			throw std::runtime_error("No server blocks are allowed inside another server block");
 		else if (line == "}")
+		{
+			curlyBrackets--;
 			break;
+		}
 		else if (isLocationBlock(line))
 			parseLocationBlock(server, line, ss);
 		else if (isDirective(line))
@@ -534,8 +548,9 @@ void	Configuration::parseServerBlock(std::stringstream &ss)
 		else
 			throw std::runtime_error("Unknown directive at this line : [" + line + "]");
 	}
+	if (curlyBrackets != 0)
+		throw std::runtime_error("A server block need to be closed before opening a new one");
 	pushServerBlock(m_serverBlocks, server);
-	curlyBrackets--;
 }
 
 

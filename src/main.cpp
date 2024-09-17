@@ -1,12 +1,17 @@
 #include "Webserv.hpp"
 
-#define MAX_EV 4096
+extern bool run;
+
+static void	signalHandler(int signum)
+{
+	(void)signum;
+	std::cout << std::endl << "SIGINT received, let's shut down the server" << std::endl;
+	run = false;
+}
 
 int	main(int ac, char **av)
 {
-	std::cout << std::endl << std::endl;
-	// signal(SIGINT, SIG_DFL);
-	// parse the config file and set the server ports through the vector
+	signal(SIGINT, signalHandler);
 	if (ac > 2)
 	{
 		std::cerr << "Usage: ./webserv <config_file>" << std::endl;
@@ -45,13 +50,3 @@ int	main(int ac, char **av)
 	}
 	return (0);
 }
-
-/*
-TODO :
-./webserv config.txt
-	celui ou on a un servername qui fini pas par un ;
-body size only in bytes - changer pour juste avoir un int et pas une struct
-`servername directive alone - si toute seule comme ca : "server_name" sans le ;
-test getLocationPath method
-
-*/
