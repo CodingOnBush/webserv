@@ -76,7 +76,7 @@ static void	initServerBlock(ServerBlock &serverBlock)
 
 static void	initLocationBlock(LocationBlock &locationBlock)
 {
-	locationBlock.path = "";
+	locationBlock.path = "/";
 	locationBlock.alias = "";
 	locationBlock.root = "";
 	locationBlock.clientMaxBodySize.value = "";

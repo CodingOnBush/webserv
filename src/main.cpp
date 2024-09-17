@@ -25,6 +25,7 @@ int	main(int ac, char **av)
 			config.printConfig();
 			initiateWebServer(config);
 			runWebserver(config);
+			closeSockets();
 		}
 		catch (std::exception &e)
 		{
@@ -40,6 +41,7 @@ int	main(int ac, char **av)
 			config.printConfig();
 			initiateWebServer(config);
 			runWebserver(config);
+			closeSockets();
 		}
 		catch (std::exception &e)
 		{
