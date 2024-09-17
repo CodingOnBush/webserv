@@ -1,5 +1,11 @@
 #include "Cgi.hpp"
 
+void printCgiParams(const std::map<std::string, std::string>& cgiParams) {
+    for (const auto& param : cgiParams) {
+        std::cout << param.first << ": " << param.second << std::endl;
+    }
+}
+
 void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Response &res)
 {
 	//create environment
@@ -11,6 +17,7 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
 	//set headers
 	//set status line
 	//set response
+	printCgiParams(location.cgiParams);
 	std::string cgiPathWithArgs = "./www/cgi-bin/test.py";
 	std::string cgiOutput;
 	std::cout << "CGI PATH: " << cgiPathWithArgs << std::endl;
