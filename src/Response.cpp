@@ -241,6 +241,7 @@ void Response::handlePostRequest(Configuration &config, LocationBlock locaion)
 		return;
 	}
 	// handle cgi
+	handleCGI(config, locaion, req, *this);
 	return;
 }
 
@@ -252,6 +253,7 @@ void Response::handleDeleteRequest(Configuration &config, LocationBlock location
 		return;
 	}
 	// handle delete
+	handleCGI(config, location, req, *this);	
 	return;
 }
 
