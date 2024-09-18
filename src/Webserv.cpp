@@ -1,5 +1,3 @@
-bool run;
-
 #include "../include/Webserv.hpp"
 
 #define NFDS 1000
