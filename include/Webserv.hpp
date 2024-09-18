@@ -26,15 +26,4 @@
 #define MAX_CLIENTS 32
 #define BUFFER_SIZE 1024
 
-//functions
-void setNonBlocking(int fd);
-void setOpt(int fd);
-int createSocket(ServerBlock serverBlock, struct sockaddr_in servaddr);
-void listenToSockets();
-void setPollWatchlist(int fd);
-void initiateWebServer(const Configuration &config);
-void acceptConnection(int fd);
-void receiveRequest(int fd);
-void sendResponse(int fd, std::string response);
-void runWebserver(Configuration &config);
-void	closeSockets();
+void webserv(Configuration &config); // main function to run the server

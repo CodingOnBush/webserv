@@ -43,7 +43,7 @@ char **createEnv(Request &req, LocationBlock &location) {
 	env[3] = strdup(ss.str().c_str());
 
     ss.str("");
-    ss << "QUERY_STRING=" << req.getBody();
+    ss << "QUERY_STRING=" << req.getBody() << CRLF;
     env[4] = strdup(ss.str().c_str());
 
     env[5] = NULL;
@@ -110,7 +110,6 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
         {
             std::cout << "child exited with status: " << WEXITSTATUS(status) << std::endl;
         }
-
         res.setBody(cgiOutput.str()); // create a parsing function to parse the output and set correctly body and headers
         res.setMimeType("html");
         res.setStatusCode(200);
