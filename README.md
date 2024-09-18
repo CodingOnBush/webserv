@@ -55,6 +55,8 @@ NEW TODOS:
 - Redirection
 	- using a return directive in file.conf block the server
 
+- be able to send a very big request (sometime with a big URI) and check that the server can handle it
+
 **Main parts of the project:**
 1. Server logic (loop)
 2. HTTP request (parsing)

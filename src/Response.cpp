@@ -253,8 +253,8 @@ void Response::handleDeleteRequest(Configuration &config, LocationBlock location
 		setMimeType("html");
 		return;
 	}
-	// handle delete
-	handleCGI(config, location, req, *this);	
+	// we don't need to handle delete requests on cgi
+	// handleCGI(config, location, req, *this);	
 	return;
 }
 
@@ -330,79 +330,79 @@ std::string Response::getResponse(Configuration &config)
 	return response;
 }
 
-void Response::handleRoot(std::string configPath, std::string requestUri)
-{
-	DIR *directoryPtr = opendir(configPath.c_str());
-	if (directoryPtr == NULL)
-	{
-		if (errno == ENOENT)
-		{
-			this->statusCode = 404;
-			return;
-		}
-		else if (errno == EACCES)
-		{
-			this->statusCode = 403;
-			return;
-		}
-		else
-		{
-			this->statusCode = 500;
-			return;
-		}
-	}
-	else
-	{
-		struct dirent *dir;
-		while ((dir = readdir(directoryPtr)) != NULL)
-		{
-			std::string fileName = dir->d_name;
-			std::cout << "fileName: " << fileName << std::endl;
-			if (fileName == "." || fileName == "..")
-				continue;
-			std::string filePath = configPath + "/" + fileName;
-			if (requestUri == "/")
-			{
-				filePath = configPath + "/" + "index.html";
-			}
-			if (requestUri == "/" || requestUri == "/" + fileName)
-			{
-				std::ifstream file(filePath.c_str());
-				std::stringstream body;
-				if (file.is_open())
-				{
-					std::string line;
-					while (std::getline(file, line))
-					{
-						body << line << std::endl;
-					}
-					file.close();
-					this->body = body.str();
-					if (requestUri == "/")
-					{
-						this->setMimeType("index.html");
-					}
-					else
-					{
-						this->setMimeType(fileName);
-					}
-					this->statusCode = 200;
-					break;
-				}
-				else
-				{
-					this->statusCode = 403;
-					break;
-				}
-			}
-		}
-		if (this->statusCode == 0)
-		{
-			this->statusCode = 404;
-		}
-		closedir(directoryPtr);
-	}
-};
+// void Response::handleRoot(std::string configPath, std::string requestUri)
+// {
+// 	DIR *directoryPtr = opendir(configPath.c_str());
+// 	if (directoryPtr == NULL)
+// 	{
+// 		if (errno == ENOENT)
+// 		{
+// 			this->statusCode = 404;
+// 			return;
+// 		}
+// 		else if (errno == EACCES)
+// 		{
+// 			this->statusCode = 403;
+// 			return;
+// 		}
+// 		else
+// 		{
+// 			this->statusCode = 500;
+// 			return;
+// 		}
+// 	}
+// 	else
+// 	{
+// 		struct dirent *dir;
+// 		while ((dir = readdir(directoryPtr)) != NULL)
+// 		{
+// 			std::string fileName = dir->d_name;
+// 			std::cout << "fileName: " << fileName << std::endl;
+// 			if (fileName == "." || fileName == "..")
+// 				continue;
+// 			std::string filePath = configPath + "/" + fileName;
+// 			if (requestUri == "/")
+// 			{
+// 				filePath = configPath + "/" + "index.html";
+// 			}
+// 			if (requestUri == "/" || requestUri == "/" + fileName)
+// 			{
+// 				std::ifstream file(filePath.c_str());
+// 				std::stringstream body;
+// 				if (file.is_open())
+// 				{
+// 					std::string line;
+// 					while (std::getline(file, line))
+// 					{
+// 						body << line << std::endl;
+// 					}
+// 					file.close();
+// 					this->body = body.str();
+// 					if (requestUri == "/")
+// 					{
+// 						this->setMimeType("index.html");
+// 					}
+// 					else
+// 					{
+// 						this->setMimeType(fileName);
+// 					}
+// 					this->statusCode = 200;
+// 					break;
+// 				}
+// 				else
+// 				{
+// 					this->statusCode = 403;
+// 					break;
+// 				}
+// 			}
+// 		}
+// 		if (this->statusCode == 0)
+// 		{
+// 			this->statusCode = 404;
+// 		}
+// 		closedir(directoryPtr);
+// 	}
+// };
 
 LocationBlock Response::getLocationFromServer(Configuration &config, Request &req)
 {

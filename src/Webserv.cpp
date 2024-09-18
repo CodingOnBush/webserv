@@ -108,6 +108,13 @@ void	webserv(Configuration &config)
 	char 						buf[1024];
 	int							i = 0;
 
+	//		  fd
+	std::map<int, Request>		requests;//what we receive from the client, the data we receive
+	//		  								check if this data is ok (see in the Request.cpp)
+	std::map<int, Response>		responses;// let's parse the request and generate a response
+	// this is here we use the configuration
+
+
 	signal(SIGINT, signal_handler);
 
 	for (std::size_t i = 0; i < serverBlocks.size(); i++)
@@ -152,7 +159,7 @@ void	webserv(Configuration &config)
 				std::cout << "coucou" << std::endl;
 				ret = recv(new_socket, &buf, 1023, 0);
 				// ret = read(new_socket, &buf, 1023);
-				std::cout << "coucou2" << std::endl;
+				// std::cout << "coucou2" << std::endl;
 				if (ret < 0)
 				{
 					close(new_socket);
@@ -174,7 +181,7 @@ void	webserv(Configuration &config)
 				Response resp = Response(requests[new_socket]);
 				
 				std::string generatedResp = resp.getResponse(config);
-			
+				printRequest(requests[new_socket]);
 				// send the response
 				if(send(new_socket, generatedResp.c_str(), generatedResp.size(), 0) < 0)
 				{
@@ -187,6 +194,7 @@ void	webserv(Configuration &config)
 			{
 				if (requests[new_socket].getParsingState() == PARSING_DONE)
 				{
+					// printRequest(requests[new_socket]);
 					Response resp = Response(requests[new_socket]);
 					std::string generatedResp = resp.getResponse(config);
 					if(send(new_socket, generatedResp.c_str(), generatedResp.size(), 0) < 0)
