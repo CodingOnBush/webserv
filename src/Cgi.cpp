@@ -25,9 +25,27 @@ char **createEnv(Request &req, LocationBlock &location)
 void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Response &res)
 {
     char **env = createEnv(req, location);
-    std::string cgiPathWithArgs = "./www/cgi-bin/test.py";
+    // std::string cgiPathWithArgs = "./www/cgi-bin/test.py";
+    std::string cgiPathWithArgs = location.cgiParams.begin()->second;
     std::stringstream cgiOutput;
+    struct stat st;
     std::cout << "CGI PATH: " << cgiPathWithArgs << std::endl;
+    if ((stat(cgiPathWithArgs.c_str(), &st) != 0))
+    {
+        std::cerr << "file does not exist" << std::endl;
+        res.setStatusCode(404);
+        return;
+    }
+    else
+    {
+        if (!(st.st_mode & S_IXUSR))
+        {
+            std::cerr << "file is not executable" << std::endl;
+            res.setStatusCode(403);
+            return;
+        }
+    }
+    
     int pipefd[2];
     if (pipe(pipefd) == -1)
     {
