@@ -111,3 +111,7 @@ elif request_method == '1':
     printPost()
 else:
     print("<html><body><h1>Method Not Supported</h1></body></html>")
+print("Content-Type: text/html")
+# to test for infinite loop
+# while True:
+#     print("hello")
