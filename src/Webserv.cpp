@@ -103,7 +103,7 @@ static int	waitingForConnection(struct pollfd *fds, std::vector<int> ports)
 void	webserv(Configuration &config)
 {
 	std::vector<ServerBlock>	serverBlocks = config.getServerBlocks();
-	std::map<int, Request>		requests;
+	// std::map<int, Request>		requests;
 	struct pollfd				fds[1000];
 	char 						buf[1024];
 	int							i = 0;
