@@ -25,8 +25,8 @@ html_content = """<!DOCTYPE html>
             margin: 8px 0 4px;
         }
         input[type="text"], textarea {
-            width: 100%;
-            padding: 10px;
+            width: 90%;
+            padding: 15px;
             margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -42,21 +42,31 @@ html_content = """<!DOCTYPE html>
         input[type="submit"]:hover {
             background-color: #45a049;
         }
+        .comment-block {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+        }
     </style>
 </head>
 <body>
 
 <h1>Leave a Comment</h1>
 
-<form action="/submit_comment" method="post">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required>
-    
-    <label for="comment">Comment:</label>
-    <textarea id="comment" name="comment" required></textarea>
-    
-    <input type="submit" value="Submit Comment">
-</form>"""
+<div class="comment-block">
+    <form action="/submit_comment" method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        
+        <label for="comment">Comment:</label>
+        <textarea id="comment" name="comment" required></textarea>
+        
+        <input type="submit" value="Submit Comment">
+    </form>
+</div>
+"""
 
 def parse_query_string(query_string):
     pairs = query_string.split('&')
@@ -81,20 +91,20 @@ def printPost():
     name, comment = parse_query_string(request_query)
     print()
     print(html_content)
-    print("<h2>Comment Submitted</h2>")
-    print("<p>Comment:")
-    print("<p>")
-    print(f"Name: {name}")
-    print(f"Comment: {comment}")
-    print("</p>")
-    print("""<form action="/delete_comment" method="delete" style="display:inline;">
-    <input type="hidden" name="index" value="{idx}">
-    <input type="submit" value="Delete Comment" 
-    style="background-color: red; color: white; border: none; border-radius: 4px; cursor: pointer;">
-    </form>""")
+    print("<h2>Comment Submitted:</h2>")
+    print("""
+    <div style="border: 1px solid #ccc; border-radius: 4px; padding: 15px; margin-top: 20px; background-color: #f9f9f9;">
+        <strong>Name:</strong> {}
+        <p><strong>Comment:</strong></p>
+        <p>{}</p>
+        <form action="/delete_comment" method="post" style="display:inline;">
+            <input type="hidden" name="name" value="{name}">
+            <input type="hidden" name="comment" value="{comment}">
+        </form>
+    </div>
+    """.format(name, comment, name=name, comment=comment))
     print("</body></html>")
     
-
 if request_method == '0':
     printGet()
 elif request_method == '1':
