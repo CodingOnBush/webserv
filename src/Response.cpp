@@ -237,7 +237,7 @@ void Response::handlePostRequest(Configuration &config, LocationBlock locaion)
 {
 	if (locaion.cgiParams.empty())
 	{
-		this->statusCode = 405;
+		//create code to handle upload files
 		return;
 	}
 	// handle cgi
@@ -250,6 +250,7 @@ void Response::handleDeleteRequest(Configuration &config, LocationBlock location
 	if (location.cgiParams.empty())
 	{
 		this->statusCode = 405;
+		setMimeType("html");
 		return;
 	}
 	// handle delete
@@ -262,6 +263,7 @@ void Response::methodCheck(LocationBlock location)
 	if (req.getMethod() == UNKNOWN)
 	{
 		this->statusCode = 405;
+		setMimeType("html");
 		return;
 	}
 	if (location.methods.empty() || std::find(location.methods.begin(), location.methods.end(), req.getMethod()) == location.methods.end())
