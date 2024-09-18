@@ -4,15 +4,8 @@ import cgi
 import cgitb
 import json
 
-# Enable debugging
-# cgitb.enable()
-
-# Content-Type header for the HTML response
 request_method = os.environ.get('REQUEST_METHOD')
-content_length = os.environ.get('CONTENT_LENGTH')
 request_query = os.environ.get('QUERY_STRING')
-# Initialize form data
-# form = cgi.FieldStorage()
 html_content = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,14 +59,9 @@ html_content = """<!DOCTYPE html>
 </form>"""
 
 def parse_query_string(query_string):
-    # Split the query string into key-value pairs
     pairs = query_string.split('&')
-    
-    # Initialize variables
     name = None
     comment = None
-    
-    # Iterate over the pairs and assign values
     for pair in pairs:
         key, value = pair.split('=')
         if key == 'name':
@@ -111,9 +99,5 @@ if request_method == '0':
     printGet()
 elif request_method == '1':
     printPost()
-elif request_method == '2':
-    printGet()
 else:
     print("<html><body><h1>Method Not Supported</h1></body></html>")
-
-# print("Content-Type: text/html\n")
