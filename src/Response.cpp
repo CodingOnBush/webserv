@@ -133,7 +133,7 @@ void Response::setHeaders(LocationBlock location)
 void Response::getBody(std::string uri, LocationBlock location)
 {
 	std::string path = setPath(location, uri);
-	std::cout << "Path: " << path << std::endl;
+	// std::cout << "Path: " << path << std::endl;
 	if (isDirectory(path))
 	{
 		DIR *directoryPtr = opendir(path.c_str());

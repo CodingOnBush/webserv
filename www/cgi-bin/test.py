@@ -13,14 +13,20 @@ print("Content-Type: text/html\n")
 
 # Determine the request method (GET, POST, DELETE)
 request_method = os.environ.get('REQUEST_METHOD')
-
+content_length = os.environ.get('CONTENT_LENGTH')
+print("content_length: ", content_length)
+# request_query = os.environ.get('QUERY_STRING')
+# print(request_query)
 # Initialize form data
 form = cgi.FieldStorage()
 
 print("METHOD")
 print(request_method)
 if request_method == '0':
-    print("<html><body><h1>Received get</h1></body></html>")
+    print("<html><body><h1>Received get</h1>")
+    print("<h2>")
+    # print(request_query)
+    print("</h2></body></html>")
 
 
 elif request_method == '1':

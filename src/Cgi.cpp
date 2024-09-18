@@ -24,7 +24,7 @@ upload location : location of the file to upload
 	// python script
 
 char **createEnv(Request &req, LocationBlock &location) {
-    char **env = new char*[5];
+    char **env = new char*[6];
     std::stringstream ss;
 
     ss << "CONTENT_LENGTH=" << req.getBody().size();
@@ -42,7 +42,11 @@ char **createEnv(Request &req, LocationBlock &location) {
 	ss << "REQUEST_METHOD=" << req.getMethod();
 	env[3] = strdup(ss.str().c_str());
 
-    env[4] = NULL;
+    ss.str("");
+    ss << "QUERY_STRING=" << req.getBody();
+    env[4] = strdup(ss.str().c_str());
+
+    env[5] = NULL;
 
     for (int j = 0; env[j]; j++) {
         std::cout << "env[" << j << "] : " << env[j] << std::endl;
