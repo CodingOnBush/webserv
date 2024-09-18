@@ -1,17 +1,7 @@
 #include "Webserv.hpp"
 
-extern bool run;
-
-static void	signalHandler(int signum)
-{
-	(void)signum;
-	std::cout << std::endl << "SIGINT received, let's shut down the server" << std::endl;
-	run = false;
-}
-
 int	main(int ac, char **av)
 {
-	signal(SIGINT, signalHandler);
 	if (ac > 2)
 	{
 		std::cerr << "Usage: ./webserv <config_file>" << std::endl;
@@ -23,8 +13,7 @@ int	main(int ac, char **av)
 		{
 			Configuration config(av[1]);
 			// config.printConfig();
-			initiateWebServer(config);
-			runWebserver(config);
+			webserv(config);
 		}
 		catch (std::exception &e)
 		{
@@ -38,8 +27,7 @@ int	main(int ac, char **av)
 		{
 			Configuration config;
 			// config.printConfig();
-			initiateWebServer(config);
-			runWebserver(config);
+			webserv(config);
 		}
 		catch (std::exception &e)
 		{

@@ -1,13 +1,16 @@
 #include "../include/Webserv.hpp"
 
+#define NFDS 1000
+
+std::vector<struct pollfd>	pollFdsList;
+struct pollfd				g_fds[NFDS];
+
+std::vector<int> 			serversFd;
+
 std::map<std::pair<std::string, int>, int> socketsToPorts;
 std::map<int, std::vector<ServerBlock> > serversToFd;
-std::vector<int> listenFds;
-std::vector<struct pollfd> pollFdsList;
 std::map<int, Request> requests;
 std::map<int, Response> responses;
-
-bool run;
 
 void setNonBlocking(int fd)
 {
@@ -42,7 +45,7 @@ void listenToSockets()
 	{
 		int socket_fd = it->first;
 		std::vector<ServerBlock> serverBlocks = it->second;
-		listenFds.push_back(socket_fd);
+		serversFd.push_back(socket_fd);
 	}
 }
 
@@ -93,9 +96,9 @@ void initiateWebServer(const Configuration &config)
 		}
 	}
 	listenToSockets();
-	for (size_t i = 0; i < listenFds.size(); i++)
+	for (size_t i = 0; i < serversFd.size(); i++)
 	{
-		setPollWatchlist(listenFds[i]);
+		setPollWatchlist(serversFd[i]);
 	}
 }
 
@@ -147,12 +150,21 @@ void sendResponse(int fd, Configuration &config)
 int findCount(int fd)
 {
 	int count = 0;
-	for (size_t i = 0; i < listenFds.size(); i++)
+	for (size_t i = 0; i < serversFd.size(); i++)
 	{
-		if (listenFds[i] == fd)
+		if (serversFd[i] == fd)
 			count++;
 	}
 	return count;
+}
+
+static void	setPollFdsEvents()
+{
+	for (size_t i = 0; i < 1000; i++)
+	{
+		g_fds[i].fd = i;
+		g_fds[i].events = POLLIN | POLLOUT | POLLRDHUP;
+	}
 }
 
 void runWebserver(Configuration &config)
@@ -160,11 +172,19 @@ void runWebserver(Configuration &config)
 	int timeout = 1000;
 	int nfds;
 
+	// g_fds = new struct pollfd[1000];
+
 	while (1)
 	{
-		int nfds = poll(&pollFdsList[0], pollFdsList.size(), timeout);
+		/* poll(struct pollfd *fds, nfds_t nfds, int timeout); */
+		setPollFdsEvents();
+		nfds = poll(&pollFdsList[0], pollFdsList.size(), timeout);
 		if (nfds < 0)
-			throw std::runtime_error("poll() failed");
+		{
+			perror("PERROR ");
+			// throw std::runtime_error("poll() failed");
+			break;
+		}
 		if (nfds == 0)
 		{
 			std::cout << "Waiting for connection" << std::endl;
@@ -178,9 +198,20 @@ void runWebserver(Configuration &config)
 		{
 			int fd = pollFdsList[i].fd;
 
-			if (pollFdsList[i].revents == 0)
+			if (pollFdsList[i].revents == 0 || fd == -1)
 				continue;
 			j++;
+			if (pollFdsList[i].revents & POLLRDHUP)
+			{
+				std::cout << "POLLRDHUP" << std::endl;
+				close(pollFdsList[i].fd);
+				requests[pollFdsList[i].fd].clearRequest(); // check if it's required
+				requests.erase(pollFdsList[i].fd);
+				pollFdsList[i].fd = -1;
+				pollFdsList[i].events = 0;
+				pollFdsList[i].revents = 0;
+				continue;
+			}
 			if (pollFdsList[i].revents & POLLIN)
 			{
 				if (findCount(fd) == 1)
@@ -192,7 +223,7 @@ void runWebserver(Configuration &config)
 					receiveRequest(fd);
 				}
 			}
-			else if (pollFdsList[i].revents & POLLOUT)
+			if (pollFdsList[i].revents & POLLOUT)
 			{
 				if (requests[fd].getParsingState() == PARSING_DONE)
 				{
@@ -210,5 +241,10 @@ void runWebserver(Configuration &config)
 				close(fd);
 			}
 		}
+	}
+	// close all sockets
+	for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
+	{
+		close(it->first);
 	}
 }

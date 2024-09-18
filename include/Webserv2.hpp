@@ -38,6 +38,3 @@ void receiveRequest(int fd);
 void sendResponse(int fd, std::string response);
 void runWebserver(Configuration &config);
 void	closeSockets();
-
-
-void	webserv(Configuration &config);
