@@ -2,6 +2,8 @@
 
 int	main(int ac, char **av)
 {
+	const std::string	defaultPath = "./config/webserv.conf";
+
 	if (ac > 2)
 	{
 		std::cerr << "Usage: ./webserv <config_file>" << std::endl;

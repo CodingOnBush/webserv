@@ -126,7 +126,7 @@ LocationBlock getMatchingLocationBlock(ServerBlock serverBlock, std::string uri)
     if (pos != std::string::npos && pos != 0) {
         return getMatchingLocationBlock(serverBlock, uri.substr(0, pos));
     }
-	return *location;
+	return *location;// TODO : maybe replace with throw and catch it in the main without stopping the server
 }
 
 std::string getDefaultErrorBody(int statusCode)

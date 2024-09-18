@@ -45,6 +45,8 @@ static int	create_socket(int port)
 		close(sockfd);
 		exit(1);
 	}
+
+	// non blocking socket
 	if(fcntl(sockfd, F_SETFL, O_NONBLOCK) < 0)
 	{
 		// std::cerr << "could not set socket to be non blocking" << std::endl;
@@ -89,7 +91,11 @@ static int	waitingForConnection(struct pollfd *fds, std::vector<int> ports)
 			<< "Waiting for connection "<< wait[(n++ % 6)] 
 			<< SET << "\r" << std::flush;
 		if ((status = poll(fds, servers_fd.size(), timeout)) < 0)
+		{
+			// we could use errno because it's not after read or write (cf subject)
 			return -1;
+		}
+		
 	}
 	return status;
 }
@@ -111,7 +117,7 @@ void	webserv(Configuration &config)
 	{
 		fds[i].fd = *it; // set descriptor fd to to listening socket
 		fds[i].events = 0; // Clear the bit array
-		fds[i].events = fds[i].events | POLLIN | POLLOUT | POLLRDHUP;
+		fds[i].events = fds[i].events | POLLIN | POLLOUT | POLLHUP;
 		i++;
 	}
 
@@ -132,7 +138,7 @@ void	webserv(Configuration &config)
 		// Verify which server has a new connection
 		for (int j = 0; j < servers_fd.size(); j++)
 		{
-			if ((fds[j].revents & POLLIN) == POLLIN)// If the server has a new connection ready
+			if (fds[j].revents & POLLIN)// If the server has a new connection ready
 			{
 				std::cout << "\r" << "Client connected on server: " << fds[j].fd << std::endl;
 				// Accept the connection
@@ -141,16 +147,20 @@ void	webserv(Configuration &config)
 					perror("ACCEPT ERROR");
 					continue;
 				}
-
 				int ret = 0;
 				// Receive the request
-				if ((ret = recv(new_socket, &buf, 1023, 0)) < 0)
+				std::cout << "coucou" << std::endl;
+				ret = recv(new_socket, &buf, 1023, 0);
+				// ret = read(new_socket, &buf, 1023);
+				std::cout << "coucou2" << std::endl;
+				if (ret < 0)
 				{
+					close(new_socket);
 					perror("RECV ERROR");
 					continue;
 				}
 				buf[ret] = '\0';
-				std::cout << buf << std::endl;
+				// std::cout << buf << std::endl;
 				std::cout << "requests count : " << count << std::endl;
 				count++;
 				
@@ -172,9 +182,8 @@ void	webserv(Configuration &config)
 					continue;
 				}
 				requests[new_socket].setRequestState(PROCESSED);
-				close(new_socket);
 			}
-			else if ((fds[j].revents & POLLOUT) == POLLOUT)
+			if (fds[j].revents & POLLOUT)
 			{
 				if (requests[new_socket].getParsingState() == PARSING_DONE)
 				{
@@ -189,7 +198,7 @@ void	webserv(Configuration &config)
 					close(new_socket);
 				}
 			}
-			else if ((fds[j].revents & POLLRDHUP) == POLLRDHUP)
+			if (fds[j].revents & POLLHUP)
 			{
 				close(fds[j].fd);
 				requests[fds[j].fd].clearRequest(); // check if it's required

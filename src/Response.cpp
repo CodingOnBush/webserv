@@ -306,7 +306,10 @@ std::string Response::getResponse(Configuration &config)
 		methodCheck(location);
 		bodySizeCheck(config, location);
 		if (location.redirection == true)
+		{
+			std::cout << "REDIRECTION" << std::endl;
 			return (handleRedirection(config, location));
+		}
 		if (this->statusCode == 0)
 		{
 			switch (req.getMethod())
