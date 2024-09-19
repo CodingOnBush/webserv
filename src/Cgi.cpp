@@ -20,6 +20,11 @@ char **createEnv(Request &req, LocationBlock &location)
             std::string pathInfo = uri.substr(pos + 3); // +3 to skip past ".py"            
             scriptName = uri.substr(0, pos + 3); // +3 to include ".py"
         }
+        else
+        {
+            scriptName = "error";
+            pathInfo = "";
+        }
     }
     else
     {
@@ -47,15 +52,53 @@ char **createEnv(Request &req, LocationBlock &location)
     ss << "PATH_INFO=" << pathInfo << CRLF;
     env[6] = strdup(ss.str().c_str());
     env[7] = NULL;
+    
     return env;
+}
+
+std::string getCGIPath(char **env, LocationBlock &location)
+{
+    if (!env)
+        return "";
+    if (env[5] == "error")
+        return (env[5]);
+
+    std::string path;
+    std::stringstream ss;
+    std::string scriptName;
+    std::string temp;
+
+    ss << env[5];
+    temp = ss.str();
+    std::size_t pos = temp.find("=");
+    if (pos != std::string::npos)
+        scriptName = temp.substr(pos + 1);
+    std::cout << "SCRIPT NAME: " << scriptName << std::endl;
+    std::cout << "LOCATION: " << location.path << std::endl;
+    if (location.path == "/")
+        path = location.root + scriptName;
+    else
+        path = location.root + location.path + scriptName;
+    return (path);
 }
 
 void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Response &res)
 {
     char **env = createEnv(req, location);
-    std::string cgiPathWithArgs = location.cgiParams.begin()->second;
     std::stringstream cgiOutput;
+    std::string cgiPathWithArgs = getCGIPath(env, location);
     struct stat st;
+    
+    if (cgiPathWithArgs == "")
+    {
+        res.setStatusCode(500); //?? is this the right error code?
+        return;
+    }
+    else if (cgiPathWithArgs == "error")
+    {
+        res.setStatusCode(404);
+        return ;
+    }
     std::cout << "CGI PATH: " << cgiPathWithArgs << std::endl;
     if ((stat(cgiPathWithArgs.c_str(), &st) != 0))
     {
