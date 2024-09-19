@@ -111,7 +111,7 @@ void	webserv(Configuration &config)
 	{
 		fds[i].fd = *it; // set descriptor fd to to listening socket
 		fds[i].events = 0; // Clear the bit array
-		fds[i].events = fds[i].events | POLLIN | POLLOUT | POLLRDHUP;
+		fds[i].events = fds[i].events | POLLIN | POLLOUT | POLLHUP;
 		i++;
 	}
 
@@ -189,7 +189,7 @@ void	webserv(Configuration &config)
 					close(new_socket);
 				}
 			}
-			else if ((fds[j].revents & POLLRDHUP) == POLLRDHUP)
+			else if ((fds[j].revents & POLLHUP) == POLLHUP)
 			{
 				close(fds[j].fd);
 				requests[fds[j].fd].clearRequest(); // check if it's required

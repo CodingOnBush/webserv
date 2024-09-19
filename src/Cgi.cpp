@@ -6,67 +6,48 @@ char **createEnv(Request &req, LocationBlock &location)
 {
     //let's parse the request and create the env variables
     std::string scriptName;
+    std::string pathInfo;
+    char **env = new char *[8];
+    std::stringstream ss;
+    std::string uri = req.getUri();
+
     if (location.pathInfo == true)
     {
-        std::string uri = req.getUri();
         std::cout << "URI: " << uri << std::endl;
         size_t pos = uri.find(".py");
         if (pos != std::string::npos)
         {
             std::string pathInfo = uri.substr(pos + 3); // +3 to skip past ".py"            
             scriptName = uri.substr(0, pos + 3); // +3 to include ".py"
-            std::stringstream ss;
-            char **env = new char *[8];
-            ss << "CONTENT_LENGTH=" << req.getBody().size();
-            env[0] = strdup(ss.str().c_str());
-            ss.str("");
-            ss << "CONTENT_TYPE=" << req.getHeaders()["Content-Type"];
-            env[1] = strdup(ss.str().c_str());
-            ss.str("");
-            ss << "UPLOAD_LOCATION=" << location.uploadLocation;
-            env[2] = strdup(ss.str().c_str());
-            ss.str("");
-            ss << "REQUEST_METHOD=" << req.getMethod();
-            env[3] = strdup(ss.str().c_str());
-            ss.str("");
-            ss << "QUERY_STRING=" << req.getBody() << CRLF;
-            env[4] = strdup(ss.str().c_str());
-            ss.str("");
-            ss << "SCRIPT_NAME=" << scriptName;
-            env[5] = strdup(ss.str().c_str());
-            ss.str("");
-            ss << "PATH_INFO=" << pathInfo << CRLF;
-            env[6] = strdup(ss.str().c_str());
-            env[7] = NULL;
-            return env;
         }
     }
     else
     {
         scriptName = req.getUri();
-        char **env = new char *[7];
-        std::stringstream ss;
-        ss << "CONTENT_LENGTH=" << req.getBody().size();
-        env[0] = strdup(ss.str().c_str());
-        ss.str("");
-        ss << "CONTENT_TYPE=" << req.getHeaders()["Content-Type"];
-        env[1] = strdup(ss.str().c_str());
-        ss.str("");
-        ss << "UPLOAD_LOCATION=" << location.uploadLocation;
-        env[2] = strdup(ss.str().c_str());
-        ss.str("");
-        ss << "REQUEST_METHOD=" << req.getMethod();
-        env[3] = strdup(ss.str().c_str());
-        ss.str("");
-        ss << "QUERY_STRING=" << req.getBody() << CRLF;
-        env[4] = strdup(ss.str().c_str());
-        ss.str("");
-        ss << "SCRIPT_NAME=" << scriptName;
-        env[5] = strdup(ss.str().c_str());
-        ss.str("");
-        env[6] = NULL;
-        return env;
+        pathInfo = "";
     }
+    ss << "CONTENT_LENGTH=" << req.getBody().size();
+    env[0] = strdup(ss.str().c_str());
+    ss.str("");
+    ss << "CONTENT_TYPE=" << req.getHeaders()["Content-Type"];
+    env[1] = strdup(ss.str().c_str());
+    ss.str("");
+    ss << "UPLOAD_LOCATION=" << location.uploadLocation;
+    env[2] = strdup(ss.str().c_str());
+    ss.str("");
+    ss << "REQUEST_METHOD=" << req.getMethod();
+    env[3] = strdup(ss.str().c_str());
+    ss.str("");
+    ss << "QUERY_STRING=" << req.getBody() << CRLF;
+    env[4] = strdup(ss.str().c_str());
+    ss.str("");
+    ss << "SCRIPT_NAME=" << scriptName;
+    env[5] = strdup(ss.str().c_str());
+    ss.str("");
+    ss << "PATH_INFO=" << pathInfo << CRLF;
+    env[6] = strdup(ss.str().c_str());
+    env[7] = NULL;
+    return env;
 }
 
 void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Response &res)
