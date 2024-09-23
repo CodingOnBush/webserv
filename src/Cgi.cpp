@@ -7,13 +7,21 @@ char **createEnv(Request &req, LocationBlock &location)
     //let's parse the request and create the env variables
     std::string scriptName;
     std::string pathInfo;
+    bool varSSet = false;
     char **env = new char *[8];
     std::stringstream ss;
     std::string uri = req.getUri();
 
-    if (location.pathInfo == true)
+    if (uri == "/submit_comment")
     {
-        std::cout << "URI: " << uri << std::endl;
+        std::cout << "URIHERETEST: " << uri << std::endl;
+        scriptName = location.cgiParams[".py"];
+        pathInfo = "";
+        varSSet = true;
+    }
+    if (location.pathInfo == true && varSSet == false)
+    {
+        std::cout << "URIHERE: " << uri << std::endl;
         size_t pos = uri.find(".py");
         if (pos != std::string::npos)
         {
@@ -26,7 +34,7 @@ char **createEnv(Request &req, LocationBlock &location)
             pathInfo = "";
         }
     }
-    else
+    else if (location.pathInfo == false && varSSet == false)
     {
         scriptName = req.getUri();
         pathInfo = "";
@@ -60,8 +68,10 @@ std::string getCGIPath(char **env, LocationBlock &location)
 {
     if (!env)
         return "";
-    if (env[5] == "error")
-        return (env[5]);
+
+    std::string tempScriptName = env[5];
+    if (tempScriptName == "error")
+        return (tempScriptName);
 
     std::string path;
     std::stringstream ss;
@@ -75,10 +85,13 @@ std::string getCGIPath(char **env, LocationBlock &location)
         scriptName = temp.substr(pos + 1);
     std::cout << "SCRIPT NAME: " << scriptName << std::endl;
     std::cout << "LOCATION: " << location.path << std::endl;
+    if (scriptName == location.cgiParams[".py"] && scriptName != "")
+        return (scriptName);
     if (location.path == "/")
         path = location.root + scriptName;
     else
         path = location.root + location.path + scriptName;
+    std::cout << "PATHINFOOOOOO: " << path << std::endl;
     return (path);
 }
 
@@ -89,8 +102,10 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
     std::string cgiPathWithArgs = getCGIPath(env, location);
     struct stat st;
     
+    std::cout << "CGI PATH: " << cgiPathWithArgs << std::endl;
     if (cgiPathWithArgs == "")
     {
+        std::cerr << "error in getting cgi path" << std::endl;
         res.setStatusCode(500); //?? is this the right error code?
         return;
     }
@@ -137,6 +152,7 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
         close(pipefd[1]);
         char *args[] = {strdup(cgiPathWithArgs.c_str()), NULL};
         execve(cgiPathWithArgs.c_str(), args, env);
+        perror("execve failed");
         exit(1);
     }
     else
@@ -157,6 +173,7 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
         {
             std::cout << "child exited with status: " << WEXITSTATUS(status) << std::endl;
         }
+        std::cout << "cgiOutput: " << cgiOutput.str() << std::endl;
         if (cgiOutput.str().empty())
         {
             res.setStatusCode(500);
@@ -182,6 +199,7 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
             res.setStatusCode(200);
         }
     }
+    //why do we need to free the env variables? Does delete[] env not do that?
     for (int i = 0; env[i]; i++)
     {
         free(env[i]);

@@ -81,7 +81,7 @@ static int	waitingForConnection(struct pollfd *fds, std::vector<int> ports)
 	std::cout << "Available ports: ";
 	for (std::vector<int>::iterator it = ports.begin(); it != ports.end(); it++)
 		std::cout << *it << " ";
-	std::cout << std::endl;
+	std::cout << "status" << status << std::endl;
 	while (status == 0)
 	{
 		std::cout 
@@ -151,7 +151,6 @@ void	webserv(Configuration &config)
 				}
 				buf[ret] = '\0';
 				std::cout << buf << std::endl;
-				std::cout << "requests count : " << count << std::endl;
 				count++;
 				
 				requests[new_socket] = Request();
