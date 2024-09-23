@@ -191,7 +191,7 @@ void Request::parseBody(std::stringstream &stream)
         new_body += c;
     }
     this->body += new_body;
-    if (this->body.size() == len)
+    if ((int)this->body.size() == len)
         setParsingState(PARSING_DONE);
 }
 void Request::parseRequestLine(const std::string &line)

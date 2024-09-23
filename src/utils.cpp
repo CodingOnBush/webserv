@@ -152,6 +152,7 @@ bool isInIndex(std::string fileName, LocationBlock location)
 
 bool hasDefaultFile(const std::string &directoryPath, std::string fileName, LocationBlock location)
 {
+	(void)fileName;
 	DIR *directoryPtr = opendir(directoryPath.c_str());
 	struct dirent *dir;
 	if (directoryPtr == NULL)

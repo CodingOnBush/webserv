@@ -601,7 +601,7 @@ std::vector<ServerBlock> const &Configuration::getServerBlocks() const
 	return m_serverBlocks;
 }
 
-const int	Configuration::getBodySize(BodySize const &bodySize)
+int	Configuration::getBodySize(BodySize const &bodySize)
 {
 	std::stringstream	ss;
 	int					weight;

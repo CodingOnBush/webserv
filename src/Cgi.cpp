@@ -25,6 +25,8 @@ char **createEnv(Request &req, LocationBlock &location)
 void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Response &res)
 {
     char **env = createEnv(req, location);
+
+    (void)Config;
     std::string cgiPathWithArgs = location.cgiParams.begin()->second;
     std::stringstream cgiOutput;
     struct stat st;

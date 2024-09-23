@@ -247,6 +247,7 @@ void Response::handlePostRequest(Configuration &config, LocationBlock locaion)
 
 void Response::handleDeleteRequest(Configuration &config, LocationBlock location)
 {
+	(void)config;
 	if (location.cgiParams.empty())
 	{
 		this->statusCode = 405;
@@ -278,7 +279,7 @@ void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 	if (maxBodySize == 0)
 		return;
 	// compare with content length header!!!
-	if (req.getBody().size() > maxBodySize)
+	if ((int)req.getBody().size() > maxBodySize)
 	{
 		if (this->statusCode == 0)
 			this->statusCode = 413;
@@ -287,6 +288,7 @@ void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 
 std::string Response::handleRedirection(Configuration &config, LocationBlock &location)
 {
+	(void)config;
 	std::stringstream ss;
 	body = "";
 	setMimeType("html");

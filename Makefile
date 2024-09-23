@@ -1,7 +1,7 @@
 NAME	:=	webserv
 
 CPP		:=	c++
-CFLAGS	:= -std=c++98 -g3 -MMD #-Werror -Wextra -Werror
+CFLAGS	:=	-std=c++98 -g3 -MMD -Werror -Wextra -Werror
 
 INC_DIR	:=	./include
 SRC_DIR	:=	./src

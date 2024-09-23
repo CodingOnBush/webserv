@@ -20,6 +20,7 @@ bool				run = true;
 
 static void	signal_handler(int signum)
 {
+	(void)signum;
 	std::cout << "\r" << BLUE << "SIGINT received, let's shut down the server" << SET << std::endl;
 	for (std::vector<int>::iterator it = servers_fd.begin(); it != servers_fd.end(); it++)
 		close(*it);
@@ -143,7 +144,7 @@ void	webserv(Configuration &config)
 			break;
 		
 		// Verify which server has a new connection
-		for (int j = 0; j < servers_fd.size(); j++)
+		for (int j = 0; j < (int)servers_fd.size(); j++)
 		{
 			if (fds[j].revents & POLLIN)// If the server has a new connection ready
 			{
