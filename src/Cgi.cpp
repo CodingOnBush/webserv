@@ -4,6 +4,24 @@
 //ajouter un check de timeout de notre execve pour verifier qu'on est pas coinces dans une boucle
 //infinie
 
+std::string getPathInfo(const std::string &uri, const std::string &keyword) {
+    size_t pos = uri.find(keyword);
+    
+    if (pos != std::string::npos) 
+    {
+        std::string result = uri.substr(pos + keyword.length());
+        if (result.empty())
+            return ("");
+        if (result[0] != '/')
+            result = "error";
+        else if(!result.empty()) 
+            result = "/" + result;
+        return result;
+    }
+    else
+        return "";
+}
+
 char **createEnv(Request &req, LocationBlock &location)
 {
     //let's parse the request and create the env variables
@@ -18,19 +36,42 @@ char **createEnv(Request &req, LocationBlock &location)
     {
         std::cout << "URIHERETEST: " << uri << std::endl;
         scriptName = location.cgiParams[".py"];
-        pathInfo = "";
+        std::string keyword = uri;
+        if (location.pathInfo == true)
+            pathInfo = getPathInfo(uri, keyword);
+        else
+            pathInfo = "";
         varSSet = true;
+    }
+    else if (location.pathInfo == true && varSSet == false)
+    {
+        std::cout << "URIHERE: " << uri << std::endl;
+        size_t pos = uri.find(location.cgiParams.begin()->first);
+        if (pos != std::string::npos) //if the keyword is found
+        {
+            //todo faire en sorte que path info ait toujours le format "/.../.../.../"
+            std::string pathInfo = getPathInfo(uri, location.cgiParams.begin()->first);          
+            scriptName = uri.substr(0, pos + 3); // +3 to include ".py"
+            if (pathInfo == "error")
+            {
+                std::cout << "PATH INFO si on et erreur :" << pathInfo << std::endl;
+                scriptName = "error";
+                pathInfo = "";
+            }
+            std::cout << "PATH INFO si on et tout ok :" << pathInfo << std::endl;
+        }
+        else
+        {
+            scriptName = "error";
+            pathInfo = "";
+            std::cout << "PATH INFO si on et erreur :" << pathInfo << std::endl;
+        }
     }
     else
     {
-        std::string root;
-        size_t pos = location.root.find("/");
-        root = location.root.substr(pos);
-        std::cout << "URIHERE: " << uri << std::endl;
-        pathInfo = root + uri;
-        scriptName = uri;
-        std::cout << "PATHINFO: " << pathInfo << std::endl;
+        scriptName = req.getUri();
         std::cout << "SCRIPTNAME: " << scriptName << std::endl;
+        pathInfo = "";
     }
     ss << "CONTENT_LENGTH=" << req.getBody().size();
     env[0] = strdup(ss.str().c_str());
@@ -44,7 +85,7 @@ char **createEnv(Request &req, LocationBlock &location)
     ss << "REQUEST_METHOD=" << req.getMethod();
     env[3] = strdup(ss.str().c_str());
     ss.str("");
-    ss << "QUERY_STRING=" << req.getBody() << CRLF;
+    ss << "QUERY_STRING=" << req.getBody();
     env[4] = strdup(ss.str().c_str());
     ss.str("");
     ss << "SCRIPT_NAME=" << scriptName;
@@ -53,72 +94,9 @@ char **createEnv(Request &req, LocationBlock &location)
     ss << "PATH_INFO=" << pathInfo << CRLF;
     env[6] = strdup(ss.str().c_str());
     env[7] = NULL;
-    
+
     return env;
 }
-
-
-// char **createEnv(Request &req, LocationBlock &location)
-// {
-//     //let's parse the request and create the env variables
-//     std::string scriptName;
-//     std::string pathInfo;
-//     bool varSSet = false;
-//     char **env = new char *[8];
-//     std::stringstream ss;
-//     std::string uri = req.getUri();
-
-//     if (uri == "/submit_comment")
-//     {
-//         std::cout << "URIHERETEST: " << uri << std::endl;
-//         scriptName = location.cgiParams[".py"];
-//         pathInfo = "";
-//         varSSet = true;
-//     }
-//     if (location.pathInfo == true && varSSet == false)
-//     {
-//         std::cout << "URIHERE: " << uri << std::endl;
-//         size_t pos = uri.find(".py");
-//         if (pos != std::string::npos)
-//         {
-//             std::string pathInfo = uri.substr(pos + 3); // +3 to skip past ".py"            
-//             scriptName = uri.substr(0, pos + 3); // +3 to include ".py"
-//         }
-//         else
-//         {
-//             scriptName = "error";
-//             pathInfo = "";
-//         }
-//     }
-//     else if (location.pathInfo == false && varSSet == false)
-//     {
-//         scriptName = req.getUri();
-//         pathInfo = "";
-//     }
-//     ss << "CONTENT_LENGTH=" << req.getBody().size();
-//     env[0] = strdup(ss.str().c_str());
-//     ss.str("");
-//     ss << "CONTENT_TYPE=" << req.getHeaders()["Content-Type"];
-//     env[1] = strdup(ss.str().c_str());
-//     ss.str("");
-//     ss << "UPLOAD_LOCATION=" << location.uploadLocation;
-//     env[2] = strdup(ss.str().c_str());
-//     ss.str("");
-//     ss << "REQUEST_METHOD=" << req.getMethod();
-//     env[3] = strdup(ss.str().c_str());
-//     ss.str("");
-//     ss << "QUERY_STRING=" << req.getBody() << CRLF;
-//     env[4] = strdup(ss.str().c_str());
-//     ss.str("");
-//     ss << "SCRIPT_NAME=" << scriptName;
-//     env[5] = strdup(ss.str().c_str());
-//     ss.str("");
-//     ss << "PATH_INFO=" << pathInfo << CRLF;
-//     env[6] = strdup(ss.str().c_str());
-//     env[7] = NULL;
-    
-//     return env;
-// }
 
 std::string getCGIPath(char **env, LocationBlock &location)
 {
@@ -168,9 +146,15 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
         return ;
     }
     std::cout << "CGI PATH: " << cgiPathWithArgs << std::endl;
-    if ((stat(cgiPathWithArgs.c_str(), &st) != 0))
+    if (stat(cgiPathWithArgs.c_str(), &st) != 0)
     {
         std::cerr << "file does not exist" << std::endl;
+        res.setStatusCode(404);
+        return;
+    }
+    else if (isDirectory(cgiPathWithArgs))
+    {
+        std::cerr << "file is a directory" << std::endl;
         res.setStatusCode(404);
         return;
     }
@@ -201,7 +185,6 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
     {
         close(pipefd[0]);
         dup2(pipefd[1], STDOUT_FILENO);
-        dup2(pipefd[1], STDERR_FILENO);
         close(pipefd[1]);
         char *args[] = {strdup(cgiPathWithArgs.c_str()), NULL};
         execve(cgiPathWithArgs.c_str(), args, env);
