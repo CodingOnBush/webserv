@@ -1,6 +1,8 @@
 #include "Cgi.hpp"
 
-
+//path info c'est tout ce qui est apres le premier slash
+//ajouter un check de timeout de notre execve pour verifier qu'on est pas coinces dans une boucle
+//infinie
 
 char **createEnv(Request &req, LocationBlock &location)
 {
@@ -19,25 +21,16 @@ char **createEnv(Request &req, LocationBlock &location)
         pathInfo = "";
         varSSet = true;
     }
-    if (location.pathInfo == true && varSSet == false)
+    else
     {
+        std::string root;
+        size_t pos = location.root.find("/");
+        root = location.root.substr(pos);
         std::cout << "URIHERE: " << uri << std::endl;
-        size_t pos = uri.find(".py");
-        if (pos != std::string::npos)
-        {
-            std::string pathInfo = uri.substr(pos + 3); // +3 to skip past ".py"            
-            scriptName = uri.substr(0, pos + 3); // +3 to include ".py"
-        }
-        else
-        {
-            scriptName = "error";
-            pathInfo = "";
-        }
-    }
-    else if (location.pathInfo == false && varSSet == false)
-    {
-        scriptName = req.getUri();
-        pathInfo = "";
+        pathInfo = root + uri;
+        scriptName = uri;
+        std::cout << "PATHINFO: " << pathInfo << std::endl;
+        std::cout << "SCRIPTNAME: " << scriptName << std::endl;
     }
     ss << "CONTENT_LENGTH=" << req.getBody().size();
     env[0] = strdup(ss.str().c_str());
@@ -64,6 +57,69 @@ char **createEnv(Request &req, LocationBlock &location)
     return env;
 }
 
+
+// char **createEnv(Request &req, LocationBlock &location)
+// {
+//     //let's parse the request and create the env variables
+//     std::string scriptName;
+//     std::string pathInfo;
+//     bool varSSet = false;
+//     char **env = new char *[8];
+//     std::stringstream ss;
+//     std::string uri = req.getUri();
+
+//     if (uri == "/submit_comment")
+//     {
+//         std::cout << "URIHERETEST: " << uri << std::endl;
+//         scriptName = location.cgiParams[".py"];
+//         pathInfo = "";
+//         varSSet = true;
+//     }
+//     if (location.pathInfo == true && varSSet == false)
+//     {
+//         std::cout << "URIHERE: " << uri << std::endl;
+//         size_t pos = uri.find(".py");
+//         if (pos != std::string::npos)
+//         {
+//             std::string pathInfo = uri.substr(pos + 3); // +3 to skip past ".py"            
+//             scriptName = uri.substr(0, pos + 3); // +3 to include ".py"
+//         }
+//         else
+//         {
+//             scriptName = "error";
+//             pathInfo = "";
+//         }
+//     }
+//     else if (location.pathInfo == false && varSSet == false)
+//     {
+//         scriptName = req.getUri();
+//         pathInfo = "";
+//     }
+//     ss << "CONTENT_LENGTH=" << req.getBody().size();
+//     env[0] = strdup(ss.str().c_str());
+//     ss.str("");
+//     ss << "CONTENT_TYPE=" << req.getHeaders()["Content-Type"];
+//     env[1] = strdup(ss.str().c_str());
+//     ss.str("");
+//     ss << "UPLOAD_LOCATION=" << location.uploadLocation;
+//     env[2] = strdup(ss.str().c_str());
+//     ss.str("");
+//     ss << "REQUEST_METHOD=" << req.getMethod();
+//     env[3] = strdup(ss.str().c_str());
+//     ss.str("");
+//     ss << "QUERY_STRING=" << req.getBody() << CRLF;
+//     env[4] = strdup(ss.str().c_str());
+//     ss.str("");
+//     ss << "SCRIPT_NAME=" << scriptName;
+//     env[5] = strdup(ss.str().c_str());
+//     ss.str("");
+//     ss << "PATH_INFO=" << pathInfo << CRLF;
+//     env[6] = strdup(ss.str().c_str());
+//     env[7] = NULL;
+    
+//     return env;
+// }
+
 std::string getCGIPath(char **env, LocationBlock &location)
 {
     if (!env)
@@ -83,15 +139,12 @@ std::string getCGIPath(char **env, LocationBlock &location)
     std::size_t pos = temp.find("=");
     if (pos != std::string::npos)
         scriptName = temp.substr(pos + 1);
-    std::cout << "SCRIPT NAME: " << scriptName << std::endl;
-    std::cout << "LOCATION: " << location.path << std::endl;
     if (scriptName == location.cgiParams[".py"] && scriptName != "")
         return (scriptName);
     if (location.path == "/")
         path = location.root + scriptName;
     else
         path = location.root + location.path + scriptName;
-    std::cout << "PATHINFOOOOOO: " << path << std::endl;
     return (path);
 }
 
@@ -106,7 +159,7 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
     if (cgiPathWithArgs == "")
     {
         std::cerr << "error in getting cgi path" << std::endl;
-        res.setStatusCode(500); //?? is this the right error code?
+        res.setStatusCode(400); //?? is this the right error code?
         return;
     }
     else if (cgiPathWithArgs == "error")
@@ -173,7 +226,6 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
         {
             std::cout << "child exited with status: " << WEXITSTATUS(status) << std::endl;
         }
-        std::cout << "cgiOutput: " << cgiOutput.str() << std::endl;
         if (cgiOutput.str().empty())
         {
             res.setStatusCode(500);
