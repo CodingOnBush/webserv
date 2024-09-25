@@ -1,4 +1,5 @@
 #include "Response.hpp"
+#include "Webserv.hpp"
 
 Response::Response() {};
 
@@ -222,6 +223,100 @@ void Response::getBody(std::string uri, LocationBlock location)
 		this->statusCode = 404;
 }
 
+std::string parseFileName(std::string body)
+{
+	// std::string keyword = "name=\"save_as\"";
+    // size_t pos = body.find(keyword);
+    // if (pos == std::string::npos)
+    //     return "";
+    // pos += keyword.length();
+	size_t pos = 0;
+	for (int i = 0; i < 3; i++)
+	{
+		pos = body.find("\n", pos);
+		if (pos == std::string::npos)
+			return "";
+		pos += 1;
+	}
+    size_t endPos = body.find("\n", pos);
+    if (endPos == std::string::npos)
+        return "";
+    std::string fileName = body.substr(pos, endPos - pos);
+    if (!fileName.empty() && fileName[fileName.size() - 1] == '\r')
+        fileName.erase(fileName.size() - 1);
+    return fileName;
+}
+
+void Response::handleUploadFiles(Configuration &config, LocationBlock &location, Request &req)
+{
+	//on va verifier s'il existe bien une upload location dans le location block si non erreur (trouver quel numero d'erreur)
+	std::string body = req.getBody();
+	if (location.uploadLocation.empty())
+	{
+		this->statusCode = 405; //check si bon code
+		// setMimeType("html");
+		return;
+	}
+	DIR *dir = opendir(location.uploadLocation.c_str());
+	if (dir == NULL)
+	{
+		if (errno == ENOENT)
+		{
+			this->statusCode = 404;
+			return;
+		}
+		else if (errno == EACCES)
+		{
+			this->statusCode = 403;
+			return;
+		}
+		else
+		{
+			this->statusCode = 500;
+			return;
+		}
+	}
+	else
+	{
+		// std::string uri = req.getUri(); //www/upload/coucou
+		// std::cout << "URI: " << uri << std::endl;
+		// int pos = uri.find("upload");
+		// // std::string fileName = uri.substr(pos + 6);
+		// std::string body = req.getBody();
+		std::string fileName = parseFileName(body);
+		std::cout << "FILENAME: " << fileName << std::endl;
+		
+		// if (fileName != "")
+		// {
+		// 	if (fileName[0] == '/')
+		// 		fileName = fileName.substr(1);
+		// }
+		// if (fileName == "")
+		// {
+		// 	std::cout << "Extension: " << req.getHeaders()["Content-Type"] << std::endl;
+			
+		// 	std::stringstream ss;
+		// 	static int uploadNb = 0;
+		// 	std::cout << "UPLOADNB: " << uploadNb << std::endl;
+		// 	ss << "upload" << uploadNb << "." << req.getHeaders()["Content-Type"];
+		// 	fileName = ss.str();
+		// 	uploadNb++;
+		// }
+		std::ofstream file(fileName.c_str());
+		if (!file.is_open()) 
+		{
+			//remplacer par throw exception? 
+			std::cerr << "Error: Could not open file " << fileName << " for writing." << std::endl;
+			this->statusCode = 500;
+			return;
+		}
+		file << req.getBody();
+		file.close();
+		this->statusCode = 201;
+	}
+	closedir(dir);
+}
+
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
 	if (location.cgiParams.empty())
@@ -233,15 +328,16 @@ void Response::handleGetRequest(Configuration &config, LocationBlock location)
 	// handle cgi
 }
 
-void Response::handlePostRequest(Configuration &config, LocationBlock locaion)
+void Response::handlePostRequest(Configuration &config, LocationBlock location)
 {
-	if (locaion.cgiParams.empty())
+	if (location.cgiParams.empty())
 	{
 		//create code to handle upload files
+		handleUploadFiles(config, location, req);
 		return;
 	}
 	// handle cgi
-	handleCGI(config, locaion, req, *this);
+	handleCGI(config, location, req, *this);
 	return;
 }
 

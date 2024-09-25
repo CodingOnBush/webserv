@@ -35,15 +35,29 @@
             font-size: 0.9em;
             color: #777;
         }
+
+        
     </style>
 </head>
 <body>
-	<h1>File Upload</h1>
+    <h1>File Upload</h1>
     <form method="post" enctype="multipart/form-data">
-        <label for="file">File</label>
+        <label for="file" >Filename</label>
         <input id="save_as" name="save_as" type="text" />
         <input id="file" name="file" type="file" />
         <button>Upload</button>
     </form>
+
+    <script>
+        // Sélectionne les éléments input file et texte
+        const fileInput = document.getElementById('file');
+        const textInput = document.getElementById('save_as');
+
+        // Ajoute un écouteur d'événement pour détecter la sélection d'un fichier
+        fileInput.addEventListener('change', function() {
+            // Mets à jour l'input texte avec le nom du fichier sélectionné
+            textInput.value = fileInput.files[0].name;
+        });
+    </script>
 </body>
 </html>

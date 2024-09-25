@@ -38,6 +38,7 @@ public:
 	std::string getResponse(Configuration &config);
 	void setStatusLine();
 	void createResponseStr(LocationBlock location);
+	void handleUploadFiles(Configuration &config, LocationBlock &location, Request &req);
 	void handleGetRequest(Configuration &config, LocationBlock location);
 	void handlePostRequest(Configuration &config, LocationBlock location);
 	void handleDeleteRequest(Configuration &config, LocationBlock location);

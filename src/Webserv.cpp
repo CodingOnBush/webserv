@@ -81,7 +81,7 @@ static int	waitingForConnection(struct pollfd *fds, std::vector<int> ports)
 	std::cout << "Available ports: ";
 	for (std::vector<int>::iterator it = ports.begin(); it != ports.end(); it++)
 		std::cout << *it << " ";
-	std::cout << "status" << status << std::endl;
+	std::cout << std::endl;
 	while (status == 0)
 	{
 		std::cout 
