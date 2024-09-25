@@ -235,6 +235,7 @@ void Response::handleGetRequest(Configuration &config, LocationBlock location)
 
 void Response::handlePostRequest(Configuration &config, LocationBlock locaion)
 {
+	std::cout << "COUCOUCOUCOU" << std::endl;
 	if (locaion.cgiParams.empty())
 	{
 		//create code to handle upload files

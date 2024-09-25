@@ -26,4 +26,7 @@
 #define MAX_CLIENTS 32
 #define BUFFER_SIZE 1024
 
-void webserv(Configuration &config); // main function to run the server
+// void webserv(Configuration &config); // main function to run the server
+// void	runWebserver(Configuration &config);
+void initiateWebServer(const Configuration &config);
+void runWebserver(Configuration &config);
