@@ -1,21 +1,17 @@
 #include "../include/socket.hpp"
 
-struct sockaddr_in	*createSockAddr(int port)
+int	createSocket(const sockaddr *addr, socklen_t len)
 {
-	struct sockaddr_in	address;
-
-	std::memset((char *)&address, 0, sizeof(address));
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = htonl(INADDR_ANY);
-	address.sin_port = htons(port);
-	return (&address);
-}
-
-int	createSocket(int port, struct sockaddr_in *address)
-{
-	int 				optname = SO_REUSEADDR | SO_REUSEPORT;
-	int					sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	int 				on = 1;
+	int	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	int	optname = SO_REUSEADDR | SO_REUSEPORT;
+	/*
+	SO_REUSEADDR
+		Reuse of local addresses is supported.
+	SO_REUSEPORT
+		Permits multiple AF_INET or AF_INET6 sockets to 
+		be bound to an identical socket address.
+	*/
+	int	on = 1;
 
 	if (sockfd < 0)
 		return (perror("socket() failed"), -1);
@@ -23,9 +19,9 @@ int	createSocket(int port, struct sockaddr_in *address)
 		return (perror("setsockopt()"), close(sockfd), -1);
 	// if (fcntl(sockfd, F_SETFL, O_NONBLOCK) < 0)
 	// 	return (perror("fcntl()"), close(sockfd), -1);
-	if ((bind(sockfd, address, sizeof(address))) < 0)
+	if ((bind(sockfd, addr, len)) < 0)
 		return (perror("bind()"), close(sockfd), -1);
-	if (listen(sockfd, 3) < 0)
+	if (listen(sockfd, 42) < 0)
 		return (perror("listen()"), close(sockfd), -1);
 	return (sockfd);
 }

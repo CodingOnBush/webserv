@@ -1,14 +1,15 @@
 #ifndef SOCKET_HPP
-#define SOCKET_HPP
+# define SOCKET_HPP
 
-#include <fcntl.h>
-#include <unistd.h>
-#include <iostream>
-#include <arpa/inet.h>
-#include <cstring>
-#include <stdio.h>
-#include <sys/socket.h>
+# include <fcntl.h>
+# include <unistd.h>
+# include <iostream>
+# include <arpa/inet.h>
+# include <cstring>
+# include <stdio.h>
+# include <sys/socket.h>
+# include <sys/types.h>
 
-int	createSocket(int port);
+int		createSocket(const sockaddr *addr, socklen_t len);
 
 #endif
