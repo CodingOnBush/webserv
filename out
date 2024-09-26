@@ -1,0 +1,213 @@
+==1051783== Memcheck, a memory error detector
+==1051783== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==1051783== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==1051783== Command: ./webserv file.conf
+==1051783== Parent PID: 1040108
+==1051783== 
+==1051783== Invalid read of size 2
+==1051783==    at 0x431AB3: runWebserver(Configuration&) (Webserv.cpp:183)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783==  Address 0x4e16166 is 6 bytes inside a block of size 8 free'd
+==1051783==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x4342CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==1051783==    by 0x4342A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==1051783==    by 0x434257: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==1051783==    by 0x43691F: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==1051783==    by 0x43258C: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==1051783==    by 0x4313BE: acceptConnection(int) (Webserv.cpp:105)
+==1051783==    by 0x431A8F: runWebserver(Configuration&) (Webserv.cpp:179)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783==  Block was alloc'd at
+==1051783==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x436CAF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==1051783==    by 0x436C40: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==1051783==    by 0x436ADF: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==1051783==    by 0x43670B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==1051783==    by 0x43258C: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==1051783==    by 0x43113E: initiateWebServer(Configuration&) (Webserv.cpp:75)
+==1051783==    by 0x4264BC: main (main.cpp:14)
+==1051783== 
+==1051783== Invalid read of size 4
+==1051783==    at 0x41AB6A: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
+==1051783==    by 0x4376DB: std::_Rb_tree<int, std::pair<int const, Request>, std::_Select1st<std::pair<int const, Request> >, std::less<int>, std::allocator<std::pair<int const, Request> > >::_M_lower_bound(std::_Rb_tree_node<std::pair<int const, Request> >*, std::_Rb_tree_node_base*, int const&) (stl_tree.h:1953)
+==1051783==    by 0x43767D: std::_Rb_tree<int, std::pair<int const, Request>, std::_Select1st<std::pair<int const, Request> >, std::less<int>, std::allocator<std::pair<int const, Request> > >::lower_bound(int const&) (stl_tree.h:1272)
+==1051783==    by 0x4374FC: std::map<int, Request, std::less<int>, std::allocator<std::pair<int const, Request> > >::lower_bound(int const&) (stl_map.h:1307)
+==1051783==    by 0x432876: std::map<int, Request, std::less<int>, std::allocator<std::pair<int const, Request> > >::operator[](int const&) (stl_map.h:507)
+==1051783==    by 0x431B22: runWebserver(Configuration&) (Webserv.cpp:188)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783==  Address 0x4e16160 is 0 bytes inside a block of size 8 free'd
+==1051783==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x4342CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==1051783==    by 0x4342A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==1051783==    by 0x434257: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==1051783==    by 0x43691F: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==1051783==    by 0x43258C: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==1051783==    by 0x4313BE: acceptConnection(int) (Webserv.cpp:105)
+==1051783==    by 0x431A8F: runWebserver(Configuration&) (Webserv.cpp:179)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783==  Block was alloc'd at
+==1051783==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x436CAF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==1051783==    by 0x436C40: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==1051783==    by 0x436ADF: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==1051783==    by 0x43670B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==1051783==    by 0x43258C: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==1051783==    by 0x43113E: initiateWebServer(Configuration&) (Webserv.cpp:75)
+==1051783==    by 0x4264BC: main (main.cpp:14)
+==1051783== 
+==1051783== Invalid read of size 4
+==1051783==    at 0x41AB64: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
+==1051783==    by 0x4328DD: std::map<int, Request, std::less<int>, std::allocator<std::pair<int const, Request> > >::operator[](int const&) (stl_map.h:509)
+==1051783==    by 0x431B22: runWebserver(Configuration&) (Webserv.cpp:188)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783==  Address 0x4e16160 is 0 bytes inside a block of size 8 free'd
+==1051783==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x4342CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==1051783==    by 0x4342A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==1051783==    by 0x434257: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==1051783==    by 0x43691F: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==1051783==    by 0x43258C: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==1051783==    by 0x4313BE: acceptConnection(int) (Webserv.cpp:105)
+==1051783==    by 0x431A8F: runWebserver(Configuration&) (Webserv.cpp:179)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783==  Block was alloc'd at
+==1051783==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x436CAF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==1051783==    by 0x436C40: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==1051783==    by 0x436ADF: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==1051783==    by 0x43670B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==1051783==    by 0x43258C: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==1051783==    by 0x43113E: initiateWebServer(Configuration&) (Webserv.cpp:75)
+==1051783==    by 0x4264BC: main (main.cpp:14)
+==1051783== 
+==1051783== Invalid read of size 4
+==1051783==    at 0x43761C: std::pair<int const, Request>::pair(int const&, Request const&) (stl_pair.h:622)
+==1051783==    by 0x432936: std::map<int, Request, std::less<int>, std::allocator<std::pair<int const, Request> > >::operator[](int const&) (stl_map.h:515)
+==1051783==    by 0x431B22: runWebserver(Configuration&) (Webserv.cpp:188)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783==  Address 0x4e16160 is 0 bytes inside a block of size 8 free'd
+==1051783==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x4342CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==1051783==    by 0x4342A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==1051783==    by 0x434257: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==1051783==    by 0x43691F: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==1051783==    by 0x43258C: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==1051783==    by 0x4313BE: acceptConnection(int) (Webserv.cpp:105)
+==1051783==    by 0x431A8F: runWebserver(Configuration&) (Webserv.cpp:179)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783==  Block was alloc'd at
+==1051783==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x436CAF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==1051783==    by 0x436C40: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==1051783==    by 0x436ADF: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==1051783==    by 0x43670B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==1051783==    by 0x43258C: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==1051783==    by 0x43113E: initiateWebServer(Configuration&) (Webserv.cpp:75)
+==1051783==    by 0x4264BC: main (main.cpp:14)
+==1051783== 
+==1051783== Conditional jump or move depends on uninitialised value(s)
+==1051783==    at 0x431B2E: runWebserver(Configuration&) (Webserv.cpp:188)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783== 
+==1051783== 
+==1051783== HEAP SUMMARY:
+==1051783==     in use at exit: 182 bytes in 8 blocks
+==1051783==   total heap usage: 1,042 allocs, 1,034 frees, 215,146 bytes allocated
+==1051783== 
+==1051783== 13 bytes in 1 blocks are indirectly lost in loss record 1 of 8
+==1051783==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x4C4F58E: strdup (strdup.c:42)
+==1051783==    by 0x40BB5F: createEnv(Request&, LocationBlock&) (Cgi.cpp:95)
+==1051783==    by 0x40C667: handleCGI(Configuration&, LocationBlock&, Request&, Response&) (Cgi.cpp:131)
+==1051783==    by 0x42B23E: Response::handleGetRequest(Configuration&, LocationBlock) (Response.cpp:232)
+==1051783==    by 0x42BBA7: Response::getResponse[abi:cxx11](Configuration&) (Response.cpp:317)
+==1051783==    by 0x431723: sendResponse(int, Configuration&) (Webserv.cpp:136)
+==1051783==    by 0x431B02: runWebserver(Configuration&) (Webserv.cpp:186)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783== 
+==1051783== 14 bytes in 1 blocks are indirectly lost in loss record 2 of 8
+==1051783==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x4C4F58E: strdup (strdup.c:42)
+==1051783==    by 0x40B62E: createEnv(Request&, LocationBlock&) (Cgi.cpp:80)
+==1051783==    by 0x40C667: handleCGI(Configuration&, LocationBlock&, Request&, Response&) (Cgi.cpp:131)
+==1051783==    by 0x42B23E: Response::handleGetRequest(Configuration&, LocationBlock) (Response.cpp:232)
+==1051783==    by 0x42BBA7: Response::getResponse[abi:cxx11](Configuration&) (Response.cpp:317)
+==1051783==    by 0x431723: sendResponse(int, Configuration&) (Webserv.cpp:136)
+==1051783==    by 0x431B02: runWebserver(Configuration&) (Webserv.cpp:186)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783== 
+==1051783== 14 bytes in 1 blocks are indirectly lost in loss record 3 of 8
+==1051783==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x4C4F58E: strdup (strdup.c:42)
+==1051783==    by 0x40B955: createEnv(Request&, LocationBlock&) (Cgi.cpp:89)
+==1051783==    by 0x40C667: handleCGI(Configuration&, LocationBlock&, Request&, Response&) (Cgi.cpp:131)
+==1051783==    by 0x42B23E: Response::handleGetRequest(Configuration&, LocationBlock) (Response.cpp:232)
+==1051783==    by 0x42BBA7: Response::getResponse[abi:cxx11](Configuration&) (Response.cpp:317)
+==1051783==    by 0x431723: sendResponse(int, Configuration&) (Webserv.cpp:136)
+==1051783==    by 0x431B02: runWebserver(Configuration&) (Webserv.cpp:186)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783== 
+==1051783== 14 bytes in 1 blocks are indirectly lost in loss record 4 of 8
+==1051783==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x4C4F58E: strdup (strdup.c:42)
+==1051783==    by 0x40BA4A: createEnv(Request&, LocationBlock&) (Cgi.cpp:92)
+==1051783==    by 0x40C667: handleCGI(Configuration&, LocationBlock&, Request&, Response&) (Cgi.cpp:131)
+==1051783==    by 0x42B23E: Response::handleGetRequest(Configuration&, LocationBlock) (Response.cpp:232)
+==1051783==    by 0x42BBA7: Response::getResponse[abi:cxx11](Configuration&) (Response.cpp:317)
+==1051783==    by 0x431723: sendResponse(int, Configuration&) (Webserv.cpp:136)
+==1051783==    by 0x431B02: runWebserver(Configuration&) (Webserv.cpp:186)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783== 
+==1051783== 17 bytes in 1 blocks are indirectly lost in loss record 5 of 8
+==1051783==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x4C4F58E: strdup (strdup.c:42)
+==1051783==    by 0x40B4A2: createEnv(Request&, LocationBlock&) (Cgi.cpp:77)
+==1051783==    by 0x40C667: handleCGI(Configuration&, LocationBlock&, Request&, Response&) (Cgi.cpp:131)
+==1051783==    by 0x42B23E: Response::handleGetRequest(Configuration&, LocationBlock) (Response.cpp:232)
+==1051783==    by 0x42BBA7: Response::getResponse[abi:cxx11](Configuration&) (Response.cpp:317)
+==1051783==    by 0x431723: sendResponse(int, Configuration&) (Webserv.cpp:136)
+==1051783==    by 0x431B02: runWebserver(Configuration&) (Webserv.cpp:186)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783== 
+==1051783== 17 bytes in 1 blocks are indirectly lost in loss record 6 of 8
+==1051783==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x4C4F58E: strdup (strdup.c:42)
+==1051783==    by 0x40B837: createEnv(Request&, LocationBlock&) (Cgi.cpp:86)
+==1051783==    by 0x40C667: handleCGI(Configuration&, LocationBlock&, Request&, Response&) (Cgi.cpp:131)
+==1051783==    by 0x42B23E: Response::handleGetRequest(Configuration&, LocationBlock) (Response.cpp:232)
+==1051783==    by 0x42BBA7: Response::getResponse[abi:cxx11](Configuration&) (Response.cpp:317)
+==1051783==    by 0x431723: sendResponse(int, Configuration&) (Webserv.cpp:136)
+==1051783==    by 0x431B02: runWebserver(Configuration&) (Webserv.cpp:186)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783== 
+==1051783== 29 bytes in 1 blocks are indirectly lost in loss record 7 of 8
+==1051783==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x4C4F58E: strdup (strdup.c:42)
+==1051783==    by 0x40B72A: createEnv(Request&, LocationBlock&) (Cgi.cpp:83)
+==1051783==    by 0x40C667: handleCGI(Configuration&, LocationBlock&, Request&, Response&) (Cgi.cpp:131)
+==1051783==    by 0x42B23E: Response::handleGetRequest(Configuration&, LocationBlock) (Response.cpp:232)
+==1051783==    by 0x42BBA7: Response::getResponse[abi:cxx11](Configuration&) (Response.cpp:317)
+==1051783==    by 0x431723: sendResponse(int, Configuration&) (Webserv.cpp:136)
+==1051783==    by 0x431B02: runWebserver(Configuration&) (Webserv.cpp:186)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783== 
+==1051783== 182 (64 direct, 118 indirect) bytes in 1 blocks are definitely lost in loss record 8 of 8
+==1051783==    at 0x484A2F3: operator new[](unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==1051783==    by 0x40AC97: createEnv(Request&, LocationBlock&) (Cgi.cpp:31)
+==1051783==    by 0x40C667: handleCGI(Configuration&, LocationBlock&, Request&, Response&) (Cgi.cpp:131)
+==1051783==    by 0x42B23E: Response::handleGetRequest(Configuration&, LocationBlock) (Response.cpp:232)
+==1051783==    by 0x42BBA7: Response::getResponse[abi:cxx11](Configuration&) (Response.cpp:317)
+==1051783==    by 0x431723: sendResponse(int, Configuration&) (Webserv.cpp:136)
+==1051783==    by 0x431B02: runWebserver(Configuration&) (Webserv.cpp:186)
+==1051783==    by 0x4264CD: main (main.cpp:15)
+==1051783== 
+==1051783== LEAK SUMMARY:
+==1051783==    definitely lost: 64 bytes in 1 blocks
+==1051783==    indirectly lost: 118 bytes in 7 blocks
+==1051783==      possibly lost: 0 bytes in 0 blocks
+==1051783==    still reachable: 0 bytes in 0 blocks
+==1051783==         suppressed: 0 bytes in 0 blocks
+==1051783== 
+==1051783== Use --track-origins=yes to see where uninitialised values come from
+==1051783== For lists of detected and suppressed errors, rerun with: -s
+==1051783== ERROR SUMMARY: 6 errors from 6 contexts (suppressed: 0 from 0)

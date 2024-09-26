@@ -378,6 +378,7 @@ void Response::methodCheck(LocationBlock location)
 
 void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 {
+	std::cout << "On passe par laaaaa" << std::endl;
 	int maxBodySize = config.getBodySize(location.clientMaxBodySize);
 	if (maxBodySize == 0)
 		return;

@@ -2,39 +2,22 @@
 
 int	main(int ac, char **av)
 {
-	if (ac > 2)
-	{
-		std::cerr << "Usage: ./webserv <config_file>" << std::endl;
-		return (1);
-	}
+	std::string	fileName = "webserv.conf";
+
 	if (ac == 2)
+		fileName = av[1];
+	try
 	{
-		try
-		{
-			Configuration config(av[1]);
-			// config.printConfig();
-			webserv(config);
-		}
-		catch (std::exception &e)
-		{
-			std::cerr << "Error : " << e.what() << std::endl;
-			return (1);
-		}
+		Configuration config(fileName);
+		// config.printConfig();
+		// runServer(config);
+		initiateWebServer(config);
+		runWebserver(config);
 	}
-	else
+	catch (std::exception &e)
 	{
-		try
-		{
-			Configuration config;
-			// config.printConfig();
-			webserv(config);
-		}
-		catch (std::exception &e)
-		{
-			std::cerr << "Error: " << e.what() << std::endl;
-			return (1);
-		}
-		return (0);
+		std::cerr << "Error : " << e.what() << std::endl;
+		return (1);
 	}
 	return (0);
 }

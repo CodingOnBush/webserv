@@ -1,10 +1,9 @@
-#ifndef WEBSERV_HPP
-#define WEBSERV_HPP
+#ifndef RUNSERVER_HPP
+#define RUNSERVER_HPP
 
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Configuration.hpp"
-#include "runServer.hpp"
 
 #include <utility>
 #include <algorithm>
@@ -28,11 +27,12 @@
 #define MAX_CLIENTS 32
 #define BUFFER_SIZE 1024
 
-extern int uploadNb;
+struct HostPort
+{
+	std::string	host;
+	int			port;
+};
 
-void webserv(Configuration &config); // main function to run the server
+void	runServer(Configuration &config);
 
-void initiateWebServer(Configuration &config);
-void runWebserver(Configuration &config);
-
-#endif // WEBSERV_HPP
+#endif // RUNSERVER_HPP

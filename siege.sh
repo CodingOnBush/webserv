@@ -1,6 +1,8 @@
-for i in {1..20000}
+for i in {1..200}
 do
-  curl -X GET localhost:8080/logo.png?test=$i -i > /dev/null 2> /dev/null &
-  # curl localhost:8081 > /dev/null 2> /dev/null &
+  curl http://localhost:8082/cgi-bin/test.py > /dev/null 2> /dev/null &
+  curl http://localhost:8082/cgi-bin/test.py > /dev/null 2> /dev/null &
+  curl http://localhost:8082/cgi-bin/test.py > /dev/null 2> /dev/null &
+  curl http://localhost:8082/cgi-bin/test.py > /dev/null 2> /dev/null &
   echo $i
 done
