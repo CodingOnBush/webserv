@@ -1,6 +1,8 @@
 #include "Webserv.hpp"
 #include "Response.hpp"
 
+int uploadNb = 0;
+
 std::string intToString(int value)
 {
 	std::stringstream ss;
@@ -261,3 +263,61 @@ std::string setPath(LocationBlock location, std::string uri)
 	}
 	return path;
 }
+
+static int checkIfFileExists(const std::string &dirPath, int uploadNb) 
+{
+    DIR *dir = opendir(dirPath.c_str());
+    if (dir == NULL) 
+	{
+        std::cerr << "Error: Could not open directory " << dirPath << std::endl;
+        return -1;
+    }
+    std::ostringstream oss;
+    oss << "default_" << uploadNb;
+    std::string targetFileName = oss.str();
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) 
+	{
+        if (entry->d_name == targetFileName) 
+		{
+            closedir(dir);
+            return 0; //true
+        }
+    }
+    closedir(dir);
+    return 1; //false
+}
+
+std::string setDefaultFileName(std::string uploadDirPath)
+{
+	std::string fileName;
+	DIR *dir = opendir(uploadDirPath.c_str());
+	if (dir == NULL)
+	{
+		return "error";
+	}
+	dirent *entry;
+	int nbDefaultFiles = 0;
+	if (uploadNb == 0)
+	{
+		while ((entry = readdir(dir)) != NULL)
+		{
+			if (std::string(entry->d_name).find("default_") != std::string::npos)
+			{
+				nbDefaultFiles++;
+			}
+		}
+		uploadNb = nbDefaultFiles + 1;
+	}
+	std::ostringstream oss;
+	oss << "default_" << uploadNb;
+	fileName = oss.str();
+	if (checkIfFileExists(uploadDirPath, uploadNb) == 0)
+	{
+		fileName = fileName + "_cpy";
+	}
+	uploadNb++;
+	closedir(dir);
+	return fileName;
+}
+

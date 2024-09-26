@@ -26,5 +26,6 @@
 #define MAX_CLIENTS 32
 #define BUFFER_SIZE 1024
 
+extern int uploadNb;
 
 void webserv(Configuration &config); // main function to run the server

@@ -278,30 +278,28 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 	}
 	else
 	{
-		// std::string uri = req.getUri(); //www/upload/coucou
-		// std::cout << "URI: " << uri << std::endl;
-		// int pos = uri.find("upload");
-		// // std::string fileName = uri.substr(pos + 6);
-		// std::string body = req.getBody();
 		std::string fileName = parseFileName(body);
 		std::cout << "FILENAME: " << fileName << std::endl;
 		
-		// if (fileName != "")
-		// {
-		// 	if (fileName[0] == '/')
-		// 		fileName = fileName.substr(1);
-		// }
-		// if (fileName == "")
-		// {
-		// 	std::cout << "Extension: " << req.getHeaders()["Content-Type"] << std::endl;
-			
-		// 	std::stringstream ss;
-		// 	static int uploadNb = 0;
-		// 	std::cout << "UPLOADNB: " << uploadNb << std::endl;
-		// 	ss << "upload" << uploadNb << "." << req.getHeaders()["Content-Type"];
-		// 	fileName = ss.str();
-		// 	uploadNb++;
-		// }
+		if (fileName != "")
+		{
+			if (fileName[0] == '/')
+				fileName = fileName.substr(1);
+		}
+		if (fileName == "")
+		{
+			fileName = setDefaultFileName(location.uploadLocation);
+			if (fileName == "error")
+			{
+				this->statusCode = 500;
+				return;
+			}
+		}
+		if (chdir(location.uploadLocation.c_str()) == -1)
+		{
+			this->statusCode = 500;
+			return;
+		}
 		std::ofstream file(fileName.c_str());
 		if (!file.is_open()) 
 		{
@@ -310,6 +308,7 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 			this->statusCode = 500;
 			return;
 		}
+		//here we don't want to put the entire request body in the file just the body part of the body
 		file << req.getBody();
 		file.close();
 		this->statusCode = 201;
