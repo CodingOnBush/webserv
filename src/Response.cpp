@@ -223,28 +223,41 @@ void Response::getBody(std::string uri, LocationBlock location)
 		this->statusCode = 404;
 }
 
-std::string parseFileName(std::string body)
+std::string parseFileName(std::string body, std::string keyword)
 {
-	// std::string keyword = "name=\"save_as\"";
-    // size_t pos = body.find(keyword);
-    // if (pos == std::string::npos)
-    //     return "";
-    // pos += keyword.length();
-	size_t pos = 0;
-	for (int i = 0; i < 3; i++)
+	std::cout << "BODYYYYY: " << body << std::endl;
+    size_t pos = body.find(keyword);
+    if (pos == std::string::npos)
 	{
-		pos = body.find("\n", pos);
-		if (pos == std::string::npos)
-			return "";
-		pos += 1;
-	}
-    size_t endPos = body.find("\n", pos);
-    if (endPos == std::string::npos)
+		std::cout << "keyword not found" << std::endl;
         return "";
-    std::string fileName = body.substr(pos, endPos - pos);
-    if (!fileName.empty() && fileName[fileName.size() - 1] == '\r')
-        fileName.erase(fileName.size() - 1);
-    return fileName;
+	}
+    pos += keyword.length();
+	size_t endPos = body.find("\r\n", pos);
+	if (endPos == std::string::npos)
+	{
+		std::cout << "endPos not found" << std::endl;
+		return "";
+	}
+	std::string fileName = body.substr(pos, endPos - pos);
+	if (!fileName.empty() && fileName[fileName.size() - 1] == '\r')
+		fileName.erase(fileName.size() - 1);
+	return fileName;
+	// size_t pos = 0;
+	// for (int i = 0; i < 3; i++)
+	// {
+	// 	pos = body.find("\n", pos);
+	// 	if (pos == std::string::npos)
+	// 		return "";
+	// 	pos += 1;
+	// }
+    // size_t endPos = body.find("\n", pos);
+    // if (endPos == std::string::npos)
+    //     return "";
+    // std::string fileName = body.substr(pos, endPos - pos);
+    // if (!fileName.empty() && fileName[fileName.size() - 1] == '\r')
+    //     fileName.erase(fileName.size() - 1);
+    // return fileName;
 }
 
 void Response::handleUploadFiles(Configuration &config, LocationBlock &location, Request &req)
@@ -277,7 +290,18 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 	}
 	else
 	{
-		std::string fileName = parseFileName(body);		
+		std::string fileName = "";
+		std::string contentType = getContentType(req.getHeaders()["Content-Type"]);
+		if (contentType == "multipart/form-data")
+		{
+			std::string boundary = body.substr(0, body.find("\r\n"));
+			std::string fileBody = getFileBody(body, boundary);
+			std::cout << "fileBody: " << fileBody << std::endl;
+			fileName = parseFileName(fileBody, "name=\"save_as\"");		
+			if (fileName == "")
+				fileName = parseFileName(body, "filename=\"");
+		}
+		std::cout << "fileName: " << fileName << std::endl;
 		if (fileName != "")
 		{
 			if (fileName[0] == '/')

@@ -67,4 +67,7 @@ std::string generateDirectoryListingHTML(const std::string& directoryPath, const
 std::string setFileCopyName(std::string givenName);
 std::string setDefaultFileName(std::string uploadDirPath);
 int checkIfFileExists(const std::string &dirPath, int uploadNb, std::string fileName);
+std::string getContentType(const std::string &contentType);
+std::string getFileBody(std::string body, std::string &boundary);
 std::string getFileContent(std::string body, Request &req);
+int getNbBoundaries(std::string body, std::string boundary);
