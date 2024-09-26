@@ -126,9 +126,23 @@ std::string getCGIPath(char **env, LocationBlock &location)
     return (path);
 }
 
+static void freeEnv(char **env)
+{
+    for (int i = 0; env[i]; i++)
+    {
+        free(env[i]);
+    }
+    delete[] env;
+}
+
 void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Response &res)
 {
     char **env = createEnv(req, location);
+    if (!env)
+    {
+        res.setStatusCode(500);
+        return;
+    }
     std::stringstream cgiOutput;
     std::string cgiPathWithArgs = getCGIPath(env, location);
     struct stat st;
@@ -138,11 +152,13 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
     {
         std::cerr << "error in getting cgi path" << std::endl;
         res.setStatusCode(400); //?? is this the right error code?
+        freeEnv(env);
         return;
     }
     else if (cgiPathWithArgs == "error")
     {
         res.setStatusCode(404);
+        freeEnv(env);
         return ;
     }
     std::cout << "CGI PATH: " << cgiPathWithArgs << std::endl;
@@ -150,12 +166,14 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
     {
         std::cerr << "file does not exist" << std::endl;
         res.setStatusCode(404);
+        freeEnv(env);
         return;
     }
     else if (isDirectory(cgiPathWithArgs))
     {
         std::cerr << "file is a directory" << std::endl;
         res.setStatusCode(404);
+        freeEnv(env);
         return;
     }
     else
@@ -164,6 +182,7 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
         {
             std::cerr << "file is not executable" << std::endl;
             res.setStatusCode(403);
+            freeEnv(env);
             return;
         }
     }
@@ -172,6 +191,7 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
     {
         std::cerr << "pipe failed" << std::endl;
         res.setStatusCode(500);
+        freeEnv(env);
         return;
     }
     int pid = fork();
@@ -179,6 +199,7 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
     {
         std::cerr << "fork failed" << std::endl;
         res.setStatusCode(500);
+        freeEnv(env);
         return;
     }
     else if (pid == 0)
@@ -189,6 +210,7 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
         char *args[] = {strdup(cgiPathWithArgs.c_str()), NULL};
         execve(cgiPathWithArgs.c_str(), args, env);
         perror("execve failed");
+        freeEnv(env);
         exit(1);
     }
     else
@@ -212,11 +234,13 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
         if (cgiOutput.str().empty())
         {
             res.setStatusCode(500);
+            freeEnv(env);
             return;
         }
         else if (WEXITSTATUS(status) != 0)
         {
             res.setStatusCode(500);
+            freeEnv(env);
             return;
         }
         //add check here to verify that the file (cgiOutput) is finite (no infinite loops in py script)
@@ -234,10 +258,5 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
             res.setStatusCode(200);
         }
     }
-    //why do we need to free the env variables? Does delete[] env not do that?
-    for (int i = 0; env[i]; i++)
-    {
-        free(env[i]);
-    }
-    delete[] env;
+    freeEnv(env);
 }

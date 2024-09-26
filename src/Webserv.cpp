@@ -74,6 +74,8 @@ void	initiateWebServer(Configuration &config)
 		struct pollfd pfd = (struct pollfd){*it, POLLIN | POLLOUT, 0};
 		pollFdsList.push_back(pfd);
 	}
+	requests.clear();
+	responses.clear();
 }
 
 void	acceptConnection(int fd)
@@ -154,6 +156,15 @@ static void handleSIGINT(int sig)
 	(void)sig;
 	std::cout << BLUE << "\nSIGINT received, stopping server" << SET << std::endl;
 	running = false;
+}
+
+static void	printRequests(std::map<int, Request> &requests)
+{
+	std::cout << "Requests:" << std::endl;
+	for (std::map<int, Request>::iterator it = requests.begin(); it != requests.end(); it++)
+	{
+		std::cout << "fd: " << it->first << " state: " << it->second.getRequestState() << std::endl;
+	}
 }
 
 void runWebserver(Configuration &config)
