@@ -254,7 +254,6 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 	if (location.uploadLocation.empty())
 	{
 		this->statusCode = 405; //check si bon code
-		// setMimeType("html");
 		return;
 	}
 	DIR *dir = opendir(location.uploadLocation.c_str());
@@ -278,14 +277,13 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 	}
 	else
 	{
-		std::string fileName = parseFileName(body);
-		std::cout << "FILENAME: " << fileName << std::endl;
-		
+		std::string fileName = parseFileName(body);		
 		if (fileName != "")
 		{
 			if (fileName[0] == '/')
 				fileName = fileName.substr(1);
 		}
+		
 		if (fileName == "")
 		{
 			fileName = setDefaultFileName(location.uploadLocation);
@@ -295,6 +293,13 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 				return;
 			}
 		}
+		
+		if (checkIfFileExists(location.uploadLocation, uploadNb, fileName) == 0)
+		{
+			std::string fileCopy = setFileCopyName(fileName);
+			fileName = fileCopy;
+		}
+		
 		if (chdir(location.uploadLocation.c_str()) == -1)
 		{
 			this->statusCode = 500;
@@ -308,8 +313,8 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 			this->statusCode = 500;
 			return;
 		}
-		//here we don't want to put the entire request body in the file just the body part of the body
-		file << req.getBody();
+		std::string fileContent = getFileContent(req.getBody(), req);
+		file << fileContent;
 		file.close();
 		this->statusCode = 201;
 	}

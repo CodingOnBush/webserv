@@ -64,4 +64,7 @@ std::string getFilePath(std::string path, std::string uri, std::string fileName)
 bool hasDefaultFile(const std::string& directoryPath, std::string fileName, LocationBlock location);
 std::string setPath(LocationBlock location, std::string uri);
 std::string generateDirectoryListingHTML(const std::string& directoryPath, const std::string &rootPath);
+std::string setFileCopyName(std::string givenName);
 std::string setDefaultFileName(std::string uploadDirPath);
+int checkIfFileExists(const std::string &dirPath, int uploadNb, std::string fileName);
+std::string getFileContent(std::string body, Request &req);

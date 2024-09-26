@@ -264,7 +264,7 @@ std::string setPath(LocationBlock location, std::string uri)
 	return path;
 }
 
-static int checkIfFileExists(const std::string &dirPath, int uploadNb) 
+int checkIfFileExists(const std::string &dirPath, int uploadNb, std::string targetFileName) 
 {
     DIR *dir = opendir(dirPath.c_str());
     if (dir == NULL) 
@@ -272,9 +272,12 @@ static int checkIfFileExists(const std::string &dirPath, int uploadNb)
         std::cerr << "Error: Could not open directory " << dirPath << std::endl;
         return -1;
     }
-    std::ostringstream oss;
-    oss << "default_" << uploadNb;
-    std::string targetFileName = oss.str();
+	if (targetFileName == "")
+	{
+		std::ostringstream oss;
+		oss << "default_" << uploadNb;
+		targetFileName = oss.str();
+	}
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) 
 	{
@@ -288,14 +291,27 @@ static int checkIfFileExists(const std::string &dirPath, int uploadNb)
     return 1; //false
 }
 
+std::string setFileCopyName(std::string givenName)
+{
+	std::string fileName;
+	size_t pos = givenName.find_last_of(".");
+	if (pos != std::string::npos)
+	{
+		std::string name = givenName.substr(0, pos);
+		std::string extension = givenName.substr(pos);
+		fileName = name + "_cpy" + extension;
+	}
+	else
+		fileName = givenName + "_cpy";
+	return fileName;
+}
+
 std::string setDefaultFileName(std::string uploadDirPath)
 {
 	std::string fileName;
 	DIR *dir = opendir(uploadDirPath.c_str());
 	if (dir == NULL)
-	{
 		return "error";
-	}
 	dirent *entry;
 	int nbDefaultFiles = 0;
 	if (uploadNb == 0)
@@ -303,21 +319,63 @@ std::string setDefaultFileName(std::string uploadDirPath)
 		while ((entry = readdir(dir)) != NULL)
 		{
 			if (std::string(entry->d_name).find("default_") != std::string::npos)
-			{
 				nbDefaultFiles++;
-			}
 		}
 		uploadNb = nbDefaultFiles + 1;
 	}
 	std::ostringstream oss;
 	oss << "default_" << uploadNb;
 	fileName = oss.str();
-	if (checkIfFileExists(uploadDirPath, uploadNb) == 0)
-	{
-		fileName = fileName + "_cpy";
-	}
+	if (checkIfFileExists(uploadDirPath, uploadNb, "") == 0)
+		fileName = setFileCopyName(fileName);
 	uploadNb++;
 	closedir(dir);
 	return fileName;
 }
 
+static std::string getContentBetweenBoundaries(std::string body, std::string boundary)
+{
+	size_t firstBoundaryPos = body.find(boundary);
+    if (firstBoundaryPos == std::string::npos)
+        return "";
+    size_t secondBoundaryPos = body.find(boundary, firstBoundaryPos + boundary.length());
+    if (secondBoundaryPos == std::string::npos)
+        return "";
+	size_t lastBoundaryPos = body.find(boundary, secondBoundaryPos + boundary.length());
+	if (lastBoundaryPos == std::string::npos)
+		return "";
+    size_t contentStartPos = secondBoundaryPos + boundary.length() + 2; // +2 to skip \r\n
+    size_t contentEndPos = lastBoundaryPos - 2; // -2 to skip \r\n
+    std::string content = body.substr(contentStartPos, contentEndPos - contentStartPos);
+    return content;
+}
+
+static std::string getContentType(const std::string &contentType)
+{
+    size_t pos = contentType.find(";");
+    if (pos == std::string::npos)
+        return "";
+
+    std::string type = contentType.substr(0, pos);
+    return type;
+}
+
+std::string getFileContent(std::string body, Request &req)
+{
+	std::string contentType = getContentType(req.getHeaders()["Content-Type"]);
+	if (contentType != "multipart/form-data")
+		return body;
+
+	std::string boundary = body.substr(0, body.find("\r\n"));
+	std::string fileBody = getContentBetweenBoundaries(body, boundary);
+	size_t contentStartPos = fileBody.find("\r\n\r\n") + 4;
+	if (contentStartPos == std::string::npos)
+		return "";
+
+	size_t contentEndPos = fileBody.find("\r\n") - 2;
+	std::string fileContent = fileBody.substr(contentStartPos, contentEndPos - contentStartPos);
+	if (fileBody.empty())
+		return "";
+
+	return fileContent;
+}
