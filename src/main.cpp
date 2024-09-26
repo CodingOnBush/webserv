@@ -10,7 +10,7 @@ int	main(int ac, char **av)
 	{
 		Configuration config(fileName);
 		// config.printConfig();
-		// runWebserver(config);
+		// runServer(config);
 		initiateWebServer(config);
 		runWebserver(config);
 	}
