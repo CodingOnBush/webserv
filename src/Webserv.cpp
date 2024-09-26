@@ -6,15 +6,15 @@ std::vector<int>							listenFds;
 std::vector<struct pollfd>					pollFdsList;
 std::map<int, Request>						requests;
 std::map<int, Response> 					responses;
+bool										running = true;
 
 void rmFromPollWatchlist(int fd)
 {
-	for (size_t i = 0; i < pollFdsList.size(); i++)
+	for (std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
 	{
-		if (pollFdsList[i].fd == fd)
+		if (it->fd == fd)
 		{
-			close(fd);
-			pollFdsList.erase(pollFdsList.begin() + i);
+			pollFdsList.erase(it);
 			break;
 		}
 	}
@@ -99,7 +99,9 @@ void	acceptConnection(int fd)
 		perror("setsockopt");
 		return;
 	}
-	pfd = (struct pollfd){newConnection, POLLIN | POLLOUT, 0};
+	pfd.fd = newConnection;
+	pfd.events = POLLIN | POLLOUT;
+	pfd.revents = 0;
 	pollFdsList.push_back(pfd);
 	serversToFd[newConnection] = serversToFd[fd];
 	requests[newConnection] = Request();
@@ -147,17 +149,22 @@ int findCount(int fd)
 	return count;
 }
 
+static void handleSIGINT(int sig)
+{
+	(void)sig;
+	running = false;
+}
+
 void runWebserver(Configuration &config)
 {
 	int timeout = 1000;
 
-	while (1)
+	signal(SIGINT, handleSIGINT);
+	while (running)
 	{
 		int nfds = poll(&pollFdsList[0], pollFdsList.size(), timeout);
 		if (nfds < 0 && errno != EINTR)
 			break;
-		if (nfds < 0)
-			continue;
 		if (nfds == 0)
 			std::cout << "Waiting for connection" << std::endl;
 		int j = 0;
