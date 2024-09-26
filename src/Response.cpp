@@ -239,7 +239,7 @@ std::string parseFileName(std::string body, std::string keyword)
 		std::cout << "endPos not found" << std::endl;
 		return "";
 	}
-	std::string fileName = body.substr(pos, endPos - pos);
+	std::string fileName = body.substr(pos, endPos - 1 - pos);
 	if (!fileName.empty() && fileName[fileName.size() - 1] == '\r')
 		fileName.erase(fileName.size() - 1);
 	return fileName;
