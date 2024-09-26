@@ -152,12 +152,15 @@ int findCount(int fd)
 static void handleSIGINT(int sig)
 {
 	(void)sig;
+	std::cout << BLUE << "\nSIGINT received, stopping server" << SET << std::endl;
 	running = false;
 }
 
 void runWebserver(Configuration &config)
 {
-	int timeout = 1000;
+	int			timeout = 500;
+	std::string	wait[] = {"⠋", "⠙", "⠸", "⠴", "⠦", "⠇"};
+	int			n = 0;
 
 	signal(SIGINT, handleSIGINT);
 	while (running)
@@ -166,7 +169,11 @@ void runWebserver(Configuration &config)
 		if (nfds < 0 && errno != EINTR)
 			break;
 		if (nfds == 0)
-			std::cout << "Waiting for connection" << std::endl;
+		{
+			std::cout << GREEN << "Waiting for connection " << wait[n++ % 6] << SET << "\r" << std::flush;
+			n++;
+		}
+		
 		int j = 0;
 		for (std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end() && j < nfds; it++)
 		{
@@ -197,5 +204,5 @@ void runWebserver(Configuration &config)
 	}
 	for(std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
 		close(it->first);
-	std::cout << "Server stopped" << std::endl;
+	// std::cout << "Server stopped" << std::endl;
 }

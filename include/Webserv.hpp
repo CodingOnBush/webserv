@@ -28,6 +28,10 @@
 #define MAX_CLIENTS 32
 #define BUFFER_SIZE 1024
 
+#define GREEN "\033[32m"
+#define BLUE "\033[34m"
+#define SET "\033[0m"
+
 extern int uploadNb;
 
 void webserv(Configuration &config); // main function to run the server
