@@ -386,29 +386,27 @@ std::string getFileBody(std::string body, std::string &boundary)
 	int nbBoundaries = getNbBoundaries(body, boundary);
 	if (nbBoundaries < 2)
 		return "";
-	else if (nbBoundaries == 2)
-	{
-		size_t firstBoundaryPos = body.find(boundary);
-		if (firstBoundaryPos == std::string::npos)
-			return "";
-		size_t secondBoundaryPos = body.find(boundary, firstBoundaryPos + boundary.length());
-		if (secondBoundaryPos == std::string::npos)
-			return "";
-		fileBody = getContentBetweenBoundaries(body, firstBoundaryPos, secondBoundaryPos);
-	}
-	else
-	{
-		size_t firstBoundaryPos = body.find(boundary);
-		if (firstBoundaryPos == std::string::npos)
-			return "";
-		size_t secondBoundaryPos = body.find(boundary, firstBoundaryPos + boundary.length());
-		if (secondBoundaryPos == std::string::npos)
-			return "";
-		size_t lastBoundaryPos = body.find(boundary, secondBoundaryPos + boundary.length());
-		if (lastBoundaryPos == std::string::npos)
-			return "";
-		fileBody = getContentBetweenBoundaries(body, secondBoundaryPos, lastBoundaryPos);
-	}
+	
+	size_t firstBoundaryPos = body.find(boundary);
+	if (firstBoundaryPos == std::string::npos)
+		return "";
+	size_t secondBoundaryPos = body.find(boundary, firstBoundaryPos + boundary.length());
+	if (secondBoundaryPos == std::string::npos)
+		return "";
+	fileBody = getContentBetweenBoundaries(body, firstBoundaryPos, secondBoundaryPos);
+	// else
+	// {
+	// 	size_t firstBoundaryPos = body.find(boundary);
+	// 	if (firstBoundaryPos == std::string::npos)
+	// 		return "";
+	// 	size_t secondBoundaryPos = body.find(boundary, firstBoundaryPos + boundary.length());
+	// 	if (secondBoundaryPos == std::string::npos)
+	// 		return "";
+	// 	size_t lastBoundaryPos = body.find(boundary, secondBoundaryPos + boundary.length());
+	// 	if (lastBoundaryPos == std::string::npos)
+	// 		return "";
+	// 	fileBody = getContentBetweenBoundaries(body, secondBoundaryPos, lastBoundaryPos);
+	// }
 	return fileBody;
 }
 
@@ -421,11 +419,9 @@ std::string getFileContent(std::string body, Request &req)
 	std::string boundary = body.substr(0, body.find("\r\n"));
 	if (boundary.empty())
 		return "";
-	std::cout << "boundary: " << boundary << std::endl;
 	std::string fileBody = getFileBody(body, boundary);
 	if (fileBody.empty())
 		return "";
-	std::cout << "fileBody: " << fileBody << std::endl;
 	size_t contentStartPos = fileBody.find("\r\n\r\n") + 4;
 	if (contentStartPos == std::string::npos)
 		return "";
