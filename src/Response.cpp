@@ -69,7 +69,9 @@ void Response::createResponseStr(LocationBlock location)
 	setHeaders(location);
 	ss << statusLine << headers << body << LF;
 	response = ss.str();
+	std::cout << "THE RESPONSE WE WANNA SEEEE" << response << std::endl;
 }
+
 void Response::setMimeType(std::string const &fileName)
 {
 	if (fileName == "html")
@@ -287,7 +289,6 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 			if (fileName[0] == '/')
 				fileName = fileName.substr(1);
 		}
-		
 		if (fileName == "")
 		{
 			fileName = setDefaultFileName(location.uploadLocation);
@@ -297,13 +298,11 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 				return;
 			}
 		}
-		
 		if (checkIfFileExists(location.uploadLocation, uploadNb, fileName) == 0)
 		{
 			std::string fileCopy = setFileCopyName(fileName);
 			fileName = fileCopy;
 		}
-		
 		if (chdir(location.uploadLocation.c_str()) == -1)
 		{
 			this->statusCode = 500;
@@ -327,6 +326,8 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
+	std::string uri = req.getUri();
+	std::cout << "URI WE WANNA SEEE: \n" << uri << std::endl;
 	if (location.cgiParams.empty())
 	{
 		getBody(req.getUri(), location);
@@ -340,14 +341,12 @@ void Response::handlePostRequest(Configuration &config, LocationBlock location)
 {
 	if (location.cgiParams.empty())
 	{
-		//create code to handle upload files
 		handleUploadFiles(config, location, req);
-		// body = "<p style=color: green; font-weight: bold;>Upload was successful!</p>";
-		// body = "<pstyle=\"color: green; font-weight: bold; text-align: center;\">Upload was successful!</p>";
-		body = "<div style=\"display: flex; justify-content: center; align-items: center; height: 100vh; color: green; font-weight: bold;\">Upload was successful!</div>";
+		// body = "<div style=\"display: flex; justify-content: center; align-items: center; height: 100vh; color: green; font-weight: bold;\">Upload was successful!</div>";
+		body = "<html><head><title>Upload Successful</title></head><body><div style=\"display: flex; justify-content: center; align-items: center; height: 100vh; color: green; font-weight: bold;\"><h1>Upload was successful!</h1></div></body></html>";
+		setMimeType("html");
 		return;
 	}
-	// handle cgi
 	handleCGI(config, location, req, *this);
 	return;
 }
