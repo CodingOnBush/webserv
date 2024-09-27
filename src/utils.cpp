@@ -394,19 +394,6 @@ std::string getFileBody(std::string body, std::string &boundary)
 	if (secondBoundaryPos == std::string::npos)
 		return "";
 	fileBody = getContentBetweenBoundaries(body, firstBoundaryPos, secondBoundaryPos);
-	// else
-	// {
-	// 	size_t firstBoundaryPos = body.find(boundary);
-	// 	if (firstBoundaryPos == std::string::npos)
-	// 		return "";
-	// 	size_t secondBoundaryPos = body.find(boundary, firstBoundaryPos + boundary.length());
-	// 	if (secondBoundaryPos == std::string::npos)
-	// 		return "";
-	// 	size_t lastBoundaryPos = body.find(boundary, secondBoundaryPos + boundary.length());
-	// 	if (lastBoundaryPos == std::string::npos)
-	// 		return "";
-	// 	fileBody = getContentBetweenBoundaries(body, secondBoundaryPos, lastBoundaryPos);
-	// }
 	return fileBody;
 }
 
