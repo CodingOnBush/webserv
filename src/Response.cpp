@@ -342,6 +342,9 @@ void Response::handlePostRequest(Configuration &config, LocationBlock location)
 	{
 		//create code to handle upload files
 		handleUploadFiles(config, location, req);
+		// body = "<p style=color: green; font-weight: bold;>Upload was successful!</p>";
+		// body = "<pstyle=\"color: green; font-weight: bold; text-align: center;\">Upload was successful!</p>";
+		body = "<div style=\"display: flex; justify-content: center; align-items: center; height: 100vh; color: green; font-weight: bold;\">Upload was successful!</div>";
 		return;
 	}
 	// handle cgi
@@ -378,7 +381,6 @@ void Response::methodCheck(LocationBlock location)
 
 void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 {
-	std::cout << "On passe par laaaaa" << std::endl;
 	int maxBodySize = config.getBodySize(location.clientMaxBodySize);
 	if (maxBodySize == 0)
 		return;
