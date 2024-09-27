@@ -420,3 +420,29 @@ std::string getFileContent(std::string body, Request &req)
 
 	return fileContent;
 }
+
+static int countSlashes(std::string path)
+{
+	int count = 0;
+	for (size_t i = 0; i < path.size(); i++)
+	{
+		if (path[i] == '/')
+			count++;
+	}
+	if (path[path.size() - 1] == '/')
+		count--;
+	return count;
+}
+
+void changeDirBack(std::string path)
+{
+	int slashes = countSlashes(path);
+	for (int i = 0; i < slashes; i++)
+	{
+		if (chdir("../") == -1)
+		{
+			std::cerr << "Error: Could not change directory back." << std::endl;
+			return;
+		}
+	}
+}

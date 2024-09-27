@@ -246,6 +246,32 @@ std::string parseFileName(std::string body, std::string keyword)
 	return fileName;
 }
 
+// int countSlashes(std::string path)
+// {
+// 	int count = 0;
+// 	for (size_t i = 0; i < path.size(); i++)
+// 	{
+// 		if (path[i] == '/')
+// 			count++;
+// 	}
+// 	if (path[path.size() - 1] == '/')
+// 		count--;
+// 	return count;
+// }
+
+// void changeDirBack(std::string path)
+// {
+// 	int slashes = countSlashes(path);
+// 	for (int i = 0; i < slashes; i++)
+// 	{
+// 		if (chdir("../") == -1)
+// 		{
+// 			std::cerr << "Error: Could not change directory back." << std::endl;
+// 			return;
+// 		}
+// 	}
+// }
+
 void Response::handleUploadFiles(Configuration &config, LocationBlock &location, Request &req)
 {
 	//on va verifier s'il existe bien une upload location dans le location block si non erreur (trouver quel numero d'erreur)
@@ -320,6 +346,7 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 		file << fileContent;
 		file.close();
 		this->statusCode = 201;
+		changeDirBack(location.uploadLocation);
 	}
 	closedir(dir);
 }

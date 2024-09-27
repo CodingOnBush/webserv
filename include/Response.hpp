@@ -71,3 +71,4 @@ std::string getContentType(const std::string &contentType);
 std::string getFileBody(std::string body, std::string &boundary);
 std::string getFileContent(std::string body, Request &req);
 int getNbBoundaries(std::string body, std::string boundary);
+void changeDirBack(std::string path);
