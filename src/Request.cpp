@@ -1,9 +1,9 @@
 #include "Request.hpp"
 
-Request::Request()
+Request::Request() : state(REQUEST_LINE)
 {
     this->parsingState = REQUEST_LINE;
-};
+}
 
 Request::~Request() {};
 

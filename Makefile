@@ -27,7 +27,8 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp
 clean:
 	rm -rf $(BIN_DIR)
 
-fclean: clean $(TARGET)
+fclean: clean 
+	rm -f $(NAME)
 
 re: fclean all
 

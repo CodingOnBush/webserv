@@ -63,3 +63,8 @@ NEW TODOS:
 3. Configuration file (parsing)
 4. Creating response (analyze config and request)
 5. CGI
+
+
+Error cases:
+
+- When we launch the program and try to upload twice in a row it breaks everything (error 404 everywhere)

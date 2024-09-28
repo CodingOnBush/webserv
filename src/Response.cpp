@@ -1,4 +1,5 @@
 #include "Response.hpp"
+#include "Webserv.hpp"
 
 Response::Response() {};
 
@@ -222,6 +223,109 @@ void Response::getBody(std::string uri, LocationBlock location)
 		this->statusCode = 404;
 }
 
+std::string parseFileName(std::string body, std::string keyword)
+{
+    size_t pos = body.find(keyword);
+    if (pos == std::string::npos)
+	{
+		std::cerr << "Error: Could not find keyword " << keyword << " in body." << std::endl;
+        return "";
+	}
+    pos += keyword.length();
+	size_t endPos = body.find("\r\n", pos);
+	if (endPos == std::string::npos)
+	{
+		std::cerr << "Error: Could not find end of line in body." << std::endl;
+		return "";
+	}
+	std::string fileName = body.substr(pos, endPos - 1 - pos);
+	if (!fileName.empty() && fileName[fileName.size() - 1] == '\r')
+		fileName.erase(fileName.size() - 1);
+	return fileName;
+}
+
+void Response::handleUploadFiles(Configuration &config, LocationBlock &location, Request &req)
+{
+	(void)config;
+	//on va verifier s'il existe bien une upload location dans le location block si non erreur (trouver quel numero d'erreur)
+	std::string body = req.getBody();
+	if (location.uploadLocation.empty())
+	{
+		this->statusCode = 405; //check si bon code
+		return;
+	}
+	DIR *dir = opendir(location.uploadLocation.c_str());
+	if (dir == NULL)
+	{
+		if (errno == ENOENT)
+		{
+			this->statusCode = 404;
+			return;
+		}
+		else if (errno == EACCES)
+		{
+			this->statusCode = 403;
+			return;
+		}
+		else
+		{
+			this->statusCode = 500;
+			return;
+		}
+	}
+	else
+	{
+		std::string fileName = "";
+		std::string contentType = getContentType(req.getHeaders()["Content-Type"]);
+		std::cout << "contentType: " << contentType << std::endl;
+		if (contentType == "multipart/form-data")
+		{
+			fileName = parseFileName(body, "filename=\"");
+			std::cout << "fileName: " << fileName << std::endl;
+		}
+		if (fileName != "")
+		{
+			if (fileName[0] == '/')
+				fileName = fileName.substr(1);
+		}
+		
+		if (fileName == "")
+		{
+			fileName = setDefaultFileName(location.uploadLocation);
+			if (fileName == "error")
+			{
+				this->statusCode = 500;
+				return;
+			}
+		}
+		
+		if (checkIfFileExists(location.uploadLocation, uploadNb, fileName) == 0)
+		{
+			std::string fileCopy = setFileCopyName(fileName);
+			fileName = fileCopy;
+		}
+		
+		if (chdir(location.uploadLocation.c_str()) == -1)
+		{
+			this->statusCode = 500;
+			return;
+		}
+		std::ofstream file(fileName.c_str());
+		if (!file.is_open()) 
+		{
+			//remplacer par throw exception? 
+			std::cerr << "Error: Could not open file " << fileName << " for writing." << std::endl;
+			this->statusCode = 500;
+			return;
+		}
+		std::string fileContent = getFileContent(req.getBody(), req);
+		file << fileContent;
+		file.close();
+		this->statusCode = 201;
+	}
+	closedir(dir);
+}
+
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
 	if (location.cgiParams.empty())
@@ -233,15 +337,16 @@ void Response::handleGetRequest(Configuration &config, LocationBlock location)
 	// handle cgi
 }
 
-void Response::handlePostRequest(Configuration &config, LocationBlock locaion)
+void Response::handlePostRequest(Configuration &config, LocationBlock location)
 {
-	if (locaion.cgiParams.empty())
+	if (location.cgiParams.empty())
 	{
 		//create code to handle upload files
+		handleUploadFiles(config, location, req);
 		return;
 	}
 	// handle cgi
-	handleCGI(config, locaion, req, *this);
+	handleCGI(config, location, req, *this);
 	return;
 }
 
@@ -275,6 +380,7 @@ void Response::methodCheck(LocationBlock location)
 
 void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 {
+	std::cout << "On passe par laaaaa" << std::endl;
 	int maxBodySize = config.getBodySize(location.clientMaxBodySize);
 	if (maxBodySize == 0)
 		return;

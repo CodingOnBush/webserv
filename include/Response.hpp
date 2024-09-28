@@ -38,6 +38,7 @@ public:
 	std::string getResponse(Configuration &config);
 	void setStatusLine();
 	void createResponseStr(LocationBlock location);
+	void handleUploadFiles(Configuration &config, LocationBlock &location, Request &req);
 	void handleGetRequest(Configuration &config, LocationBlock location);
 	void handlePostRequest(Configuration &config, LocationBlock location);
 	void handleDeleteRequest(Configuration &config, LocationBlock location);
@@ -63,3 +64,10 @@ std::string getFilePath(std::string path, std::string uri, std::string fileName)
 bool hasDefaultFile(const std::string& directoryPath, std::string fileName, LocationBlock location);
 std::string setPath(LocationBlock location, std::string uri);
 std::string generateDirectoryListingHTML(const std::string& directoryPath, const std::string &rootPath);
+std::string setFileCopyName(std::string givenName);
+std::string setDefaultFileName(std::string uploadDirPath);
+int checkIfFileExists(const std::string &dirPath, int uploadNb, std::string fileName);
+std::string getContentType(const std::string &contentType);
+std::string getFileBody(std::string body, std::string &boundary);
+std::string getFileContent(std::string body, Request &req);
+int getNbBoundaries(std::string body, std::string boundary);

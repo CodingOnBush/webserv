@@ -1,4 +1,5 @@
-#pragma once
+#ifndef WEBSERV_HPP
+#define WEBSERV_HPP
 
 #include "Request.hpp"
 #include "Response.hpp"
@@ -9,7 +10,7 @@
 #include <iostream>
 #include <string>
 #include <arpa/inet.h>
-// #include <sys/epoll.h>
+#include <sys/epoll.h>
 #include <vector>
 #include <map>
 #include <set>
@@ -26,4 +27,12 @@
 #define MAX_CLIENTS 32
 #define BUFFER_SIZE 1024
 
-void webserv(Configuration &config); // main function to run the server
+#define GREEN "\033[32m"
+#define BLUE "\033[34m"
+#define SET "\033[0m"
+
+extern int  uploadNb;
+
+void    runWebServer(Configuration &config);
+
+#endif // WEBSERV_HPP

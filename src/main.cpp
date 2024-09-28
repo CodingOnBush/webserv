@@ -1,50 +1,19 @@
-#include "../include/socket.hpp"
-#include <signal.h>
+#include "../include/Webserv.hpp"
 
-// #include <vector>
-
-// typedef std::vector<int> fd_vector;
-
-bool	running = true;
-
-static void	sigintHandler(int sig)
+int	main(int ac, char **av)
 {
-	(void)sig;
-	running = false;
-	std::cout << "SIGINT received" << std::endl;
-}
+	std::string	defaultConfigPath = "./config/default.conf";
 
-
-
-// fd_vector	servers_fd;
-
-int	main(void)
-{
-	signal(SIGINT, sigintHandler);
-
-	struct sockaddr_in		addr;
-	socklen_t				len;
-	int						sockfd;
-	int						sockfd2;
-	int						port = 8080;
-
-	std::memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	addr.sin_port = htons(port);
-	if ((sockfd = createSocket((const sockaddr *)&addr, sizeof(addr))) < 0)
-		return (1);
-	if ((sockfd2 = createSocket((const sockaddr *)&addr, sizeof(addr))) < 0)
-		return (1);
-	while (running)
+	if (ac == 2)
+		defaultConfigPath = av[1];
+	try
 	{
-		std::cout << "waiting for connection" << std::endl;
-		int	newsockfd = accept(sockfd, NULL, NULL);
-		if (newsockfd < 0)
-			continue ;
-		std::cout << "new connection" << std::endl;
-		close(newsockfd);
+		Configuration	config(defaultConfigPath);
+		
+		runWebServer(config);
 	}
-	close(sockfd);
+	catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
+	}
 	return (0);
 }
