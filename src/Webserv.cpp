@@ -174,6 +174,7 @@ void runWebServer(Configuration &config)
 	std::string	wait[] = {"⠋", "⠙", "⠸", "⠴", "⠦", "⠇"};
 	int			n = 0;
 
+	initiateWebServer(config);
 	signal(SIGINT, handleSIGINT);
 	while (running)
 	{
@@ -216,5 +217,4 @@ void runWebServer(Configuration &config)
 	}
 	for(std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
 		close(it->first);
-	// std::cout << "Server stopped" << std::endl;
 }
