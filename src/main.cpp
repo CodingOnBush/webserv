@@ -1,23 +1,19 @@
-#include "Webserv.hpp"
+#include "../include/Webserv.hpp"
 
 int	main(int ac, char **av)
 {
-	std::string	fileName = "webserv.conf";
+	std::string	defaultConfigPath = "./config/default.conf";
 
 	if (ac == 2)
-		fileName = av[1];
+		defaultConfigPath = av[1];
 	try
 	{
-		Configuration config(fileName);
-		// config.printConfig();
-		// runServer(config);
-		initiateWebServer(config);
-		runWebserver(config);
+		Configuration	config(defaultConfigPath);
+		
+		runWebServer(config);
 	}
-	catch (std::exception &e)
-	{
-		std::cerr << "Error : " << e.what() << std::endl;
-		return (1);
+	catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
 	}
 	return (0);
 }

@@ -18,11 +18,11 @@ Todo List - Webserv
 
 NEW TODOS:
 - Parsing:
-	- client_max_body_size can be set to 0, check the syntax how it can be defined in nginx config (Sets the maximum allowed size of the client request body. If the size in a request exceeds the configured value, the 413 (Request Entity Too Large) error is returned to the client. Please be aware that browsers cannot correctly display this error. Setting size to 0 disables checking of client request body size. )
 	- add the first (default) location block if there's no "location /" block set in the config
 - Errors handling:
 	- Proper status code everywhere (all requests) and verify that correct error pages are returned (default or custom)
 	- <s>Setup default error pages (add a file with them)</s>
+	- Sometimes we return 500 error page and the status code 404...
 - Connecting config and request:
 	- <s>Check host, port and server_names and have server block</s>
 	- <s>Inside server block check for location path and return either corrponding location or default location</s>
@@ -51,6 +51,11 @@ NEW TODOS:
 	- upload files functionality
 	- GET, POST, and DELETE methods
 	- multiple ports
+
+- Redirection
+	- using a return directive in file.conf block the server
+
+- be able to send a very big request (sometime with a big URI) and check that the server can handle it
 
 **Main parts of the project:**
 1. Server logic (loop)

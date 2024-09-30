@@ -98,7 +98,7 @@ class Configuration
 		//...
 		
 		// tools
-		const int			getBodySize(BodySize const &bodySize);
+		int					getBodySize(BodySize const &bodySize);
 		std::vector<int>	getPorts() const;// maybe to remove
 		void				printConfig() const;
 		//...

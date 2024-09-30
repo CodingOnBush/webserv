@@ -1,4 +1,5 @@
 #include "../include/Webserv.hpp"
+#include "Webserv.hpp"
 
 std::map<std::pair<std::string, int>, int>	socketsToPorts;
 std::map<int, std::vector<ServerBlock> >	serversToFd;
@@ -74,6 +75,8 @@ void	initiateWebServer(Configuration &config)
 		struct pollfd pfd = (struct pollfd){*it, POLLIN | POLLOUT, 0};
 		pollFdsList.push_back(pfd);
 	}
+	requests.clear();
+	responses.clear();
 }
 
 void	acceptConnection(int fd)
@@ -156,12 +159,22 @@ static void handleSIGINT(int sig)
 	running = false;
 }
 
-void runWebserver(Configuration &config)
+static void	printRequests(std::map<int, Request> &requests)
+{
+	std::cout << "Requests:" << std::endl;
+	for (std::map<int, Request>::iterator it = requests.begin(); it != requests.end(); it++)
+	{
+		std::cout << "fd: " << it->first << " state: " << it->second.getRequestState() << std::endl;
+	}
+}
+
+void runWebServer(Configuration &config)
 {
 	int			timeout = 500;
 	std::string	wait[] = {"⠋", "⠙", "⠸", "⠴", "⠦", "⠇"};
 	int			n = 0;
 
+	initiateWebServer(config);
 	signal(SIGINT, handleSIGINT);
 	while (running)
 	{
@@ -204,5 +217,4 @@ void runWebserver(Configuration &config)
 	}
 	for(std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
 		close(it->first);
-	// std::cout << "Server stopped" << std::endl;
 }

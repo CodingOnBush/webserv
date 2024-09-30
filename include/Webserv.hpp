@@ -4,7 +4,6 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Configuration.hpp"
-#include "runServer.hpp"
 
 #include <utility>
 #include <algorithm>
@@ -32,11 +31,8 @@
 #define BLUE "\033[34m"
 #define SET "\033[0m"
 
-extern int uploadNb;
+extern int  uploadNb;
 
-void webserv(Configuration &config); // main function to run the server
-
-void initiateWebServer(Configuration &config);
-void runWebserver(Configuration &config);
+void    runWebServer(Configuration &config);
 
 #endif // WEBSERV_HPP

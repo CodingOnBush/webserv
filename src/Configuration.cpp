@@ -1,6 +1,10 @@
 #include "../include/Configuration.hpp"
 #include "Configuration.hpp"
 
+// TODO :
+// add default location block even if we have some location blocks
+// need a function to comapre location blocks and if we don't have a default one, add it
+
 static void	printSplit(std::vector<std::string> split)
 {
 	std::cout << "split size : " << split.size() << std::endl;
@@ -597,7 +601,7 @@ std::vector<ServerBlock> const &Configuration::getServerBlocks() const
 	return m_serverBlocks;
 }
 
-const int	Configuration::getBodySize(BodySize const &bodySize)
+int	Configuration::getBodySize(BodySize const &bodySize)
 {
 	std::stringstream	ss;
 	int					weight;

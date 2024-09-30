@@ -128,7 +128,7 @@ LocationBlock getMatchingLocationBlock(ServerBlock serverBlock, std::string uri)
     if (pos != std::string::npos && pos != 0) {
         return getMatchingLocationBlock(serverBlock, uri.substr(0, pos));
     }
-	return *location;
+	return *location;// TODO : maybe replace with throw and catch it in the main without stopping the server
 }
 
 std::string getDefaultErrorBody(int statusCode)
@@ -154,6 +154,7 @@ bool isInIndex(std::string fileName, LocationBlock location)
 
 bool hasDefaultFile(const std::string &directoryPath, std::string fileName, LocationBlock location)
 {
+	(void)fileName;
 	DIR *directoryPtr = opendir(directoryPath.c_str());
 	struct dirent *dir;
 	if (directoryPtr == NULL)
