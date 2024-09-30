@@ -1,13 +1,50 @@
 #include "../include/Webserv.hpp"
 #include "Webserv.hpp"
 
-std::map<std::pair<std::string, int>, int>	socketsToPorts;
+std::map<std::pair<std::string, int>, int>	socketsToPorts;// unused in this code...
 std::map<int, std::vector<ServerBlock> >	serversToFd;
 std::vector<int>							listenFds;
 std::vector<struct pollfd>					pollFdsList;
 std::map<int, Request>						requests;
 std::map<int, Response> 					responses;
 bool										running = true;
+
+static void printPollFdsList(std::vector<struct pollfd> &pollFdsList)
+{
+	std::cout << "PollFdsList ( " << pollFdsList.size() << " fds):" << std::endl;
+	for (std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
+	{
+		std::cout << "fd: " << it->fd << " events: " << it->events << " revents: " << it->revents << std::endl;
+	}
+}
+
+static void	printListenFds()
+{
+	std::cout << "ListenFds (" << listenFds.size() << "):" << std::endl;
+	for (std::vector<int>::iterator it = listenFds.begin(); it != listenFds.end(); it++)
+	{
+		std::cout << *it << std::endl;
+	}
+}
+
+static void	printSocketsToPorts()
+{
+	std::cout << "SocketsToPorts (" << socketsToPorts.size() << "):" << std::endl;
+	for (std::map<std::pair<std::string, int>, int>::iterator it = socketsToPorts.begin(); it != socketsToPorts.end(); it++)
+	{
+		std::cout << it->first.first << ":" << it->first.second << "(host:port) -> socket: " << it->second << std::endl;
+	}
+}
+
+static void	printServersToFd()
+{
+	std::cout << "ServersToFd (" << serversToFd.size() << "):" << std::endl;
+	for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
+	{
+		ServerBlock	server = it->second[0];
+		std::cout << "fd: " << it->first << " server port: " << server.port << std::endl;
+	}
+}
 
 void rmFromPollWatchlist(int fd)
 {
@@ -21,14 +58,6 @@ void rmFromPollWatchlist(int fd)
 	}
 }
 
-static void	initSockaddr(struct sockaddr_in &addr, int port)
-{
-	memset((char*)&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = INADDR_ANY;
-	addr.sin_port = htons(port);
-}
-
 static int	createServerSocket(int port)
 {
 	int 				serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -39,7 +68,10 @@ static int	createServerSocket(int port)
 		return (perror("socket"), -1);
 	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 		return (perror("setsockopt"), close(serverSocket), -1);
-	initSockaddr(addr, port);
+	memset((char*)&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_port = htons(port);
 	if (bind(serverSocket, (struct sockaddr *)&addr, sizeof(addr)) == -1)
 		return (perror("bind"), close(serverSocket), -1);
 	if (listen(serverSocket, 10) == -1)
@@ -68,22 +100,27 @@ void	initiateWebServer(Configuration &config)
 		}
 		serversToFd[serverSocket].push_back(*it);
 	}
+	printServersToFd();
+	printSocketsToPorts();
 	for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
 		listenFds.push_back(it->first);
+	printListenFds();
 	for (std::vector<int>::iterator it = listenFds.begin(); it != listenFds.end(); it++)
 	{
 		struct pollfd pfd;
 		pfd.fd = *it;
-		pfd.events = POLLIN | POLLOUT | POLLHUP;
+		pfd.events = POLLIN | POLLOUT;
 		pfd.revents = 0;
 		pollFdsList.push_back(pfd);
 	}
+	printPollFdsList(pollFdsList);
 	requests.clear();
 	responses.clear();
 }
 
 void	acceptConnection(int fd)
 {
+	std::cout << "Accepting connection" << std::endl;
 	int				newConnection = accept(fd, NULL, NULL);
 	int				opt = 1;
 	
@@ -104,7 +141,7 @@ void	acceptConnection(int fd)
 		perror("setsockopt");
 		return;
 	}
-	struct pollfd	pfd = (struct pollfd){newConnection, POLLIN | POLLOUT | POLLHUP, 0};
+	struct pollfd	pfd = (struct pollfd){newConnection, POLLIN | POLLOUT, 0};
 	pollFdsList.push_back(pfd);
 	serversToFd[newConnection] = serversToFd[fd];
 	requests[newConnection] = Request();
@@ -133,7 +170,7 @@ void receiveRequest(int fd)
 
 void sendResponse(int fd, Configuration &config)
 {
-	// printRequest(requests[fd]);
+	printRequest(requests[fd]);
 	static int i = 0;
 	std::cout << "Sending response (" << i++ << ")" << std::endl;
 	Response resp(requests[fd]);
@@ -163,7 +200,7 @@ int findCount(int fd)
 static void handleSIGINT(int sig)
 {
 	(void)sig;
-	std::cout << BLUE << "\nSIGINT received, stopping server" << SET << std::endl;
+	std::cout << BLUE << "\n  { SIGINT received, stopping server }" << SET << std::endl;
 	running = false;
 }
 
@@ -178,50 +215,58 @@ static void	printRequests(std::map<int, Request> &requests)
 
 void runWebServer(Configuration &config)
 {
-	int			timeout = 500;
-	std::string	wait[] = {"⠋", "⠙", "⠸", "⠴", "⠦", "⠇"};
-	int			n = 0;
+	const std::string	wait[] = {"⠋", "⠙", "⠸", "⠴", "⠦", "⠇"};
+	int					n;
 
 	initiateWebServer(config);
 	signal(SIGINT, handleSIGINT);
 	while (running)
 	{
-		int nfds = poll(&pollFdsList[0], pollFdsList.size(), timeout);
-		if (nfds < 0 && errno != EINTR)
+		int nfds = poll(&pollFdsList[0], pollFdsList.size(), TIMEOUT);
+		if (nfds < 0)
 			break;
-		if (nfds == 0)
-			std::cout << GREEN << "Waiting for connection " << wait[n++ % 6] << SET << "\r" << std::flush;
 		
+		/*
+		ne redescend plus en dessous de 0 après avoir fait http://localhost:8080/ puis
+		cliquer sur meow.gif et revenir en arrirère
+		*/
+		if (nfds == 0)
+		{
+			std::cout << GREEN << "  { Waiting for connection " << wait[n++ % 6] << " }" << SET << "\r" << std::flush;
+			if (n == 6)
+				n = 0;
+		}
+		
+		// std::cout << "nfds: " << nfds << std::endl;
+		// printPollFdsList(pollFdsList);
+
 		int j = 0;
 		int pollFdsListSize = pollFdsList.size();
-		// for (std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end() && j < nfds; it++)
 		for (int i = 0; i < pollFdsListSize && j < nfds; i++)
 		{
-			struct pollfd *it = &pollFdsList[i];
-			if (it->fd == -1)
-				continue;
-			if (it->revents == 0)
+			struct pollfd	pfd = pollFdsList[i];
+
+			if (pfd.revents == 0 || pfd.fd == -1)
 				continue;
 			j++;
-			if (it->revents & POLLIN)
+			if (pfd.revents & POLLIN)
 			{
-				if (findCount(it->fd) == 1)
-					acceptConnection(it->fd);
+				if (findCount(pfd.fd) > 0)
+					acceptConnection(pfd.fd);
 				else
-					receiveRequest(it->fd);
+					receiveRequest(pfd.fd);
 			}
-			if (requests[it->fd].getParsingState() == PARSING_DONE && it->revents & POLLOUT)
+			if (requests[pfd.fd].getParsingState() == PARSING_DONE && pfd.revents & POLLOUT)
 			{
-				sendResponse(it->fd, config);
+				sendResponse(pfd.fd, config);
 			}
-			if (requests[it->fd].getRequestState() == PROCESSED || it->revents & POLLHUP)
+			if (requests[pfd.fd].getRequestState() == PROCESSED)
 			{
-				rmFromPollWatchlist(it->fd);
-				serversToFd.erase(it->fd);
-				requests[it->fd].clearRequest();
-				requests.erase(it->fd);
-				if (it->fd != -1)
-					close(it->fd);
+				rmFromPollWatchlist(pfd.fd);
+				serversToFd.erase(pfd.fd);
+				requests[pfd.fd].clearRequest();
+				requests.erase(pfd.fd);
+				close(pfd.fd);
 			}
 		}
 	}
