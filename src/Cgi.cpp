@@ -34,7 +34,7 @@ char **createEnv(Request &req, LocationBlock &location)
 
     if (uri == "/submit_comment")
     {
-        std::cout << "URIHERETEST: " << uri << std::endl;
+        // std::cout << "URIHERETEST: " << uri << std::endl;
         scriptName = location.cgiParams[".py"];
         std::string keyword = uri;
         if (location.pathInfo == true)
@@ -45,7 +45,7 @@ char **createEnv(Request &req, LocationBlock &location)
     }
     else if (location.pathInfo == true && varSSet == false)
     {
-        std::cout << "URIHERE: " << uri << std::endl;
+        // std::cout << "URIHERE: " << uri << std::endl;
         size_t pos = uri.find(location.cgiParams.begin()->first);
         if (pos != std::string::npos) //if the keyword is found
         {
@@ -54,23 +54,23 @@ char **createEnv(Request &req, LocationBlock &location)
             scriptName = uri.substr(0, pos + 3); // +3 to include ".py"
             if (pathInfo == "error")
             {
-                std::cout << "PATH INFO si on et erreur :" << pathInfo << std::endl;
+                // std::cout << "PATH INFO si on et erreur :" << pathInfo << std::endl;
                 scriptName = "error";
                 pathInfo = "";
             }
-            std::cout << "PATH INFO si on et tout ok :" << pathInfo << std::endl;
+            // std::cout << "PATH INFO si on et tout ok :" << pathInfo << std::endl;
         }
         else
         {
             scriptName = "error";
             pathInfo = "";
-            std::cout << "PATH INFO si on et erreur :" << pathInfo << std::endl;
+            // std::cout << "PATH INFO si on et erreur :" << pathInfo << std::endl;
         }
     }
     else
     {
         scriptName = req.getUri();
-        std::cout << "SCRIPTNAME: " << scriptName << std::endl;
+        // std::cout << "SCRIPTNAME: " << scriptName << std::endl;
         pathInfo = "";
     }
     ss << "CONTENT_LENGTH=" << req.getBody().size();
@@ -144,11 +144,11 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
         res.setStatusCode(500);
         return;
     }
-    std::stringstream cgiOutput;
-    std::string cgiPathWithArgs = getCGIPath(env, location);
-    struct stat st;
+    std::stringstream   cgiOutput;
+    std::string         cgiPathWithArgs = getCGIPath(env, location);
+    struct stat         st;
     
-    std::cout << "CGI PATH: " << cgiPathWithArgs << std::endl;
+    // std::cout << "CGI PATH: " << cgiPathWithArgs << std::endl;
     if (cgiPathWithArgs == "")
     {
         std::cerr << "error in getting cgi path" << std::endl;
@@ -162,7 +162,7 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
         freeEnv(env);
         return ;
     }
-    std::cout << "CGI PATH: " << cgiPathWithArgs << std::endl;
+    // std::cout << "CGI PATH: " << cgiPathWithArgs << std::endl;
     if (stat(cgiPathWithArgs.c_str(), &st) != 0)
     {
         std::cerr << "file does not exist" << std::endl;
@@ -230,7 +230,7 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
         waitpid(pid, &status, 0);
         if (WIFEXITED(status))
         {
-            std::cout << "child exited with status: " << WEXITSTATUS(status) << std::endl;
+            // std::cout << "child exited with status: " << WEXITSTATUS(status) << std::endl;
         }
         if (cgiOutput.str().empty())
         {

@@ -1,7 +1,7 @@
 #include "Response.hpp"
 #include "Webserv.hpp"
 
-Response::Response() {};
+Response::Response() : statusCode(0) {};
 
 Response::Response(Request &req) : req(req), statusCode(0) {};
 
@@ -69,7 +69,7 @@ void Response::createResponseStr(LocationBlock location)
 	setHeaders(location);
 	ss << statusLine << headers << body << LF;
 	response = ss.str();
-	std::cout << "THE RESPONSE WE WANNA SEEEE" << response << std::endl;
+	// std::cout << "THE RESPONSE WE WANNA SEEEE" << response << std::endl;
 }
 
 void Response::setMimeType(std::string const &fileName)
@@ -305,11 +305,11 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 	{
 		std::string fileName = "";
 		std::string contentType = getContentType(req.getHeaders()["Content-Type"]);
-		std::cout << "contentType: " << contentType << std::endl;
+		// std::cout << "contentType: " << contentType << std::endl;
 		if (contentType == "multipart/form-data")
 		{
 			fileName = parseFileName(body, "filename=\"");
-			std::cout << "fileName: " << fileName << std::endl;
+			// std::cout << "fileName: " << fileName << std::endl;
 		}
 		if (fileName != "")
 		{
@@ -355,7 +355,7 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
 	std::string uri = req.getUri();
-	std::cout << "URI WE WANNA SEEE: \n" << uri << std::endl;
+	// std::cout << "URI WE WANNA SEEE: \n" << uri << std::endl;
 	if (location.cgiParams.empty())
 	{
 		getBody(req.getUri(), location);
@@ -493,7 +493,7 @@ std::string Response::getResponse(Configuration &config)
 // 		while ((dir = readdir(directoryPtr)) != NULL)
 // 		{
 // 			std::string fileName = dir->d_name;
-// 			std::cout << "fileName: " << fileName << std::endl;
+// 			// std::cout << "fileName: " << fileName << std::endl;
 // 			if (fileName == "." || fileName == "..")
 // 				continue;
 // 			std::string filePath = configPath + "/" + fileName;

@@ -417,7 +417,7 @@ std::string getFileContent(std::string body, Request &req)
 	std::string fileContent = fileBody.substr(contentStartPos, contentEndPos - contentStartPos);
 	if (fileBody.empty())
 		return "";
-	std::cout << "fileContent: " << fileContent << std::endl;
+	// std::cout << "fileContent: " << fileContent << std::endl;
 
 	return fileContent;
 }

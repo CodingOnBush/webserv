@@ -72,7 +72,10 @@ void	initiateWebServer(Configuration &config)
 		listenFds.push_back(it->first);
 	for (std::vector<int>::iterator it = listenFds.begin(); it != listenFds.end(); it++)
 	{
-		struct pollfd pfd = (struct pollfd){*it, POLLIN | POLLOUT, 0};
+		struct pollfd pfd;
+		pfd.fd = *it;
+		pfd.events = POLLIN | POLLOUT | POLLHUP;
+		pfd.revents = 0;
 		pollFdsList.push_back(pfd);
 	}
 	requests.clear();
@@ -83,7 +86,6 @@ void	acceptConnection(int fd)
 {
 	int				newConnection = accept(fd, NULL, NULL);
 	int				opt = 1;
-	struct pollfd	pfd;
 	
 	if (newConnection < 0)
 	{
@@ -102,9 +104,7 @@ void	acceptConnection(int fd)
 		perror("setsockopt");
 		return;
 	}
-	pfd.fd = newConnection;
-	pfd.events = POLLIN | POLLOUT;
-	pfd.revents = 0;
+	struct pollfd	pfd = (struct pollfd){newConnection, POLLIN | POLLOUT | POLLHUP, 0};
 	pollFdsList.push_back(pfd);
 	serversToFd[newConnection] = serversToFd[fd];
 	requests[newConnection] = Request();
@@ -133,11 +133,19 @@ void receiveRequest(int fd)
 
 void sendResponse(int fd, Configuration &config)
 {
-	printRequest(requests[fd]);
+	// printRequest(requests[fd]);
+	static int i = 0;
+	std::cout << "Sending response (" << i++ << ")" << std::endl;
 	Response resp(requests[fd]);
 	responses[fd] = resp;
 	std::string generatedResponse = responses[fd].getResponse(config);
 	int bytes_sent = send(fd, generatedResponse.c_str(), generatedResponse.size(), 0);
+	if (bytes_sent == -1)
+	{
+		std::cout << "ERROR SEND" << std::endl;
+		perror("send");
+		return;
+	}
 	requests[fd].setRequestState(PROCESSED);
 }
 
@@ -182,14 +190,16 @@ void runWebServer(Configuration &config)
 		if (nfds < 0 && errno != EINTR)
 			break;
 		if (nfds == 0)
-		{
 			std::cout << GREEN << "Waiting for connection " << wait[n++ % 6] << SET << "\r" << std::flush;
-			n++;
-		}
 		
 		int j = 0;
-		for (std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end() && j < nfds; it++)
+		int pollFdsListSize = pollFdsList.size();
+		// for (std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end() && j < nfds; it++)
+		for (int i = 0; i < pollFdsListSize && j < nfds; i++)
 		{
+			struct pollfd *it = &pollFdsList[i];
+			if (it->fd == -1)
+				continue;
 			if (it->revents == 0)
 				continue;
 			j++;
@@ -200,18 +210,18 @@ void runWebServer(Configuration &config)
 				else
 					receiveRequest(it->fd);
 			}
-			if (it->revents & POLLOUT)
+			if (requests[it->fd].getParsingState() == PARSING_DONE && it->revents & POLLOUT)
 			{
-				if (requests[it->fd].getParsingState() == PARSING_DONE)
-					sendResponse(it->fd, config);
+				sendResponse(it->fd, config);
 			}
-			if (requests[it->fd].getRequestState() == PROCESSED)
+			if (requests[it->fd].getRequestState() == PROCESSED || it->revents & POLLHUP)
 			{
 				rmFromPollWatchlist(it->fd);
 				serversToFd.erase(it->fd);
 				requests[it->fd].clearRequest();
 				requests.erase(it->fd);
-				close(it->fd);
+				if (it->fd != -1)
+					close(it->fd);
 			}
 		}
 	}

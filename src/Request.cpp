@@ -1,9 +1,6 @@
 #include "Request.hpp"
 
-Request::Request() : state(REQUEST_LINE)
-{
-    this->parsingState = REQUEST_LINE;
-}
+Request::Request() : state(REQUEST_LINE), parsingState(REQUEST_LINE) {}
 
 Request::~Request() {};
 
@@ -285,18 +282,18 @@ void Request::clearRequest(void)
 }
 void printRequest(Request &req)
 {
-    std::cout << std::string(21, '*') << std::endl;
-    std::cout << "Method: " << req.getMethod() << std::endl;
-    std::cout << "URI: " << req.getUri() << std::endl;
-    std::cout << "Version: " << req.getVersion() << std::endl;
-    std::cout << "Headers: " << std::endl;
+    // std::cout << std::string(21, '*') << std::endl;
+    // std::cout << "Method: " << req.getMethod() << std::endl;
+    // std::cout << "URI: " << req.getUri() << std::endl;
+    // std::cout << "Version: " << req.getVersion() << std::endl;
+    // std::cout << "Headers: " << std::endl;
     std::map<std::string, std::string> headers = req.getHeaders();
     for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it)
     {
-        std::cout << it->first << ":" << it->second << std::endl;
+        // std::cout << it->first << ":" << it->second << std::endl;
     }
-    std::cout << "Body: " << std::endl;
-    std::cout << req.getBody() << std::endl;
-    std::cout << std::endl;
-    std::cout << std::string(21, '*') << std::endl;
+    // std::cout << "Body: " << std::endl;
+    // std::cout << req.getBody() << std::endl;
+    // std::cout << std::endl;
+    // std::cout << std::string(21, '*') << std::endl;
 }

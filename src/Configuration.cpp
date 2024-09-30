@@ -16,31 +16,31 @@ static void	printSplit(std::vector<std::string> split)
 
 static bool	isValidHost(std::string const &host)
 {
-	size_t	dot = 0;
+	// size_t	dot = 0;
 
 	if (host.empty())
 		return false;
-	if (host == "localhost")
-		return true;
-	for (size_t i = 0; i < host.size(); i++)
-	{
-		if (host.at(i) == '.')
-			dot++;
-	}
-	if (dot != 3 || host.find_first_of("0123456789.") == std::string::npos)
-		return false;
-	if (host.find_first_not_of("0123456789.") != std::string::npos)
-		return false;
-	if (host.find_first_of(".") == 0 || host.find_last_of(".") == host.size() - 1)
-		return false;
-	for (size_t i = 0; i < host.size(); i++)
-	{
-		if (host.at(i) == '.')
-		{
-			if (host.at(i + 1) == '.')
-				return false;
-		}
-	}
+	// if (host == "localhost")
+	// 	return true;
+	// for (size_t i = 0; i < host.size(); i++)
+	// {
+	// 	if (host.at(i) == '.')
+	// 		dot++;
+	// }
+	// if (dot != 3 || host.find_first_of("0123456789.") == std::string::npos)
+	// 	return false;
+	// if (host.find_first_not_of("0123456789.") != std::string::npos)
+	// 	return false;
+	// if (host.find_first_of(".") == 0 || host.find_last_of(".") == host.size() - 1)
+	// 	return false;
+	// for (size_t i = 0; i < host.size(); i++)
+	// {
+	// 	if (host.at(i) == '.')
+	// 	{
+	// 		if (host.at(i + 1) == '.')
+	// 			return false;
+	// 	}
+	// }
 	return true;
 }
 
