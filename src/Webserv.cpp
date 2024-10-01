@@ -216,7 +216,7 @@ static void	printRequests(std::map<int, Request> &requests)
 void runWebServer(Configuration &config)
 {
 	const std::string	wait[] = {"⠋", "⠙", "⠸", "⠴", "⠦", "⠇"};
-	int					n;
+	int					n = 0;
 
 	initiateWebServer(config);
 	signal(SIGINT, handleSIGINT);

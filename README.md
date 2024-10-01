@@ -68,3 +68,13 @@ NEW TODOS:
 Error cases:
 
 - When we launch the program and try to upload twice in a row it breaks everything (error 404 everywhere)
+
+- Search for all read/recv/write/send on a socket and check that, if an error is returned, the client is removed.
+
+- Limit the client body (use: curl -X POST -H "Content-Type: plain/text" --data "BODY IS HERE write something shorter or longer than body limit").
+
+- In the configuration, try to setup the same port multiple times. It should not work.
+
+- Launch multiple servers at the same time with different configurations but with common ports. Does it work? If it does, ask why the server should work if one of the configurations isn't functional. Keep going.
+
+- You can use a script containing an infinite loop or an error; you are free to do whatever tests you want within the limits of acceptability that remain at your discretion. The group being evaluated should help you with this. METTRE UN TIMEOUT SUR LE SCRIPT POUR PAS RESTER BLOQUE
