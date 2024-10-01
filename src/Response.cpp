@@ -69,7 +69,6 @@ void Response::createResponseStr(LocationBlock location)
 	setHeaders(location);
 	ss << statusLine << headers << body << LF;
 	response = ss.str();
-	// std::cout << "THE RESPONSE WE WANNA SEEEE" << response << std::endl;
 }
 
 void Response::setMimeType(std::string const &fileName)
@@ -382,15 +381,28 @@ void Response::handlePostRequest(Configuration &config, LocationBlock location)
 void Response::handleDeleteRequest(Configuration &config, LocationBlock location)
 {
 	(void)config;
-	if (location.cgiParams.empty())
+	std::string uri = req.getUri();
+	std::string filePath = location.root + uri;
+	struct stat fileStat;
+	if (stat(filePath.c_str(), &fileStat) == -1)
 	{
-		this->statusCode = 405;
+		this->statusCode = 404;
 		setMimeType("html");
 		return;
 	}
-	// we don't need to handle delete requests on cgi
-	// handleCGI(config, location, req, *this);	
-	return;
+	else
+	{
+		if (remove(filePath.c_str()) != 0)
+		{
+			this->statusCode = 500;
+			setMimeType("html");
+			return;
+		}
+		body = "<html><head><title>File successfully deleted!</title></head><body><div><h1>Delete operation was successful!</h1></div></body></html>";
+		setMimeType("html");
+		this->statusCode = 200;
+		return;
+	}
 }
 
 void Response::methodCheck(LocationBlock location)
