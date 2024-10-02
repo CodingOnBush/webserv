@@ -1,18 +1,12 @@
+### Example Siege Command:
 
-// int	main(int ac, char **av)
-// {
-// 	const std::string	defaultConfigPath = "./config/webserv.conf";
+```bash
+siege -b -t 1M -c 50 http://localhost:8080
+```
 
-// 	try
-// 	{
-// 		Configuration config((ac == 2) ? av[1] : defaultConfigPath);
-// 		config.printConfig();
-// 		webserv(config);
-// 	}
-// 	catch (std::exception &e)
-// 	{
-// 		std::cerr << "Error : " << e.what() << std::endl;
-// 		return (1);
-// 	}
-// 	return (0);
-// }
+### Explanation of the command:
+
+- **`-b`**: This flag runs Siege in "benchmarking mode." In this mode, Siege will send requests as fast as possible without waiting between them.
+- **`-t 1M`**: This specifies the duration for which the test will run. Here, `1M` means 1 minute. You can adjust this to other time units, like `10S` (10 seconds) or `1H` (1 hour).
+- **`-c 50`**: This sets the number of concurrent users (simulated connections) to 50. You can adjust this number based on how much load you want to simulate.
+- **`http://localhost:8080`**: The target URL of your server (replace this with your actual server address and port).

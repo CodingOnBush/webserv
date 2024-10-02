@@ -171,7 +171,7 @@ void sendResponse(int fd, Configuration &config)
 {
 	// printRequest(requests[fd]);
 	static int i = 0;
-	std::cout << "Sending response (" << i++ << ")" << std::endl;
+	// std::cout << "Sending response (" << i++ << ")" << std::endl;
 	Response resp(requests[fd]);
 	responses[fd] = resp;
 	std::string generatedResponse = responses[fd].getResponse(config);
@@ -224,20 +224,14 @@ void runWebServer(Configuration &config)
 		int nfds = poll(&pollFdsList[0], pollFdsList.size(), TIMEOUT);
 		if (nfds < 0)
 			break;
-		
-		/*
-		ne redescend plus en dessous de 0 après avoir fait http://localhost:8080/ puis
-		cliquer sur meow.gif et revenir en arrirère
-		*/
 		if (nfds == 0)
 		{
 			std::cout << GREEN << "  { Waiting for connection " << wait[n++ % 6] << " }" << SET << "\r" << std::flush;
 			if (n == 6)
 				n = 0;
 		}
-		
-		// std::cout << "nfds: " << nfds << std::endl;
-		// printPollFdsList(pollFdsList);
+		else if (nfds > 0)
+			std::cout << "  { Connection received }                              " << "\r" << std::flush;
 
 		int j = 0;
 		int pollFdsListSize = pollFdsList.size();
