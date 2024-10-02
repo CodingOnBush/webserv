@@ -88,7 +88,7 @@ void	initiateWebServer(Configuration &config)
 		std::pair<std::string, int>	hostPort = std::make_pair(it->host, it->port);
 		int					 		serverSocket;
 
-		std::cout << "(" << it->host << ":" << it->port << ")"<< std::endl;
+		// std::cout << "(" << it->host << ":" << it->port << ")"<< std::endl;
 		if (socketsToPorts.find(hostPort) != socketsToPorts.end())
 			serverSocket = socketsToPorts[hostPort];
 		else
@@ -100,11 +100,11 @@ void	initiateWebServer(Configuration &config)
 		}
 		serversToFd[serverSocket].push_back(*it);
 	}
-	printServersToFd();
-	printSocketsToPorts();
+	// printServersToFd();
+	// printSocketsToPorts();
 	for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
 		listenFds.push_back(it->first);
-	printListenFds();
+	// printListenFds();
 	for (std::vector<int>::iterator it = listenFds.begin(); it != listenFds.end(); it++)
 	{
 		struct pollfd pfd;
@@ -113,16 +113,15 @@ void	initiateWebServer(Configuration &config)
 		pfd.revents = 0;
 		pollFdsList.push_back(pfd);
 	}
-	printPollFdsList(pollFdsList);
+	// printPollFdsList(pollFdsList);
 	requests.clear();
 	responses.clear();
 }
 
 void	acceptConnection(int fd)
 {
-	std::cout << "Accepting connection" << std::endl;
-	int				newConnection = accept(fd, NULL, NULL);
-	int				opt = 1;
+	int	newConnection = accept(fd, NULL, NULL);
+	int	opt = 1;
 	
 	if (newConnection < 0)
 	{
@@ -170,7 +169,7 @@ void receiveRequest(int fd)
 
 void sendResponse(int fd, Configuration &config)
 {
-	printRequest(requests[fd]);
+	// printRequest(requests[fd]);
 	static int i = 0;
 	std::cout << "Sending response (" << i++ << ")" << std::endl;
 	Response resp(requests[fd]);

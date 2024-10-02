@@ -26,7 +26,7 @@
 
 #define MAX_CLIENTS 32
 #define BUFFER_SIZE 1024
-#define TIMEOUT 500
+#define TIMEOUT 50
 
 #define GREEN "\033[32m"
 #define BLUE "\033[34m"
