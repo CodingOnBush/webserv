@@ -16,6 +16,7 @@ enum requestState
 {
 	RECEIVED,
 	PROCESSED,
+	DONE
 };
 
 enum parsingState

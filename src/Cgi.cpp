@@ -222,24 +222,14 @@ void    handleCGI(Configuration &Config, LocationBlock &location, Request &req, 
     {
         close(pipefd[1]);
         char buffer[128];
-        // std::cout << "PARENT" << std::endl;
-        // ssize_t bytesRead;
-        // while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0)
-        // {
-        //     buffer[bytesRead] = '\0';
-        //     cgiOutput << buffer;
-        // }
-        // close(pipefd[0]);
-
         int status;
         cgiStart = std::time(0);
-        
-        do {
-            // std::cout << "COUCOU" << std::endl;
-            // std::cout << "std::time(0) = " << std::time(0) << std::endl;
-            if (std::time(0) - cgiStart > CGITIMEOUT)
+
+        while (true) 
+        {
+            // Check if the timeout has been exceeded
+            if (std::time(0) - cgiStart > CGITIMEOUT) 
             {
-                // std::cout << "TIMEOUT" << std::endl;
                 std::cout << "std::time(0) - cgiStart = " << std::time(0) - cgiStart << std::endl;
                 kill(pid, SIGKILL);
                 res.setStatusCode(504);
@@ -248,13 +238,13 @@ void    handleCGI(Configuration &Config, LocationBlock &location, Request &req, 
                 res.fdToClose = true;
                 return;
             }
-        } while (waitpid(pid, &status, WNOHANG) == 0);
-
+            // Check if the child process has terminated
+            if (waitpid(pid, &status, WNOHANG) != 0) 
+                break; // Sleep for 10 milliseconds
+        }
 
         if (WIFEXITED(status))
-        {
-            // std::cout << "child exited with status: " << WEXITSTATUS(status) << std::endl;
-        }
+            std::cout << "child exited with status: " << WEXITSTATUS(status) << std::endl;
         ssize_t bytesRead;
         while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0)
         {
@@ -262,13 +252,7 @@ void    handleCGI(Configuration &Config, LocationBlock &location, Request &req, 
             cgiOutput << buffer;
         }
         close(pipefd[0]);
-        if (cgiOutput.str().empty())
-        {
-            res.setStatusCode(500);
-            freeEnv(env);
-            return;
-        }
-        else if (WEXITSTATUS(status) != 0)
+        if (cgiOutput.str().empty() || WEXITSTATUS(status) != 0)
         {
             res.setStatusCode(500);
             freeEnv(env);

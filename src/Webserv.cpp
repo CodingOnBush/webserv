@@ -1,6 +1,9 @@
 #include "../include/Webserv.hpp"
 #include "Webserv.hpp"
 
+std::map<int, std::time_t> startTimeForFd;
+
+
 std::map<std::pair<std::string, int>, int>	socketsToPorts;// unused in this code...
 std::map<int, std::vector<ServerBlock> >	serversToFd;
 std::map<int, std::time_t>					fdToTimeoutCheck;
@@ -175,6 +178,7 @@ void sendResponse(int fd, Configuration &config)
 	// std::cout << "Sending response (" << i++ << ")" << std::endl;
 	Response resp(requests[fd]);
 	responses[fd] = resp;
+	startTimeForFd[fd] = std::time(0);
 	std::string generatedResponse = responses[fd].getResponse(config);
 	int bytes_sent = send(fd, generatedResponse.c_str(), generatedResponse.size(), 0);
 	if (bytes_sent == -1)
@@ -210,6 +214,26 @@ static void	printRequests(std::map<int, Request> &requests)
 	for (std::map<int, Request>::iterator it = requests.begin(); it != requests.end(); it++)
 	{
 		std::cout << "fd: " << it->first << " state: " << it->second.getRequestState() << std::endl;
+	}
+}
+
+void checkTimeouts(std::map<int, std::time_t> &startTimeForFd)
+{
+	std::time_t currentTime = std::time(0);
+	std::map<int, std::time_t>::iterator it = startTimeForFd.begin();
+	while (it != startTimeForFd.end())
+	{
+		if (currentTime - it->second > 3)
+		{
+			rmFromPollWatchlist(it->first);
+			serversToFd.erase(it->first);
+			requests[it->first].clearRequest();
+			requests.erase(it->first);
+			close(it->first);
+			startTimeForFd.erase(it++);
+		}
+		else
+			it++;
 	}
 }
 
@@ -252,21 +276,13 @@ void runWebServer(Configuration &config)
 					receiveRequest(pfd.fd);
 			}
 			if (requests[pfd.fd].getParsingState() == PARSING_DONE && pfd.revents & POLLOUT)
-			{
 				sendResponse(pfd.fd, config);
-				std::cout << "COUCOUCOUCOUCOCUOOUCUOCOUCUOCOU" << std::endl;
-				if (responses[pfd.fd].fdToClose)
-				{
-					requests[pfd.fd].setRequestState(PROCESSED);
-					// std::cout << "Closing connection" << std::endl;
-					// rmFromPollWatchlist(pfd.fd);
-					// serversToFd.erase(pfd.fd);
-					// requests[pfd.fd].clearRequest();
-					// requests.erase(pfd.fd);
-					// close(pfd.fd);
-				}
+			if (requests[pfd.fd].getRequestState() == PROCESSED)
+			{
+				requests[pfd.fd].clearRequest();
+				requests.erase(pfd.fd);
 			}
-			if (requests[pfd.fd].getRequestState() == PROCESSED || (pfd.revents & POLLHUP))
+			if (pfd.revents & POLLHUP)
 			{
 				rmFromPollWatchlist(pfd.fd);
 				serversToFd.erase(pfd.fd);
@@ -274,9 +290,8 @@ void runWebServer(Configuration &config)
 				requests.erase(pfd.fd);
 				close(pfd.fd);
 			}
+			checkTimeouts(startTimeForFd);
 		}
-
-		printPollFdsList(pollFdsList);
 	}
 	for(std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
 		close(it->first);
