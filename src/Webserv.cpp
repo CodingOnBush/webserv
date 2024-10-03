@@ -3,6 +3,7 @@
 
 std::map<std::pair<std::string, int>, int>	socketsToPorts;// unused in this code...
 std::map<int, std::vector<ServerBlock> >	serversToFd;
+std::map<int, std::time_t>					fdToTimeoutCheck;
 std::vector<int>							listenFds;
 std::vector<struct pollfd>					pollFdsList;
 std::map<int, Request>						requests;
@@ -226,12 +227,13 @@ void runWebServer(Configuration &config)
 			break;
 		if (nfds == 0)
 		{
-			std::cout << GREEN << "  { Waiting for connection " << wait[n++ % 6] << " }" << SET << "\r" << std::flush;
-			if (n == 6)
-				n = 0;
+			// std::cout << GREEN << "  { Waiting for connection " << wait[n++ % 6] << " }" << SET << "\r" << std::flush;
+			std::cout << GREEN << "Waiting for connection..." << SET << std::endl;
+			// if (n == 6)
+			// 	n = 0;
 		}
-		else if (nfds > 0)
-			std::cout << "  { Connection received }                              " << "\r" << std::flush;
+		// else if (nfds > 0)
+		// 	std::cout << GREEN << "Connection received!" << SET << std::endl;
 
 		int j = 0;
 		int pollFdsListSize = pollFdsList.size();

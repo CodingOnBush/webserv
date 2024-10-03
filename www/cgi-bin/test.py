@@ -4,6 +4,9 @@ import cgi
 import cgitb
 import json
 
+# while True:
+    # pass
+
 print("Hi from test.py")
 request_method = os.environ.get('REQUEST_METHOD')
 request_query = os.environ.get('QUERY_STRING')

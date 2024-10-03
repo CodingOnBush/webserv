@@ -4,6 +4,9 @@
 //ajouter un check de timeout de notre execve pour verifier qu'on est pas coinces dans une boucle
 //infinie
 
+std::time_t cgiStart = 0;
+#define CGITIMEOUT 2000
+
 std::string getPathInfo(const std::string &uri, const std::string &keyword) {
     size_t pos = uri.find(keyword);
     
@@ -205,6 +208,7 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
     }
     else if (pid == 0)
     {
+        std::cout << "COUCOU" << std::endl;
         close(pipefd[0]);
         dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[1]);
@@ -218,6 +222,37 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
     {
         close(pipefd[1]);
         char buffer[128];
+        std::cout << "PARENT" << std::endl;
+        // ssize_t bytesRead;
+        // while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0)
+        // {
+        //     buffer[bytesRead] = '\0';
+        //     cgiOutput << buffer;
+        // }
+        // close(pipefd[0]);
+
+        int status;
+        cgiStart = std::time(0);
+        
+        do {
+            // std::cout << "COUCOU" << std::endl;
+            // std::cout << "std::time(0) = " << std::time(0) << std::endl;
+            // std::cout << "std::time(0) - cgiStart = " << std::time(0) - cgiStart << std::endl;
+            if (std::time(0) - cgiStart > 2)
+            {
+                // std::cout << "TIMEOUT" << std::endl;
+                kill(pid, SIGKILL);
+                res.setStatusCode(500);
+                freeEnv(env);
+                return;
+            }
+        } while (waitpid(pid, &status, WNOHANG) == 0);
+
+
+        if (WIFEXITED(status))
+        {
+            // std::cout << "child exited with status: " << WEXITSTATUS(status) << std::endl;
+        }
         ssize_t bytesRead;
         while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0)
         {
@@ -225,13 +260,6 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
             cgiOutput << buffer;
         }
         close(pipefd[0]);
-
-        int status;
-        waitpid(pid, &status, 0);
-        if (WIFEXITED(status))
-        {
-            // std::cout << "child exited with status: " << WEXITSTATUS(status) << std::endl;
-        }
         if (cgiOutput.str().empty())
         {
             res.setStatusCode(500);
@@ -258,6 +286,8 @@ void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Res
             res.setMimeType("html");
             res.setStatusCode(200);
         }
+
+        // std::cout << "CGI OUTPUT: " << cgiOutput.str() << std::endl;
     }
     freeEnv(env);
 }
