@@ -33,6 +33,8 @@ class Response
 		void 			getBody(std::string uri, LocationBlock location);
 		std::string 	handleRedirection(Configuration &config, LocationBlock &location);
 	public:
+		bool	fdToClose;// maybe to move to private
+
 		Response();
 		Response(Request &req);
 		~Response();

@@ -1,9 +1,9 @@
 #include "Response.hpp"
 #include "Webserv.hpp"
 
-Response::Response() : statusCode(0) {};
+Response::Response() : statusCode(0), fdToClose(false) {};
 
-Response::Response(Request &req) : req(req), statusCode(0) {};
+Response::Response(Request &req) : req(req), statusCode(0), fdToClose(false) {};
 
 Response::~Response() {};
 
