@@ -1,11 +1,12 @@
 #include "../include/Webserv.hpp"
 #include "Webserv.hpp"
 
+typedef std::pair<std::string, int> Hostport;
+
 std::vector<ClientConnection>	g_connections;
 
-std::map<int, std::time_t> startTimeForFd;
-std::set<int>				g_listeningSockets; //server ports sockets that are listening for connections
-typedef std::pair<std::string, int> Hostport;
+std::map<int, std::time_t>			startTimeForFd;
+std::set<int>						g_listeningSockets; //server ports sockets that are listening for connections
 
 
 // std::map<std::pair<std::string, int>, int>	hostPort_to_socket_fd;
