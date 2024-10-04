@@ -1,15 +1,32 @@
-==478109== Memcheck, a memory error detector
-==478109== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==478109== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
-==478109== Command: ./webserv file.conf
-==478109== Parent PID: 406830
-==478109== 
-==478109== 
-==478109== HEAP SUMMARY:
-==478109==     in use at exit: 0 bytes in 0 blocks
-==478109==   total heap usage: 3,975,247 allocs, 3,975,247 frees, 3,159,174,072 bytes allocated
-==478109== 
-==478109== All heap blocks were freed -- no leaks are possible
-==478109== 
-==478109== For lists of detected and suppressed errors, rerun with: -s
-==478109== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==728524== Memcheck, a memory error detector
+==728524== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==728524== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==728524== Command: ./webserv file.conf
+==728524== Parent PID: 694268
+==728524== 
+==728524== 
+==728524== FILE DESCRIPTORS: 5 open (0 std) at exit.
+==728524== Open file descriptor 103: /usr/share/code/v8_context_snapshot.bin
+==728524==    <inherited from parent>
+==728524== 
+==728524== Open AF_UNIX socket 39: <unknown>
+==728524==    <inherited from parent>
+==728524== 
+==728524== Open file descriptor 38: /home/momrane/.config/Code/logs/20241004T134226/ptyhost.log
+==728524==    <inherited from parent>
+==728524== 
+==728524== Open file descriptor 37: /usr/share/code/resources/app/node_modules.asar
+==728524==    <inherited from parent>
+==728524== 
+==728524== Open file descriptor 3: /home/momrane/Webserv/outfile
+==728524==    <inherited from parent>
+==728524== 
+==728524== 
+==728524== HEAP SUMMARY:
+==728524==     in use at exit: 0 bytes in 0 blocks
+==728524==   total heap usage: 1,665 allocs, 1,665 frees, 498,132 bytes allocated
+==728524== 
+==728524== All heap blocks were freed -- no leaks are possible
+==728524== 
+==728524== For lists of detected and suppressed errors, rerun with: -s
+==728524== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
