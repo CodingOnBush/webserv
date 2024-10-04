@@ -78,7 +78,7 @@ static int	createServerSocket(int port)
 	addr.sin_port = htons(port);
 	if (bind(serverSocket, (struct sockaddr *)&addr, sizeof(addr)) == -1)
 		return (perror("bind"), close(serverSocket), -1);
-	if (listen(serverSocket, 10) == -1)
+	if (listen(serverSocket, MAX_CLIENTS) == -1)
 		return (perror("listen"), close(serverSocket), -1);
 	return (serverSocket);
 }
@@ -146,6 +146,7 @@ void	acceptConnection(int fd)
 	}
 	struct pollfd	pfd = (struct pollfd){newConnection, POLLIN | POLLOUT | POLLHUP, 0};
 	pollFdsList.push_back(pfd);
+	std::cout << "PollFdsList size: " << pollFdsList.size() << std::endl;
 	serversToFd[newConnection] = serversToFd[fd];
 	requests[newConnection] = Request();
 }
@@ -223,7 +224,7 @@ void checkTimeouts(std::map<int, std::time_t> &startTimeForFd)
 	std::map<int, std::time_t>::iterator it = startTimeForFd.begin();
 	while (it != startTimeForFd.end())
 	{
-		if (currentTime - it->second > 3)
+		if (currentTime - it->second > 5)
 		{
 			rmFromPollWatchlist(it->first);
 			serversToFd.erase(it->first);
@@ -281,6 +282,7 @@ void runWebServer(Configuration &config)
 			{
 				requests[pfd.fd].clearRequest();
 				requests.erase(pfd.fd);
+				rmFromPollWatchlist(pfd.fd);
 			}
 			if (pfd.revents & POLLHUP)
 			{
@@ -291,6 +293,7 @@ void runWebServer(Configuration &config)
 				close(pfd.fd);
 			}
 			checkTimeouts(startTimeForFd);
+			// printPollFdsList(pollFdsList);
 		}
 	}
 	for(std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)

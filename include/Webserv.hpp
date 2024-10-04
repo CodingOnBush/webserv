@@ -25,7 +25,7 @@
 #include <poll.h>
 #include <ctime>
 
-#define MAX_CLIENTS 32
+#define MAX_CLIENTS 100
 #define BUFFER_SIZE 1024
 #define TIMEOUT 500
 

@@ -78,3 +78,5 @@ Error cases:
 - Launch multiple servers at the same time with different configurations but with common ports. Does it work? If it does, ask why the server should work if one of the configurations isn't functional. Keep going.
 
 - You can use a script containing an infinite loop or an error; you are free to do whatever tests you want within the limits of acceptability that remain at your discretion. The group being evaluated should help you with this. METTRE UN TIMEOUT SUR LE SCRIPT POUR PAS RESTER BLOQUE
+
+- Check that when we accept connections we don't have more clients than the maximum number of clients allowed. (here we never check that NewClientFd is not > than the max number of clients)
