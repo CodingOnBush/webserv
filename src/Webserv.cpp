@@ -146,7 +146,7 @@ void	acceptConnection(int fd)
 	}
 	struct pollfd	pfd = (struct pollfd){newConnection, POLLIN | POLLOUT | POLLHUP, 0};
 	pollFdsList.push_back(pfd);
-	std::cout << "PollFdsList size: " << pollFdsList.size() << std::endl;
+	// std::cout << "PollFdsList size: " << pollFdsList.size() << std::endl;
 	serversToFd[newConnection] = serversToFd[fd];
 	requests[newConnection] = Request();
 }
@@ -207,6 +207,8 @@ static void handleSIGINT(int sig)
 	(void)sig;
 	std::cout << BLUE << "\n  { SIGINT received, stopping server }" << SET << std::endl;
 	running = false;
+	for(std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
+		close(it->first);
 }
 
 static void	printRequests(std::map<int, Request> &requests)
@@ -278,13 +280,15 @@ void runWebServer(Configuration &config)
 			}
 			if (requests[pfd.fd].getParsingState() == PARSING_DONE && pfd.revents & POLLOUT)
 				sendResponse(pfd.fd, config);
-			if (requests[pfd.fd].getRequestState() == PROCESSED)
-			{
-				requests[pfd.fd].clearRequest();
-				requests.erase(pfd.fd);
-				rmFromPollWatchlist(pfd.fd);
-			}
-			if (pfd.revents & POLLHUP)
+			// if (requests[pfd.fd].getRequestState() == PROCESSED)
+			// {
+			// 	requests[pfd.fd].clearRequest();
+			// 	requests.erase(pfd.fd);
+			// 	rmFromPollWatchlist(pfd.fd);
+			// 	serversToFd.erase(pfd.fd);
+			// 	close(pfd.fd);
+			// }
+			if (requests[pfd.fd].getRequestState() == PROCESSED || (pfd.revents & POLLHUP))
 			{
 				rmFromPollWatchlist(pfd.fd);
 				serversToFd.erase(pfd.fd);
@@ -296,6 +300,7 @@ void runWebServer(Configuration &config)
 			// printPollFdsList(pollFdsList);
 		}
 	}
+	std::cout << "Server stopped" << std::endl;
 	for(std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
 		close(it->first);
 }
