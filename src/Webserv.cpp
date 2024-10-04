@@ -4,7 +4,7 @@
 std::vector<ClientConnection>	g_connections;
 
 std::map<int, std::time_t> startTimeForFd;
-
+std::set<int>				g_listeningSockets; //server ports sockets that are listening for connections
 typedef std::pair<std::string, int> Hostport;
 
 
@@ -13,6 +13,7 @@ std::map<int, ServerBlock>	socketFd_to_ServerBlock;
 std::map<int, std::time_t>	fdToTimeoutCheck;
 std::vector<int>			listenFds;
 std::vector<struct pollfd>	pollFdsList;
+
 std::map<int, Request>		requests;
 std::map<int, Response> 	responses;
 bool						running = true;
@@ -128,6 +129,7 @@ static void	initServer(Configuration &config)
 			continue;
 		socketFd_to_ServerBlock[server_fd] = currentServer;
 		listenFds.push_back(server_fd);
+		// g_listeningSockets.insert(server_fd);
 	}
 	for (std::vector<int>::iterator it = listenFds.begin(); it != listenFds.end(); it++)
 	{
@@ -198,6 +200,7 @@ void receiveRequest(int fd)
 	ss.write(buffer, return_value);
 	req.parseRequest(ss);
 	req.setRequestState(PARSING_DONE);
+	g_connections[fd].startTime = std::time(0);
 }
 
 static void	resetEvent(int fd)
@@ -285,7 +288,7 @@ static void checkTimeouts()
 
 	for (std::vector<ClientConnection>::iterator it = g_connections.begin(); it != g_connections.end(); it++)
 	{
-		if (std::time(0) - it->startTime > 30)
+		if (std::time(0) - it->startTime > 5)
 		{
 			std::cout << "fd " << it->pfd.fd << " timed out" << std::endl;
 			rmFromPollWatchlist(it->pfd.fd);
@@ -309,6 +312,16 @@ static void checkTimeouts()
 
 }
 
+static bool	fdAleradyExists(int fd)
+{
+	for (std::vector<ClientConnection>::iterator it = g_connections.begin(); it != g_connections.end(); it++)
+	{
+		if (it->pfd.fd == fd)
+			return true;
+	}
+	return false;
+}
+
 void runWebServer(Configuration &config)
 {
 	int	n = 0;
@@ -319,7 +332,7 @@ void runWebServer(Configuration &config)
 	signal(SIGINT, handleSIGINT);
 	while (running)
 	{
-		nfds = poll(pollFdsList.data(), pollFdsList.size(), TIMEOUT);
+		nfds = poll(&pollFdsList[0], pollFdsList.size(), TIMEOUT);
 		if (nfds < 0)
 			break;
 		if (nfds == 0)
@@ -337,7 +350,7 @@ void runWebServer(Configuration &config)
 			j++;
 			if (pfd.revents & POLLIN)
 			{
-				if (findCount(pfd.fd) > 0)
+				if (!fdAleradyExists(pfd.fd))
 					acceptConnection(pfd.fd);
 				else
 					receiveRequest(pfd.fd);
