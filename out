@@ -1,38 +1,32 @@
-==620409== Memcheck, a memory error detector
-==620409== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==620409== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
-==620409== Command: ./webserv file.conf
-==620409== Parent PID: 616131
-==620409== 
-==620409== 
-==620409== FILE DESCRIPTORS: 10 open (3 std) at exit.
-==620409== Open file descriptor 103: /usr/share/code/v8_context_snapshot.bin
-==620409==    <inherited from parent>
-==620409== 
-==620409== Open AF_UNIX socket 42: <unknown>
-==620409==    <inherited from parent>
-==620409== 
-==620409== Open file descriptor 40: /dev/ptmx
-==620409==    <inherited from parent>
-==620409== 
-==620409== Open AF_UNIX socket 39: <unknown>
-==620409==    <inherited from parent>
-==620409== 
-==620409== Open file descriptor 38: /home/vvaudain/.config/Code/logs/20241004T132826/ptyhost.log
-==620409==    <inherited from parent>
-==620409== 
-==620409== Open file descriptor 37: /usr/share/code/resources/app/node_modules.asar
-==620409==    <inherited from parent>
-==620409== 
-==620409== Open file descriptor 3: /home/vvaudain/webserv/out
-==620409==    <inherited from parent>
-==620409== 
-==620409== 
-==620409== HEAP SUMMARY:
-==620409==     in use at exit: 0 bytes in 0 blocks
-==620409==   total heap usage: 806,234 allocs, 806,234 frees, 640,688,422 bytes allocated
-==620409== 
-==620409== All heap blocks were freed -- no leaks are possible
-==620409== 
-==620409== For lists of detected and suppressed errors, rerun with: -s
-==620409== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==733711== Memcheck, a memory error detector
+==733711== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==733711== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==733711== Command: ./webserv file.conf
+==733711== Parent PID: 637862
+==733711== 
+==733711== 
+==733711== FILE DESCRIPTORS: 5 open (0 std) at exit.
+==733711== Open file descriptor 103: /usr/share/code/v8_context_snapshot.bin
+==733711==    <inherited from parent>
+==733711== 
+==733711== Open file descriptor 39: /dev/ptmx
+==733711==    <inherited from parent>
+==733711== 
+==733711== Open file descriptor 38: /home/vvaudain/.config/Code/logs/20241004T160706/ptyhost.log
+==733711==    <inherited from parent>
+==733711== 
+==733711== Open file descriptor 37: /usr/share/code/resources/app/node_modules.asar
+==733711==    <inherited from parent>
+==733711== 
+==733711== Open file descriptor 3: /home/vvaudain/webserv/out
+==733711==    <inherited from parent>
+==733711== 
+==733711== 
+==733711== HEAP SUMMARY:
+==733711==     in use at exit: 0 bytes in 0 blocks
+==733711==   total heap usage: 805,569 allocs, 805,569 frees, 639,396,944 bytes allocated
+==733711== 
+==733711== All heap blocks were freed -- no leaks are possible
+==733711== 
+==733711== For lists of detected and suppressed errors, rerun with: -s
+==733711== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

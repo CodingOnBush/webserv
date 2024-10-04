@@ -1,13 +1,7 @@
 #include "../include/Webserv.hpp"
 #include "Webserv.hpp"
 
-struct Connection
-{
-	int		fd;
-	std::string	host;
-	int			port;
-	std::time_t	startTime;
-};
+std::vector<ClientConnection>	g_connections;
 
 std::map<int, std::time_t> startTimeForFd;
 
@@ -168,8 +162,17 @@ void	acceptConnection(int fd)
 		perror("setsockopt");
 		return;
 	}
-	struct pollfd	pfd = (struct pollfd){newConnection, POLLIN | POLLOUT | POLLHUP, 0};
-	pollFdsList.push_back(pfd);
+	// struct pollfd	pfd = (struct epollfd){newConnection, POLLIN | POLLOUT | POLLHUP, 0};
+	// pollFdsList.push_back(pfd);
+
+	ClientConnection newClient;
+	
+	newClient.startTime = std::time(0);
+	newClient.pfd.fd = newConnection;
+	newClient.pfd.events = POLLIN | POLLOUT | POLLHUP;
+	newClient.pfd.revents = 0;
+	g_connections.push_back(newClient);
+	pollFdsList.push_back(newClient.pfd);
 	// std::cout << "PollFdsList size: " << pollFdsList.size() << std::endl;
 	socketFd_to_ServerBlock[newConnection] = socketFd_to_ServerBlock[fd];
 	requests[newConnection] = Request();
@@ -212,12 +215,12 @@ static void	resetEvent(int fd)
 void	sendResponse(int fd, Configuration &config)
 {
 	// printRequest(requests[fd]);
-	static int i = 0;
-	std::cout << "Sending response (" << i++ << ")" << std::endl;
+	// static int i = 0;
 	responses[fd] = Response(requests[fd]);
 	startTimeForFd[fd] = std::time(0);
 	std::string generatedResponse = responses[fd].getResponse(config);
 	// std::cout << "fd : " << fd << std::endl;
+	std::cout << "Sending response (" << fd << ")" << std::endl;
 	int bytes_sent = send(fd, generatedResponse.c_str(), generatedResponse.size(), 0);
 	if (bytes_sent == -1)
 	{
@@ -259,24 +262,51 @@ static void	printRequests(std::map<int, Request> &requests)
 	}
 }
 
-void checkTimeouts(std::map<int, std::time_t> &startTimeForFd)
+static void checkTimeouts()
 {
-	std::time_t currentTime = std::time(0);
-	std::map<int, std::time_t>::iterator it = startTimeForFd.begin();
-	while (it != startTimeForFd.end())
+	// std::time_t currentTime = std::time(0);
+	// std::map<int, std::time_t>::iterator it = startTimeForFd.begin();
+	// while (it != startTimeForFd.end())
+	// {
+	// 	if (currentTime - it->second > 5)
+	// 	{
+	// 		rmFromPollWatchlist(it->first);
+	// 		socketFd_to_ServerBlock.erase(it->first);
+	// 		requests[it->first].clearRequest();
+	// 		requests.erase(it->first);
+	// 		close(it->first);
+	// 		startTimeForFd.erase(it++);
+	// 	}
+	// 	else
+	// 		it++;
+	// }
+
+	std::vector<int> fdsToRemove;
+
+	for (std::vector<ClientConnection>::iterator it = g_connections.begin(); it != g_connections.end(); it++)
 	{
-		if (currentTime - it->second > 5)
+		if (std::time(0) - it->startTime > 30)
 		{
-			rmFromPollWatchlist(it->first);
-			socketFd_to_ServerBlock.erase(it->first);
-			requests[it->first].clearRequest();
-			requests.erase(it->first);
-			close(it->first);
-			startTimeForFd.erase(it++);
+			std::cout << "fd " << it->pfd.fd << " timed out" << std::endl;
+			rmFromPollWatchlist(it->pfd.fd);
+			close(it->pfd.fd);
+			fdsToRemove.push_back(it->pfd.fd);
+			break;
 		}
-		else
-			it++;
 	}
+	
+	for (std::vector<int>::iterator it = fdsToRemove.begin(); it != fdsToRemove.end(); it++)
+	{
+		for (std::vector<ClientConnection>::iterator it2 = g_connections.begin(); it2 != g_connections.end(); it2++)
+		{
+			if (it2->pfd.fd == *it)
+			{
+				g_connections.erase(it2);
+				break;
+			}
+		}
+	}
+
 }
 
 void runWebServer(Configuration &config)
@@ -296,6 +326,7 @@ void runWebServer(Configuration &config)
 			std::cout << GREEN << "Waiting for connection..." << SET << std::endl;
 
 		pollFdsListSize = pollFdsList.size();
+		// std::cout << "pollFdsListSize: " << pollFdsListSize << std::endl;
 		int j = 0;
 		for (int i = 0; i < pollFdsListSize && j < nfds; i++)
 		{
@@ -314,19 +345,19 @@ void runWebServer(Configuration &config)
 			if (requests[pfd.fd].getParsingState() == PARSING_DONE && pfd.revents & POLLOUT)
 				sendResponse(pfd.fd, config);
 			// printPollFdsList(pollFdsList);
-			if (requests[pfd.fd].getRequestState() == PROCESSED)
-			{
-				pollFdsList.erase(pollFdsList.begin() + i);
-				i--;
-				pollFdsListSize--;
-			}
+			// if (requests[pfd.fd].getRequestState() == PROCESSED)
+			// {
+			// 	pollFdsList.erase(pollFdsList.begin() + i);
+			// 	i--;
+			// 	pollFdsListSize--;
+			// }
 			if (pfd.revents & POLLHUP)
 			{
 				std::cout << "fd " << pfd.fd << " disconnected" << std::endl;
 				pollFdsList.erase(pollFdsList.begin() + i);
 			}
 		}
-		checkTimeouts(startTimeForFd);
+		checkTimeouts();
 	}
 	std::cout << "Server stopped" << std::endl;
 	for(std::map<int, ServerBlock>::iterator it = socketFd_to_ServerBlock.begin(); it != socketFd_to_ServerBlock.end(); it++)

@@ -33,6 +33,12 @@
 #define BLUE "\033[34m"
 #define SET "\033[0m"
 
+struct ClientConnection
+{
+	std::time_t	startTime;
+	struct pollfd pfd;
+};
+
 extern int  uploadNb;
 
 void    runWebServer(Configuration &config);
