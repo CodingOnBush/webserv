@@ -3,14 +3,18 @@
 
 bool			g_running = true;
 Connection		g_connections[MAX_EVENTS];
-struct pollfd	g_pfds[MAX_EVENTS];// list of all file descriptors to poll
+// struct pollfd	g_pfds[MAX_EVENTS];// list of all file descriptors to poll
+std::vector<struct pollfd>	g_pfds;
 
 static void	closeAllFds()
 {
-	for (nfds_t i = 0; i < MAX_EVENTS; i++)
+	for (size_t i = 0; i < g_pfds.size(); i++)
 	{
 		if (g_pfds[i].fd > 0)
+		{
 			close(g_pfds[i].fd);
+			g_pfds.erase(g_pfds.begin() + i);
+		}
 	}
 }
 
@@ -76,26 +80,17 @@ static void	acceptNewConnection(struct pollfd &pfd)
 		perror("fcntl");
 		return;
 	}
-	if (setsockopt(newConnection, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+	if (setsockopt(newConnection, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT | SO_KEEPALIVE, &opt, sizeof(opt)) < 0)
 	{
 		close(newConnection);
 		perror("setsockopt");
 		return;
 	}
-	if (setsockopt(newConnection, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) < 0)
-	{
-		close(newConnection);
-		perror("setsockopt");
-		return;
-	}
-	if (setsockopt(newConnection, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt)) < 0)
-	{
-		close(newConnection);
-		perror("setsockopt");
-		return;
-	}
-	g_pfds[newConnection].fd = newConnection;
-	g_pfds[newConnection].events = POLLIN | POLLHUP;
+	struct pollfd	newPfd;
+
+	newPfd.fd = newConnection;
+	newPfd.events = POLLIN;
+	g_pfds.push_back(newPfd);
 	g_connections[newConnection].req = Request();
 	g_connections[newConnection].startTime = std::time(0);
 	std::cout << "New connection on fd " << newConnection << " accepted at " << std::time(0) << std::endl;
@@ -113,7 +108,7 @@ void	receiveRequest(struct pollfd &pfd)
 		perror("recv");
 		return;
 	}
-	g_pfds[pfd.fd].events = POLLOUT;
+	pfd.events = POLLOUT | POLLHUP;
 	if (bytesReceived == 0)
 	{
 		g_connections[pfd.fd].req.setRequestState(RECEIVED);
@@ -154,31 +149,30 @@ static void	handleSIGINT(int sig)
 	closeAllFds();
 }
 
-static void	initPfds(struct pollfd *pfds, std::set<int> &listeningFds)
+static void	initPfds(std::vector<struct pollfd> &pfds, std::set<int> &listeningFds)
 {
-	for(nfds_t i = 0; i < MAX_EVENTS; i++)
+	for (std::set<int>::iterator it = listeningFds.begin(); it != listeningFds.end(); it++)
 	{
-		if (listeningFds.find(i) != listeningFds.end())
-		{
-			pfds[i].fd = i;
-			pfds[i].events = POLLIN | POLLHUP;
-			pfds[i].revents = 0;
-		}
-		else
-			pfds[i].fd = -1;
+		struct pollfd	pfd;
+
+		pfd.fd = *it;
+		pfd.events = POLLIN;
+		pfds.push_back(pfd);
 	}
 }
 
 static void	checkTimeouts(nfds_t i, std::set<int> &listeningFds)
 {
-	if (listeningFds.find(g_pfds[i].fd) == listeningFds.end() && g_pfds[i].fd > 0)
+	if (listeningFds.find(g_pfds[i].fd) != listeningFds.end() || g_pfds[i].fd < 0)
 	{
-		if (std::time(0) - g_connections[g_pfds[i].fd].startTime >= 5)
-		{
-			std::cout << "fd " << g_pfds[i].fd << " timed out" << std::endl;
-			close(g_pfds[i].fd);
-			g_pfds[i].fd = -1;
-		}
+		// std::cout << "No timeout for listening fd " << g_pfds[i].fd << std::endl;
+		return ;
+	}
+	if (std::time(0) - g_connections[g_pfds[i].fd].startTime > 5)
+	{
+		std::cout << "fd " << g_pfds[i].fd << " timed out" << std::endl;
+		close(g_pfds[i].fd);
+		g_pfds.erase(g_pfds.begin() + i);
 	}
 }
 
@@ -188,17 +182,16 @@ void runWebServer(Configuration &config)
 	std::set<int>	listeningFds;// used only to check if a fd is a server socket
 
 	listeningFds = createListeningFds(config);
-	memset(g_pfds, 0, sizeof(g_pfds));
 	initPfds(g_pfds, listeningFds);
 	signal(SIGINT, handleSIGINT);
 	while(g_running)
 	{
-		int nfds = poll(g_pfds, MAX_EVENTS, TIMEOUT);
+		int nfds = poll(g_pfds.data(), g_pfds.size(), TIMEOUT);
 		if (nfds < 0)
 			break;
 		if (nfds == 0)
 			std::cout << GREEN << "Waiting for connection..." << SET << std::endl;
-		for (nfds_t i = 0; i < MAX_EVENTS; i++)
+		for (size_t i = 0; i < g_pfds.size(); i++)
 		{
 			// if (g_pfds[i].fd > 0)
 			// 	std::cout << "loop through g_pfds[" << i << "].fd = " << g_pfds[i].fd << std::endl;
@@ -219,11 +212,12 @@ void runWebServer(Configuration &config)
 				{
 					std::cout << "fd " << g_pfds[i].fd << " disconnected" << std::endl;
 					close(g_pfds[i].fd);
-					g_pfds[i].fd = -1;
+					g_pfds.erase(g_pfds.begin() + i);
 				}
 			}
 			checkTimeouts(i, listeningFds);
 		}
 	}
 	closeAllFds();
+	std::cout << "Bye!" << std::endl;
 }

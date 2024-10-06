@@ -26,7 +26,7 @@
 #include <ctime>
 
 #define MAX_CLIENTS 42
-#define MAX_EVENTS 100
+#define MAX_EVENTS 1024
 #define BUFFER_SIZE 1024
 #define TIMEOUT 500
 

@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-Request::Request() : state(REQUEST_LINE), parsingState(REQUEST_LINE) {}
+Request::Request() : state(RECEIVING), parsingState(REQUEST_LINE) {}
 
 Request::~Request() {};
 
