@@ -5,7 +5,7 @@
 //infinie
 
 std::time_t cgiStart = 0;
-#define CGITIMEOUT 5
+
 
 std::string getPathInfo(const std::string &uri, const std::string &keyword) {
     size_t pos = uri.find(keyword);
@@ -228,7 +228,7 @@ void    handleCGI(Configuration &Config, LocationBlock &location, Request &req, 
         while (true) 
         {
             // Check if the timeout has been exceeded
-            if (std::time(0) - cgiStart > CGITIMEOUT) 
+            if (std::time(0) - cgiStart >= CGITIMEOUT)
             {
                 std::cout << "std::time(0) - cgiStart = " << std::time(0) - cgiStart << std::endl;
                 kill(pid, SIGKILL);

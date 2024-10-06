@@ -25,7 +25,8 @@
 #include <poll.h>
 #include <ctime>
 
-#define MAX_CLIENTS 100
+#define MAX_CLIENTS 42
+#define MAX_EVENTS 100
 #define BUFFER_SIZE 1024
 #define TIMEOUT 500
 
@@ -33,10 +34,13 @@
 #define BLUE "\033[34m"
 #define SET "\033[0m"
 
-struct ClientConnection
+typedef std::vector<ServerBlock> Servers;
+
+struct Connection
 {
-	std::time_t	startTime;
-	struct pollfd pfd;
+	std::time_t		startTime;
+	Request			req;
+	Response		res;
 };
 
 extern int  uploadNb;

@@ -46,9 +46,11 @@ struct LocationBlock {
 	std::vector<http_method>			methods;
 };
 
+typedef std::pair<std::string, int> Hostport;
+
 struct ServerBlock {
-	int									port;
-	std::string							host;
+
+	Hostport							hostPort;
 	std::vector<std::string>			serverNames;
 	std::string							root;
 	BodySize							clientMaxBodySize;
@@ -101,3 +103,5 @@ class Configuration
 		void				printConfig() const;
 		//...
 };
+
+void	initLocationBlock(LocationBlock &locationBlock);

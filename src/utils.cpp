@@ -38,7 +38,7 @@ bool serverBlockExists(Configuration &config, Request &req)
 	int port = req.getPort();
 	for (std::vector<ServerBlock>::iterator it = serverBlocks.begin(); it != serverBlocks.end(); it++)
 	{
-		if (it->host == host && it->port == port)
+		if (it->hostPort.first == host && it->hostPort.second == port)
 			return true;
 	}
 	return false;
@@ -49,7 +49,7 @@ int serverBlocksCount(Configuration &config, std::string host, int port)
 	std::vector<ServerBlock> serverBlocks = config.getServerBlocks();
 	for (std::vector<ServerBlock>::iterator it = serverBlocks.begin(); it != serverBlocks.end(); it++)
 	{
-		if (it->host == host && it->port == port)
+		if (it->hostPort.first == host && it->hostPort.second == port)
 			count++;
 	}
 	return count;
@@ -61,7 +61,7 @@ ServerBlock getDefaultServerBlock(Configuration &config, std::string host, int p
 	std::vector<ServerBlock> serverBlocks = config.getServerBlocks();
 	for (std::vector<ServerBlock>::iterator it = serverBlocks.begin(); it != serverBlocks.end(); it++)
 	{
-		if (it->host == host && it->port == port)
+		if (it->hostPort.first == host && it->hostPort.second == port)
 			return *it;
 	}
 	return *serverBlock;
@@ -74,7 +74,7 @@ bool matchExists(Configuration &config, std::string host, int port)
 	{
 		for (std::vector<std::string>::iterator it2 = it->serverNames.begin(); it2 != it->serverNames.end(); ++it2)
 		{
-			if (it->host == host && it->port == port && *it2 == host)
+			if (it->hostPort.first == host && it->hostPort.second == port && *it2 == host)
 				return true;
 		}
 	}
@@ -89,7 +89,7 @@ ServerBlock getMatchingServerBlock(Configuration &config, std::string host, int 
 	{
 		for (std::vector<std::string>::iterator it2 = it->serverNames.begin(); it2 != it->serverNames.end(); ++it2)
 		{
-			if (it->host == host && it->port == port && *it2 == host)
+			if (it->hostPort.first == host && it->hostPort.second == port && *it2 == host)
 				return *it;
 		}
 	}

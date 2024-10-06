@@ -7,6 +7,8 @@
 #include <sys/wait.h>
 #include <ctime>
 
+#define CGITIMEOUT 2
+
 class Response;
 
 void handleCGI(Configuration &Config, LocationBlock &location, Request &req, Response &res);

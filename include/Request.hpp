@@ -14,6 +14,7 @@
 
 enum requestState
 {
+	RECEIVING,
 	RECEIVED,
 	PROCESSED,
 	DONE

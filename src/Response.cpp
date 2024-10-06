@@ -118,6 +118,7 @@ void Response::setMimeType(std::string const &fileName)
 	else
 		mimeType = "application/octet-stream";
 }
+
 void Response::setHeaders(LocationBlock location)
 {
 	std::stringstream ss;
@@ -448,6 +449,8 @@ std::string Response::handleRedirection(Configuration &config, LocationBlock &lo
 std::string Response::getResponse(Configuration &config)
 {
 	LocationBlock location;
+
+	initLocationBlock(location);
 	if (serverBlockExists(config, this->req))
 	{
 		location = getLocationFromServer(config, this->req);

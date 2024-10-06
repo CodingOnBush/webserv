@@ -60,8 +60,8 @@ static std::vector<std::string>	stringSplit(std::string const &line, char delim)
 
 static void	initServerBlock(ServerBlock &serverBlock)
 {
-	serverBlock.port = 8080;
-	serverBlock.host = "localhost";
+	serverBlock.hostPort.first = "localhost";
+	serverBlock.hostPort.second = 8080;
 	serverBlock.serverNames.clear();
 	serverBlock.root = "./www";
 	serverBlock.clientMaxBodySize.value = "0";
@@ -78,7 +78,7 @@ static void	initServerBlock(ServerBlock &serverBlock)
 	serverBlock.listenHasBeenSet = false;
 }
 
-static void	initLocationBlock(LocationBlock &locationBlock)
+void	initLocationBlock(LocationBlock &locationBlock)
 {
 	locationBlock.path = "/";
 	locationBlock.alias = "";
@@ -389,20 +389,20 @@ static void	setListen(std::string const &value, ServerBlock &serverBlock, std::v
 	}
 	if (value.find_first_of(':') != std::string::npos)
 	{
-		serverBlock.host = value.substr(0, value.find(':'));
-		if (!isValidHost(serverBlock.host))
-			throw std::runtime_error("Invalid host '" + serverBlock.host + "'");
+		serverBlock.hostPort.first = value.substr(0, value.find(':'));
+		if (!isValidHost(serverBlock.hostPort.first))
+			throw std::runtime_error("Invalid host '" + serverBlock.hostPort.first + "'");
 		ss << value.substr(value.find(':') + 1);
 		if (ss.str().find_first_not_of("0123456789") != std::string::npos)
 			throw std::runtime_error("Port must be a number.");
-		ss >> serverBlock.port;
+		ss >> serverBlock.hostPort.second;
 	}
 	else
 	{
 		ss << value;
 		if (ss.str().find_first_not_of("0123456789") != std::string::npos)
 			throw std::runtime_error("Port must be a number.");
-		ss >> serverBlock.port;
+		ss >> serverBlock.hostPort.second;
 	}
 	serverBlock.listenHasBeenSet = true;
 }
@@ -623,7 +623,7 @@ std::vector<int>	Configuration::getPorts() const
 	std::vector<int>	ports;
 
 	for (std::vector<ServerBlock>::const_iterator it = m_serverBlocks.begin(); it != m_serverBlocks.end(); ++it)
-		ports.push_back(it->port);
+		ports.push_back(it->hostPort.second);
 	return ports;
 }
 
@@ -634,8 +634,8 @@ void	Configuration::printConfig() const
 		std::cout << "\033[0;33;42m----- SERVER -----\033[0m" << std::endl;
 		
 		// LISTEN
-		std::cout << "port: " << it->port << std::endl;
-		std::cout << "host: " << it->host << std::endl;
+		std::cout << "port: " << it->hostPort.second << std::endl;
+		std::cout << "host: " << it->hostPort.first << std::endl;
 		
 		// SERVER NAMES
 		std::cout << "serverNames: ";
