@@ -552,6 +552,16 @@ std::string Response::getResponse(Configuration &config)
 // 	}
 // };
 
+void Response::clearResponse(void)
+{
+	this->statusCode = 0;
+	this->headers.clear();
+	this->body.clear();
+	this->response.clear();
+	this->mimeType.clear();
+	this->fdToClose = false;
+}
+
 LocationBlock Response::getLocationFromServer(Configuration &config, Request &req)
 {
 	ServerBlock serverBlock;

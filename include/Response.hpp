@@ -50,6 +50,7 @@ class Response
 		void 		setMimeType(std::string const &fileName);
 		void 		setStatusCode(int code);
 		void 		setBody(std::string const &body);
+		void 		clearResponse();
 };
 
 std::string intToString(int value);

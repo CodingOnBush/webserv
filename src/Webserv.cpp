@@ -1,20 +1,18 @@
 #include "../include/Webserv.hpp"
 #include "Webserv.hpp"
 
-bool			g_running = true;
-Connection		g_connections[MAX_EVENTS];
-// struct pollfd	g_pfds[MAX_EVENTS];// list of all file descriptors to poll
+bool						g_running = true;
+std::map<int, Connection>	g_connections;
 std::vector<struct pollfd>	g_pfds;
 
 static void	closeAllFds()
 {
-	for (size_t i = 0; i < g_pfds.size(); i++)
+	for(std::vector<struct pollfd>::iterator it = g_pfds.begin(); it != g_pfds.end(); it++)
 	{
-		if (g_pfds[i].fd > 0)
-		{
-			close(g_pfds[i].fd);
-			g_pfds.erase(g_pfds.begin() + i);
-		}
+		g_connections.erase(it->fd);
+		if (it->fd > 0)
+			close(it->fd);
+		g_pfds.erase(it);
 	}
 }
 
@@ -65,35 +63,35 @@ static std::set<int>	createListeningFds(Configuration &config)
 
 static void	acceptNewConnection(struct pollfd &pfd)
 {
-	int	newConnection;
+	int	newFd;
 	int	opt = 1;
 	
-	newConnection = accept(pfd.fd, NULL, NULL);
-	if (newConnection < 0)
+	newFd = accept(pfd.fd, NULL, NULL);
+	if (newFd < 0)
 	{
 		perror("accept");
 		return;
 	}
-	if (fcntl(newConnection, F_SETFL, O_NONBLOCK) < 0)
+	if (fcntl(newFd, F_SETFL, O_NONBLOCK) < 0)
 	{
-		close(newConnection);
+		close(newFd);
 		perror("fcntl");
 		return;
 	}
-	if (setsockopt(newConnection, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT | SO_KEEPALIVE, &opt, sizeof(opt)) < 0)
+	if (setsockopt(newFd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT | SO_KEEPALIVE, &opt, sizeof(opt)) < 0)
 	{
-		close(newConnection);
+		close(newFd);
 		perror("setsockopt");
 		return;
 	}
 	struct pollfd	newPfd;
 
-	newPfd.fd = newConnection;
+	newPfd.fd = newFd;
 	newPfd.events = POLLIN;
 	g_pfds.push_back(newPfd);
-	g_connections[newConnection].req = Request();
-	g_connections[newConnection].startTime = std::time(0);
-	std::cout << "New connection on fd " << newConnection << " accepted at " << std::time(0) << std::endl;
+	g_connections[newFd].req = Request();
+	g_connections[newFd].startTime = std::time(0);
+	std::cout << "New connection on fd " << newFd << " accepted at " << std::time(0) << std::endl;
 }
 
 void	receiveRequest(struct pollfd &pfd)
@@ -116,7 +114,6 @@ void	receiveRequest(struct pollfd &pfd)
 	}
 	ss.write(buffer, bytesReceived);
 	g_connections[pfd.fd].req.parseRequest(ss);
-	g_connections[pfd.fd].req.setRequestState(PARSING_DONE);
 	g_connections[pfd.fd].startTime = std::time(0);
 	std::cout << "Received request from fd " << pfd.fd << " at " << std::time(0) << std::endl;
 }
@@ -136,9 +133,8 @@ static void	sendResponse(struct pollfd &pfd, Configuration &config)
 		return;
 	}
 	pfd.events = POLLIN;
-	g_connections[pfd.fd].req.setRequestState(PROCESSED);
-	g_connections[pfd.fd].res = Response();
-	g_connections[pfd.fd].req = Request();
+	g_connections[pfd.fd].res.clearResponse();
+	g_connections[pfd.fd].req.clearRequest();
 }
 
 static void	handleSIGINT(int sig)
@@ -161,18 +157,23 @@ static void	initPfds(std::vector<struct pollfd> &pfds, std::set<int> &listeningF
 	}
 }
 
-static void	checkTimeouts(nfds_t i, std::set<int> &listeningFds)
+static void	checkTimeouts(std::set<int> &listeningFds)
 {
-	if (listeningFds.find(g_pfds[i].fd) != listeningFds.end() || g_pfds[i].fd < 0)
+	std::vector<struct pollfd>	pfdsToRemove;
+
+	for(std::vector<struct pollfd>::iterator it = g_pfds.begin(); it != g_pfds.end(); it++)
 	{
-		// std::cout << "No timeout for listening fd " << g_pfds[i].fd << std::endl;
-		return ;
-	}
-	if (std::time(0) - g_connections[g_pfds[i].fd].startTime > 5)
-	{
-		std::cout << "fd " << g_pfds[i].fd << " timed out" << std::endl;
-		close(g_pfds[i].fd);
-		g_pfds.erase(g_pfds.begin() + i);
+		if (listeningFds.find(it->fd) != listeningFds.end())
+			continue;
+		if (it->fd == 0 || it->fd == 1 || it->fd == 2)
+			continue;
+		if (std::time(0) - g_connections[it->fd].startTime > 3)
+		{
+			std::cout << "fd " << it->fd << " timed out" << std::endl;
+			g_connections.erase(it->fd);
+			close(it->fd);
+			pfdsToRemove.push_back(*it);
+		}
 	}
 }
 
@@ -191,32 +192,33 @@ void runWebServer(Configuration &config)
 			break;
 		if (nfds == 0)
 			std::cout << GREEN << "Waiting for connection..." << SET << std::endl;
-		for (size_t i = 0; i < g_pfds.size(); i++)
+		for (std::vector<struct pollfd>::iterator it = g_pfds.begin(); it != g_pfds.end(); it++)
 		{
-			// if (g_pfds[i].fd > 0)
-			// 	std::cout << "loop through g_pfds[" << i << "].fd = " << g_pfds[i].fd << std::endl;
-			if (g_pfds[i].revents != 0 && g_pfds[i].fd > 0)
+			// if (it->fd > 0)
+			// 	std::cout << "loop through g_pfds[" << it - g_pfds.begin() << "].fd = " << it->fd << std::endl;
+			if (it->revents != 0 && it->fd > 0)
 			{
-				if (g_pfds[i].revents & POLLIN)
+				if (it->revents & POLLIN)
 				{
-					if (listeningFds.find(g_pfds[i].fd) != listeningFds.end())
-						acceptNewConnection(g_pfds[i]);
+					if (listeningFds.find(it->fd) != listeningFds.end())
+						acceptNewConnection(*it);
 					else
-						receiveRequest(g_pfds[i]);
+						receiveRequest(*it);
 				}
-				if (g_pfds[i].revents & POLLOUT)
+				if (it->revents & POLLOUT)
 				{
-					sendResponse(g_pfds[i], config);
+					// if (g_connections[it->fd].req.getRequestState() == PARSING_DONE)
+					sendResponse(*it, config);
 				}
-				if (g_pfds[i].revents & POLLHUP)
+				if (it->revents & POLLHUP)
 				{
-					std::cout << "fd " << g_pfds[i].fd << " disconnected" << std::endl;
-					close(g_pfds[i].fd);
-					g_pfds.erase(g_pfds.begin() + i);
+					std::cout << "fd " << it->fd << " disconnected" << std::endl;
+					close(it->fd);
+					g_pfds.erase(it);
 				}
 			}
-			checkTimeouts(i, listeningFds);
 		}
+		// checkTimeouts(listeningFds);
 	}
 	closeAllFds();
 	std::cout << "Bye!" << std::endl;
