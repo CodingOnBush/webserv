@@ -38,6 +38,7 @@ typedef std::vector<ServerBlock> Servers;
 
 struct Connection
 {
+	bool			isListener;
 	std::time_t		startTime;
 	Request			req;
 	Response		res;

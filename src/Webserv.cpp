@@ -5,18 +5,41 @@ bool						g_running = true;
 std::map<int, Connection>	g_connections;
 std::vector<struct pollfd>	g_pfds;
 
-static void	closeAllFds()
+static void	addNewConnection(int fd, bool isListener)
 {
-	for(std::vector<struct pollfd>::iterator it = g_pfds.begin(); it != g_pfds.end(); it++)
-	{
-		g_connections.erase(it->fd);
-		if (it->fd > 0)
-			close(it->fd);
-		g_pfds.erase(it);
-	}
+	Connection	conn;
+
+	conn.isListener = isListener;
+	conn.startTime = std::time(0);
+	conn.req = Request();
+	conn.res = Response();
+	g_connections.insert(std::pair<int, Connection>(fd, conn));
 }
 
-static int	createServerSocket(int port)
+static void	addNewPfd(int fd, int events)
+{
+	struct pollfd	pfd;
+
+	pfd.fd = fd;
+	pfd.events = events;
+	pfd.revents = 0;
+	g_pfds.push_back(pfd);
+}
+
+static void	closeAllFds()
+{
+	std::vector<struct pollfd>::iterator	it;
+
+	for (std::map<int, Connection>::iterator it = g_connections.begin(); it != g_connections.end(); it++)
+	{
+		if (it->first > 0)
+			close(it->first);
+	}
+	g_connections.clear();
+	g_pfds.clear();
+}
+
+static int	createSocket(int port)
 {
 	struct sockaddr_in	addr;
 	int 				opt = 1;
@@ -38,33 +61,11 @@ static int	createServerSocket(int port)
 	return (newSocketFd);
 }
 
-static std::set<int>	createListeningFds(Configuration &config)
-{
-	std::set<Hostport>	hostPorts;
-	std::set<int>		listeningFds;
-	Servers				servers;
-	
-	servers = config.getServerBlocks();
-	for (Servers::iterator it = servers.begin(); it != servers.end(); it++)
-	{
-		ServerBlock	s = *it;
-		int			fd;
-
-		if (hostPorts.find(s.hostPort) != hostPorts.end())
-			continue;
-		fd = createServerSocket(s.hostPort.second);
-		if (fd < 0)
-			continue;
-		hostPorts.insert(s.hostPort);
-		listeningFds.insert(fd);
-	}
-	return (listeningFds);
-}
-
 static void	acceptNewConnection(struct pollfd &pfd)
 {
 	int	newFd;
 	int	opt = 1;
+	int	optname = SO_REUSEADDR | SO_REUSEPORT | SO_KEEPALIVE;
 	
 	newFd = accept(pfd.fd, NULL, NULL);
 	if (newFd < 0)
@@ -78,19 +79,14 @@ static void	acceptNewConnection(struct pollfd &pfd)
 		perror("fcntl");
 		return;
 	}
-	if (setsockopt(newFd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT | SO_KEEPALIVE, &opt, sizeof(opt)) < 0)
+	if (setsockopt(newFd, SOL_SOCKET, optname, &opt, sizeof(opt)) < 0)
 	{
 		close(newFd);
 		perror("setsockopt");
 		return;
 	}
-	struct pollfd	newPfd;
-
-	newPfd.fd = newFd;
-	newPfd.events = POLLIN;
-	g_pfds.push_back(newPfd);
-	g_connections[newFd].req = Request();
-	g_connections[newFd].startTime = std::time(0);
+	addNewPfd(newFd, POLLIN);
+	addNewConnection(newFd, false);
 	std::cout << "New connection on fd " << newFd << " accepted at " << std::time(0) << std::endl;
 }
 
@@ -121,13 +117,13 @@ void	receiveRequest(struct pollfd &pfd)
 static void	sendResponse(struct pollfd &pfd, Configuration &config)
 {
 	std::string	response;
-	int			bytesSent;
+	int			bytes;
 
 	g_connections[pfd.fd].res = Response(g_connections[pfd.fd].req);
 	g_connections[pfd.fd].startTime = std::time(0);
 	response = g_connections[pfd.fd].res.getResponse(config);
-	bytesSent = send(pfd.fd, response.c_str(), response.size(), 0);
-	if (bytesSent < 0)
+	bytes = send(pfd.fd, response.c_str(), response.size(), 0);
+	if (bytes < 0)
 	{
 		perror("send");
 		return;
@@ -142,48 +138,62 @@ static void	handleSIGINT(int sig)
 	(void)sig;
 	std::cout << BLUE << "\n  { SIGINT received, stopping server }" << SET << std::endl;
 	g_running = false;
-	closeAllFds();
 }
 
-static void	initPfds(std::vector<struct pollfd> &pfds, std::set<int> &listeningFds)
-{
-	for (std::set<int>::iterator it = listeningFds.begin(); it != listeningFds.end(); it++)
-	{
-		struct pollfd	pfd;
-
-		pfd.fd = *it;
-		pfd.events = POLLIN;
-		pfds.push_back(pfd);
-	}
-}
-
-static void	checkTimeouts(std::set<int> &listeningFds)
+static void	checkTimeouts()
 {
 	std::vector<struct pollfd>	pfdsToRemove;
 
 	for(std::vector<struct pollfd>::iterator it = g_pfds.begin(); it != g_pfds.end(); it++)
 	{
-		if (listeningFds.find(it->fd) != listeningFds.end())
+		if (g_connections[it->fd].isListener)
 			continue;
-		if (it->fd == 0 || it->fd == 1 || it->fd == 2)
-			continue;
-		if (std::time(0) - g_connections[it->fd].startTime > 3)
+		if (std::time(0) - g_connections[it->fd].startTime >= 2)
 		{
-			std::cout << "fd " << it->fd << " timed out" << std::endl;
 			g_connections.erase(it->fd);
 			close(it->fd);
 			pfdsToRemove.push_back(*it);
+			std::cout << "fd " << it->fd << " timed out" << std::endl;
 		}
+	}
+	int	size = g_pfds.size();
+	for (int i = 0; i < size; i++)
+	{
+		for (std::vector<struct pollfd>::iterator it = pfdsToRemove.begin(); it != pfdsToRemove.end(); it++)
+		{
+			if (g_pfds[i].fd == it->fd)
+			{
+				g_pfds.erase(g_pfds.begin() + i);
+				size--;
+				break;
+			}
+		}
+	}
+
+}
+
+static void	createListeningFds(Configuration &config)
+{
+	std::set<Hostport>	pairs;
+	Servers				servers;
+	
+	servers = config.getServerBlocks();
+	for (Servers::iterator it = servers.begin(); it != servers.end(); it++)
+	{
+		if (pairs.find(it->hostPort) != pairs.end())
+			continue;
+		pairs.insert(it->hostPort);
+		int	fd = createSocket(it->hostPort.second);
+		if (fd < 0)
+			continue;
+		addNewConnection(fd, true);
+		addNewPfd(fd, POLLIN);
 	}
 }
 
 void runWebServer(Configuration &config)
 {
-	
-	std::set<int>	listeningFds;// used only to check if a fd is a server socket
-
-	listeningFds = createListeningFds(config);
-	initPfds(g_pfds, listeningFds);
+	createListeningFds(config);
 	signal(SIGINT, handleSIGINT);
 	while(g_running)
 	{
@@ -194,31 +204,28 @@ void runWebServer(Configuration &config)
 			std::cout << GREEN << "Waiting for connection..." << SET << std::endl;
 		for (std::vector<struct pollfd>::iterator it = g_pfds.begin(); it != g_pfds.end(); it++)
 		{
-			// if (it->fd > 0)
-			// 	std::cout << "loop through g_pfds[" << it - g_pfds.begin() << "].fd = " << it->fd << std::endl;
 			if (it->revents != 0 && it->fd > 0)
 			{
 				if (it->revents & POLLIN)
 				{
-					if (listeningFds.find(it->fd) != listeningFds.end())
+					if (g_connections[it->fd].isListener)
 						acceptNewConnection(*it);
 					else
 						receiveRequest(*it);
 				}
 				if (it->revents & POLLOUT)
 				{
-					// if (g_connections[it->fd].req.getRequestState() == PARSING_DONE)
 					sendResponse(*it, config);
 				}
 				if (it->revents & POLLHUP)
 				{
+					// close(it->fd);
+					// g_pfds.erase(it);
 					std::cout << "fd " << it->fd << " disconnected" << std::endl;
-					close(it->fd);
-					g_pfds.erase(it);
 				}
 			}
 		}
-		// checkTimeouts(listeningFds);
+		checkTimeouts();
 	}
 	closeAllFds();
 	std::cout << "Bye!" << std::endl;
