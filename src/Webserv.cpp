@@ -12,7 +12,7 @@ bool										running = true;
 
 static void	resetPfd(struct pollfd &pfd)
 {
-	pfd.events = POLLIN | POLLOUT | POLLHUP;
+	pfd.events = POLLIN | POLLOUT;
 	pfd.revents = 0;
 }
 
@@ -135,7 +135,12 @@ void	acceptConnection(int fd)
 
 static void	closeConnection(int fd)
 {
-	
+	std::cout << "Closing connection on fd: " << fd << std::endl;
+	close(fd);
+	rmFromPollWatchlist(fd);
+	serversToFd.erase(fd);
+	requests[fd].clearRequest();
+	// connections.erase(fd);
 }
 
 void receiveRequest(int fd, struct pollfd &pfd)
@@ -175,8 +180,6 @@ void receiveRequest(int fd, struct pollfd &pfd)
 	req.parseRequest(ss);
 
 	std::cout << "request received" << std::endl;
-	// pfd.events = POLLOUT | POLLHUP;
-	// pfd.revents = 0;
 }
 
 void sendResponse(int fd, Configuration &config, struct pollfd &pfd)
@@ -218,7 +221,6 @@ static void	printPollFds()
 		<< it->events << ", revents: " 
 		<< ((it->revents & POLLIN) ? "POLLIN | " : "X | ")
 		<< ((it->revents & POLLOUT) ? "POLLOUT | " : "X | ")
-		<< ((it->revents & POLLHUP) ? "POLLHUP" : "X")
 		<< "}"
 		<< std::endl;
 	}
@@ -232,7 +234,6 @@ static void	printPfd(std::vector<struct pollfd>::iterator it)
 		<< it->events << ", revents: " 
 		<< ((it->revents & POLLIN) ? "POLLIN | " : "X | ")
 		<< ((it->revents & POLLOUT) ? "POLLOUT | " : "X | ")
-		<< ((it->revents & POLLHUP) ? "POLLHUP" : "X")
 		<< "}"
 	<< std::endl;
 }
@@ -291,10 +292,6 @@ void runWebServer(Configuration &config)
 					// std::cout << "parsing done !!!" << std::endl;
 					sendResponse(it->fd, config, *it);
 				}
-			}
-			if (it->revents & POLLHUP)
-			{
-				std::cout << "POLLHUP" << std::endl;
 			}
 		}
 		// std::cout << "--------------END----------------" << std::endl;
