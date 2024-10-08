@@ -461,7 +461,7 @@ void	Configuration::parseLocationDirective(std::string &line, LocationBlock &loc
 	else if (key == "return")
 		setReturn(locationBlock.redirects, locationBlock.redirection, split);
 	else if (key == "cgi")
-		setCgi(locationBlock.cgiParams, split);
+		pushSplit(locationBlock.cgiExtensions, split);
 	else if (key == "allowed_methods")
 		setAllowedMethods(locationBlock.methods, split);
 	else

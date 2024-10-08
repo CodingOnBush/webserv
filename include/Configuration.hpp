@@ -42,6 +42,7 @@ struct LocationBlock {
 	std::string							uploadLocation;
 	std::map<int, std::string>			redirects;
 	bool                               	redirection;
+	std::vector<std::string>			cgiExtensions;
 	std::map<std::string, std::string>	cgiParams;
 	std::vector<http_method>			methods;
 };
@@ -57,6 +58,7 @@ struct ServerBlock {
 	int									bodySize;
 	bool								autoindex;
 	std::vector<std::string>			indexes;
+	std::vector<std::string>			cgiExtensions;
 	std::map<std::string, std::string>	errorPages;
 	std::map<int, std::string>			redirects;
 	bool                               	redirection;
