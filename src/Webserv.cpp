@@ -1,7 +1,7 @@
 #include "../include/Webserv.hpp"
 #include "Webserv.hpp"
 
-std::vector<struct pollfd>					pollFdsList;
+PollFds					pollFdsList;
 
 std::map<int, Connection>					connections;
 
@@ -12,7 +12,7 @@ bool										running = true;
 
 static void rmFromPollWatchlist(int fd)
 {
-	for (std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
+	for (PollFds::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
 	{
 		if (it->fd == fd)
 		{
@@ -59,11 +59,12 @@ static void	initiateWebServer(Configuration &config)
 		serverSocket = createServerSocket(it->hostPort.second);
 		if (serverSocket == -1)
 			continue;
-		serversToFd[serverSocket].push_back(*it);
+		// serversToFd[serverSocket].push_back(*it);
+		listenFds.insert(serverSocket);
 		hostPorts.insert(it->hostPort);
 	}
-	for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
-		listenFds.insert(it->first);
+	// for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
+	// 	listenFds.insert(it->first);
 	for (std::set<int>::iterator it = listenFds.begin(); it != listenFds.end(); it++)
 	{
 		struct pollfd pfd;
@@ -112,58 +113,67 @@ static void	acceptConnection(int fd)
 	}
 	addNewClient(clientFd);
 	std::cout << "New client connected on fd: " << clientFd << std::endl;
-	serversToFd[clientFd] = serversToFd[fd];
-	requests[clientFd] = Request();
+	// serversToFd[clientFd] = serversToFd[fd];
+	// requests[clientFd] = Request();
+	Connection conn;
+
+	conn.isListener = false;
+	conn.startTime = std::time(0);
+	conn.req = Request();
+	connections[clientFd] = conn;
+
+	// connections[clientFd] = (Connection){false, std::time(0), Request(), Response()};
 }
 
-static void	closeConnection(int fd)
+static PollFds::iterator	closeConnection(PollFds::iterator it)
 {
-	std::cout << "Closing connection on fd: " << fd << std::endl;
-	close(fd);
-	rmFromPollWatchlist(fd);
-	serversToFd.erase(fd);
-	requests[fd].clearRequest();
-	// connections.erase(fd);
+	std::cout << "Closing connection on fd: " << it->fd << std::endl;
+	// rmFromPollWatchlist(fd);
+	// g_toClose.push_back(fd);
+	// serversToFd.erase(fd);
+	connections[it->fd].req.clearRequest();
+	connections.erase(it->fd);
+	close(it->fd);
+	return pollFdsList.erase(it);
 }
 
-static void receiveRequest(int fd)
+static int	receiveRequest(int fd)
 {
-	std::string			fullRequest;
 	char 				buffer[BUFFER_SIZE];
-	Request 			&req = requests[fd];
+	Request 			&req = connections[fd].req;
 	ssize_t 			bytes;
 	std::stringstream	ss;
 
 	memset(buffer, 0, BUFFER_SIZE);
 	bytes = recv(fd, buffer, BUFFER_SIZE, 0);
 	if (bytes < 0)
-		return;
+		return 0;
 	buffer[bytes] = '\0';
 	// std::cout << "[" << buffer << "]" << std::endl;
 	std::cout << "request received" << std::endl;
 	if (bytes == 0)
 	{
 		std::cout << "Connection closed" << std::endl;
-		closeConnection(fd);
-		return;
+		// closeConnection(fd);
+		return 0;
 	}
 	ss.write(buffer, bytes);
 	req.parseRequest(ss);
+	return 1;
 }
 
 static void	sendResponse(int fd, Configuration &config)
 {
-	Response	resp(requests[fd]);
-	std::string	response;
+	Response	resp(connections[fd].req);
+	std::string	str;
 
-	printRequest(requests[fd]);
-	responses[fd] = resp;
-	response = responses[fd].getResponse(config);
-	send(fd, response.c_str(), response.size(), 0);
+	printRequest(connections[fd].req);
+	connections[fd].res = resp;
+	str = connections[fd].res.getResponse(config);
+	send(fd, str.c_str(), str.size(), 0);
 	std::cout << "Response sent" << std::endl;
-	requests[fd].clearRequest();
-	connections[fd].startTime = std::time(0);
 	connections[fd].req.clearRequest();
+	connections[fd].startTime = std::time(0);
 	connections[fd].res.clearResponse();
 }
 
@@ -177,7 +187,7 @@ static void handleSIGINT(int sig)
 static void	printPollFds()
 {
 	std::cout << "POLLFDS :" << std::endl;
-	for (std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
+	for (PollFds::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
 	{
 		std::cout
 		<< "{fd: " << it->fd << ", events: " 
@@ -190,7 +200,7 @@ static void	printPollFds()
 	std::cout << std::endl;
 }
 
-static void	printPfd(std::vector<struct pollfd>::iterator it)
+static void	printPfd(PollFds::iterator it)
 {
 	std::cout 
 		<< "PFD: {fd: " << it->fd << ", events: " 
@@ -201,21 +211,26 @@ static void	printPfd(std::vector<struct pollfd>::iterator it)
 	<< std::endl;
 }
 
-static void	checkTimeouts()
-{
-	std::time_t	now = std::time(0);
+// static void	checkTimeouts()
+// {
+// 	std::time_t	now = std::time(0);
+// 	std::vector<int>	toClose;
 
-	for (std::map<int, Connection>::iterator it = connections.begin(); it != connections.end(); it++)
-	{
-		if (it->second.isListener)
-			continue;
-		if (now - it->second.startTime > 5)
-		{
-			std::cout << "Connection timeout on fd: " << it->first << std::endl;
-			closeConnection(it->first);
-		}
-	}
-}
+// 	if (connections.size() == 0)
+// 		return;
+// 	for (std::map<int, Connection>::iterator it = connections.begin(); it != connections.end(); it++)
+// 	{
+// 		if (it->second.isListener)
+// 			continue;
+// 		if (now - it->second.startTime >= 3)
+// 		{
+// 			std::cout << "Connection timeout on fd: " << it->first << std::endl;
+// 			toClose.push_back(it->first);
+// 		}
+// 	}
+// 	for (std::vector<int>::iterator it = toClose.begin(); it != toClose.end(); it++)
+// 		closeConnection(*it);
+// }
 
 void runWebServer(Configuration &config)
 {
@@ -228,25 +243,24 @@ void runWebServer(Configuration &config)
 	while (running)
 	{
 		int nfds = poll(pollFdsList.data(), pollFdsList.size(), timeout);
-		if (nfds < 0 && errno != EINTR)
-			break;
-		if (nfds == 0)
+		if ((nfds < 0 && errno != EINTR) || running == false)
 		{
-			std::cout << GREEN << "Waiting for connection " << wait[n++ % 6] << SET << "\r" << std::flush;
-			// std::cout << GREEN << "Waiting for connection..." << SET << std::endl;
+			std::cout << "COUCOUCOU" << std::endl;
+			break;
+		}
+		if (nfds >= 0)
+		{
+			std::cout << GREEN << "Server running " << wait[n++] << SET << "\r" << std::flush;
 			if (n == 6)
 				n = 0;
 		}
 		
 		int j = 0;
-		std::cout << "------------START--------------" << std::endl;
-		printPollFds();
-		for (std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end() && j < nfds; it++)
+		for (PollFds::iterator it = pollFdsList.begin(); it != pollFdsList.end() && j < nfds;)
 		{
-			// printPfd(it);
 			if (it->revents == 0)
 			{
-				// std::cout << "No events" << std::endl;
+				it++;
 				continue;
 			}
 			j++;
@@ -255,18 +269,24 @@ void runWebServer(Configuration &config)
 				if (connections[it->fd].isListener)
 					acceptConnection(it->fd);
 				else
-					receiveRequest(it->fd);
+				{
+					if (!receiveRequest(it->fd))
+					{
+						it = closeConnection(it);
+						continue;
+					}
+				}
 			}
 			if (it->revents & POLLOUT)
 			{
-				if (requests[it->fd].getParsingState() == PARSING_DONE)
+				if (connections[it->fd].req.getParsingState() == PARSING_DONE)
 					sendResponse(it->fd, config);
 			}
+			it++;
 		}
-		checkTimeouts();
-		std::cout << "--------------END----------------" << std::endl;
+		// checkTimeouts();
 	}
-	for(std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
-		close(it->first);
+	for (PollFds::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
+		close(it->fd);
 	std::cout << "Server stopped" << std::endl;
 }

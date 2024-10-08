@@ -35,6 +35,7 @@
 #define SET "\033[0m"
 
 typedef std::vector<ServerBlock> Servers;
+typedef std::vector<struct pollfd> PollFds;
 
 struct Connection
 {
