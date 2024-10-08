@@ -42,7 +42,7 @@ struct LocationBlock {
 	std::string							uploadLocation;
 	std::map<int, std::string>			redirects;
 	bool                               	redirection;
-	std::map<std::string, std::string>	cgiParams;
+	std::vector<std::string>			cgiParams;
 	std::vector<http_method>			methods;
 };
 

@@ -356,13 +356,13 @@ void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
 	std::string uri = req.getUri();
 	// std::cout << "URI WE WANNA SEEE: \n" << uri << std::endl;
-	if (location.cgiParams.empty())
+	if (url end with .py and .py is specified in config)
+		handleCGI(config, location, req, *this);
+	else
 	{
 		getBody(req.getUri(), location);
 		return;
 	}
-	handleCGI(config, location, req, *this);
-	// handle cgi
 }
 
 void Response::handlePostRequest(Configuration &config, LocationBlock location)

@@ -92,6 +92,7 @@ void	initLocationBlock(LocationBlock &locationBlock)
 	locationBlock.indexes.clear();
 	locationBlock.errorPages.clear();
 	locationBlock.uploadLocation = "./www/upload";
+	locationBlock.cgiParams.clear();
 	locationBlock.redirects.clear();
 	locationBlock.redirection = false;
 	locationBlock.cgiParams.clear();
