@@ -189,7 +189,10 @@ void Request::parseBody(std::stringstream &stream)
     }
     this->body += new_body;
     if ((int)this->body.size() == len)
+    {
+        // std::cout << "COUCOUCOUCOUCCOU" << std::endl;
         setParsingState(PARSING_DONE);
+    }
 }
 void Request::parseRequestLine(const std::string &line)
 {
@@ -279,6 +282,7 @@ void Request::clearRequest(void)
     this->headers.clear();
     this->state = 0;
     this->body.clear();
+    this->parsingState = REQUEST_LINE;
 }
 void printRequest(Request &req)
 {
