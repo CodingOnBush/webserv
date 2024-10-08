@@ -10,16 +10,17 @@ std::map<int, Request>						requests;
 std::map<int, Response> 					responses;
 bool										running = true;
 
-static void rmFromPollWatchlist(int fd)
+static void	addNewClientAndConnection(int fd, bool isListener)
 {
-	for (PollFds::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
-	{
-		if (it->fd == fd)
-		{
-			pollFdsList.erase(it);
-			break;
-		}
-	}
+	struct pollfd newPollFd;
+
+	memset(&newPollFd, 0, sizeof(newPollFd));
+	newPollFd.fd = fd;
+	newPollFd.events = POLLIN | POLLOUT;
+	newPollFd.revents = 0;
+	pollFdsList.push_back(newPollFd);
+
+	connections[fd] = (Connection){isListener, std::time(0), Request(), Response()};
 }
 
 static int	createServerSocket(int port)
@@ -59,34 +60,26 @@ static void	initiateWebServer(Configuration &config)
 		serverSocket = createServerSocket(it->hostPort.second);
 		if (serverSocket == -1)
 			continue;
-		// serversToFd[serverSocket].push_back(*it);
 		listenFds.insert(serverSocket);
 		hostPorts.insert(it->hostPort);
 	}
-	// for (std::map<int, std::vector<ServerBlock> >::iterator it = serversToFd.begin(); it != serversToFd.end(); it++)
-	// 	listenFds.insert(it->first);
 	for (std::set<int>::iterator it = listenFds.begin(); it != listenFds.end(); it++)
-	{
-		struct pollfd pfd;
-
-		memset(&pfd, 0, sizeof(pfd));
-		pfd.fd = *it;
-		pfd.events = POLLIN;
-		pfd.revents = 0;
-		pollFdsList.push_back(pfd);
-		connections[pfd.fd] = (Connection){true, std::time(0), Request(), Response()};
-	}
+		addNewClientAndConnection(*it, true);
 }
 
-static void	addNewClient(int fd)
+static void	removeClient(int fd)
 {
-	struct pollfd newPollFd;
-
-	memset(&newPollFd, 0, sizeof(newPollFd));
-	newPollFd.fd = fd;
-	newPollFd.events = POLLIN | POLLOUT;
-	newPollFd.revents = 0;
-	pollFdsList.push_back(newPollFd);
+	std::cout << "Removing client on fd: " << fd << std::endl;
+	close(fd);
+	connections.erase(fd);
+	for (PollFds::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
+	{
+		if (it->fd == fd)
+		{
+			it = pollFdsList.erase(it);
+			break;
+		}
+	}
 }
 
 static void	acceptConnection(int fd)
@@ -111,26 +104,13 @@ static void	acceptConnection(int fd)
 		perror("setsockopt");
 		return;
 	}
-	addNewClient(clientFd);
+	addNewClientAndConnection(clientFd, false);
 	std::cout << "New client connected on fd: " << clientFd << std::endl;
-	// serversToFd[clientFd] = serversToFd[fd];
-	// requests[clientFd] = Request();
-	Connection conn;
-
-	conn.isListener = false;
-	conn.startTime = std::time(0);
-	conn.req = Request();
-	connections[clientFd] = conn;
-
-	// connections[clientFd] = (Connection){false, std::time(0), Request(), Response()};
 }
 
 static PollFds::iterator	closeConnection(PollFds::iterator it)
 {
 	std::cout << "Closing connection on fd: " << it->fd << std::endl;
-	// rmFromPollWatchlist(fd);
-	// g_toClose.push_back(fd);
-	// serversToFd.erase(fd);
 	connections[it->fd].req.clearRequest();
 	connections.erase(it->fd);
 	close(it->fd);
@@ -147,7 +127,7 @@ static int	receiveRequest(int fd)
 	memset(buffer, 0, BUFFER_SIZE);
 	bytes = recv(fd, buffer, BUFFER_SIZE, 0);
 	if (bytes < 0)
-		return 0;
+		return FAILURE;
 	buffer[bytes] = '\0';
 	// std::cout << "[" << buffer << "]" << std::endl;
 	std::cout << "request received" << std::endl;
@@ -155,20 +135,19 @@ static int	receiveRequest(int fd)
 	{
 		std::cout << "Connection closed" << std::endl;
 		// closeConnection(fd);
-		return 0;
+		return FAILURE;
 	}
 	ss.write(buffer, bytes);
 	req.parseRequest(ss);
-	return 1;
+	return SUCCESS;
 }
 
 static void	sendResponse(int fd, Configuration &config)
 {
-	Response	resp(connections[fd].req);
 	std::string	str;
 
+	connections[fd].res = Response(connections[fd].req);
 	printRequest(connections[fd].req);
-	connections[fd].res = resp;
 	str = connections[fd].res.getResponse(config);
 	send(fd, str.c_str(), str.size(), 0);
 	std::cout << "Response sent" << std::endl;
@@ -258,35 +237,38 @@ void runWebServer(Configuration &config)
 		int j = 0;
 		for (PollFds::iterator it = pollFdsList.begin(); it != pollFdsList.end() && j < nfds;)
 		{
-			if (it->revents == 0)
-			{
-				it++;
-				continue;
-			}
-			j++;
-			if (it->revents & POLLIN)
-			{
-				if (connections[it->fd].isListener)
-					acceptConnection(it->fd);
-				else
-				{
-					if (!receiveRequest(it->fd))
-					{
-						it = closeConnection(it);
-						continue;
-					}
-				}
-			}
-			if (it->revents & POLLOUT)
-			{
-				if (connections[it->fd].req.getParsingState() == PARSING_DONE)
-					sendResponse(it->fd, config);
-			}
-			it++;
+		    if (it->revents == 0)
+		    {
+		        ++it;
+		        continue;
+		    }
+		    j++;
+		    if (it->revents & POLLIN)
+		    {
+		        if (connections.find(it->fd) != connections.end() && connections[it->fd].isListener)
+		        {
+		            acceptConnection(it->fd);
+		        }
+		        else
+		        {
+		            if (receiveRequest(it->fd) == FAILURE)
+		            {
+		                it = closeConnection(it);  // Update the iterator properly
+		                continue;  // Skip incrementing the iterator since it's already updated
+		            }
+		        }
+		    }
+		    if (it->revents & POLLOUT)
+		    {
+		        if (connections[it->fd].req.getParsingState() == PARSING_DONE)
+		            sendResponse(it->fd, config);
+		    }
+		    ++it;
 		}
+
 		// checkTimeouts();
 	}
-	for (PollFds::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
-		close(it->fd);
+	// for (PollFds::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
+	// 	close(it->fd);
 	std::cout << "Server stopped" << std::endl;
 }

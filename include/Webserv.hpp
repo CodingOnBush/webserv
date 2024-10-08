@@ -34,6 +34,9 @@
 #define BLUE "\033[34m"
 #define SET "\033[0m"
 
+#define FAILURE -1
+#define SUCCESS 0
+
 typedef std::vector<ServerBlock> Servers;
 typedef std::vector<struct pollfd> PollFds;
 
