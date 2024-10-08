@@ -4,7 +4,7 @@ import cgi
 import cgitb
 import json
 
-print("Hi from test.py")
+print("Hi from cgi_post.py")
 request_method = os.environ.get('REQUEST_METHOD')
 request_query = os.environ.get('QUERY_STRING')
 html_content = """<!DOCTYPE html>
@@ -57,7 +57,7 @@ html_content = """<!DOCTYPE html>
 <h1>Leave a Comment</h1>
 
 <div class="comment-block">
-    <form action="/submit_comment" method="post">
+    <form action="/cgi-bin/cgi_post.py" method="post">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" required>
         
@@ -82,16 +82,10 @@ def parse_query_string(query_string):
             
     return name, comment
 
-def printGet():
-
-    print()
-    print(html_content)
-    print("</body></html>")
-
 def printPost():
     name, comment = parse_query_string(request_query)
     print()
-    print(html_content)
+    # print(html_content)
     print("<h2>Comment Submitted:</h2>")
     print("""
     <div style="border: 1px solid #ccc; border-radius: 4px; padding: 15px; margin-top: 20px; background-color: #f9f9f9;">
@@ -106,12 +100,7 @@ def printPost():
     """.format(name, comment, name=name, comment=comment))
     print("</body></html>")
     
-if request_method == '0':
-    printGet()
-elif request_method == '1':
-    printPost()
-else:
-    print("<html><body><h1>Method Not Supported</h1></body></html>")
+printPost()
 print("Content-Type: text/html")
 # to test for infinite loop
 # while True:

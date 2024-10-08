@@ -629,109 +629,110 @@ std::vector<int>	Configuration::getPorts() const
 
 void	Configuration::printConfig() const
 {
-	for(std::vector<ServerBlock>::const_iterator it = m_serverBlocks.begin(); it != m_serverBlocks.end(); ++it)
-	{
-		std::cout << "\033[0;33;42m----- SERVER -----\033[0m" << std::endl;
+	// for(std::vector<ServerBlock>::const_iterator it = m_serverBlocks.begin(); it != m_serverBlocks.end(); ++it)
+	// {
+	// 	std::cout << "\033[0;33;42m----- SERVER -----\033[0m" << std::endl;
 		
-		// LISTEN
-		std::cout << "port: " << it->hostPort.second << std::endl;
-		std::cout << "host: " << it->hostPort.first << std::endl;
+	// 	// LISTEN
+	// 	std::cout << "port: " << it->hostPort.second << std::endl;
+	// 	std::cout << "host: " << it->hostPort.first << std::endl;
 		
-		// SERVER NAMES
-		std::cout << "serverNames: ";
-		for (std::vector<std::string>::const_iterator it2 = it->serverNames.begin(); it2 != it->serverNames.end(); ++it2)
-			std::cout << *it2 << " ";
-		std::cout << std::endl;
+	// 	// SERVER NAMES
+	// 	std::cout << "serverNames: ";
+	// 	for (std::vector<std::string>::const_iterator it2 = it->serverNames.begin(); it2 != it->serverNames.end(); ++it2)
+	// 		std::cout << *it2 << " ";
+	// 	std::cout << std::endl;
 		
-		// ROOT
-		std::cout << "root: " << it->root << std::endl;
+	// 	// ROOT
+	// 	std::cout << "root: " << it->root << std::endl;
 		
-		// ERROR PAGES
-		std::cout << "errorPages: ";
-		for (std::map<std::string, std::string>::const_iterator it2 = it->errorPages.begin(); it2 != it->errorPages.end(); ++it2)
-			std::cout << it2->first << ":" << it2->second << " ";
-		std::cout << std::endl;
+	// 	// ERROR PAGES
+	// 	std::cout << "errorPages: ";
+	// 	for (std::map<std::string, std::string>::const_iterator it2 = it->errorPages.begin(); it2 != it->errorPages.end(); ++it2)
+	// 		std::cout << it2->first << ":" << it2->second << " ";
+	// 	std::cout << std::endl;
 		
-		// CLIENT MAX BODY SIZE
-		std::cout << "clientMaxBodySize: " << it->clientMaxBodySize.value << " " << it->clientMaxBodySize.unit << std::endl;
-		std::cout << "bodySize: " << it->bodySize << std::endl;
+	// 	// CLIENT MAX BODY SIZE
+	// 	std::cout << "clientMaxBodySize: " << it->clientMaxBodySize.value << " " << it->clientMaxBodySize.unit << std::endl;
+	// 	std::cout << "bodySize: " << it->bodySize << std::endl;
 		
-		// AUTOINDEX
-		std::cout << "autoindex: " << (it->autoindex ? "on" : "off") << std::endl;
+	// 	// AUTOINDEX
+	// 	std::cout << "autoindex: " << (it->autoindex ? "on" : "off") << std::endl;
 
-		// INDEXES
-		std::cout << "indexes: ";
-		for (std::vector<std::string>::const_iterator it2 = it->indexes.begin(); it2 != it->indexes.end(); ++it2)
-			std::cout << *it2 << " ";
-		std::cout << std::endl;
+	// 	// INDEXES
+	// 	std::cout << "indexes: ";
+	// 	for (std::vector<std::string>::const_iterator it2 = it->indexes.begin(); it2 != it->indexes.end(); ++it2)
+	// 		std::cout << *it2 << " ";
+	// 	std::cout << std::endl;
 
-		// ERROR PAGES
-		std::cout << "errorPages: ";
-		for (std::map<std::string, std::string>::const_iterator it2 = it->errorPages.begin(); it2 != it->errorPages.end(); ++it2)
-			std::cout << it2->first << ":" << it2->second << " ";
-		std::cout << std::endl;
+	// 	// ERROR PAGES
+	// 	std::cout << "errorPages: ";
+	// 	for (std::map<std::string, std::string>::const_iterator it2 = it->errorPages.begin(); it2 != it->errorPages.end(); ++it2)
+	// 		std::cout << it2->first << ":" << it2->second << " ";
+	// 	std::cout << std::endl;
 
-		// REDIRECTS
-		std::cout << "redirection : " << (it->redirection ? "on" : "off") << std::endl;
-		std::cout << "redirects: ";
-		for (std::map<int, std::string>::const_iterator it2 = it->redirects.begin(); it2 != it->redirects.end(); ++it2)
-			std::cout << it2->first << " " << it2->second << " ";
-		std::cout << std::endl;
+	// 	// REDIRECTS
+	// 	std::cout << "redirection : " << (it->redirection ? "on" : "off") << std::endl;
+	// 	std::cout << "redirects: ";
+	// 	for (std::map<int, std::string>::const_iterator it2 = it->redirects.begin(); it2 != it->redirects.end(); ++it2)
+	// 		std::cout << it2->first << " " << it2->second << " ";
+	// 	std::cout << std::endl;
 
-		// CGI PARAMS
-		std::cout << "cgiParams: ";
-		for (std::map<std::string, std::string>::const_iterator it2 = it->cgiParams.begin(); it2 != it->cgiParams.end(); ++it2)
-			std::cout << it2->first << " " << it2->second << " ";
-		std::cout << std::endl;
+	// 	// CGI PARAMS
+	// 	std::cout << "cgiParams: ";
+	// 	for (std::map<std::string, std::string>::const_iterator it2 = it->cgiParams.begin(); it2 != it->cgiParams.end(); ++it2)
+	// 		std::cout << it2->first << " " << it2->second << " ";
+	// 	std::cout << std::endl;
 
-		// METHODS
-		std::cout << "methods: ";
-		for (std::vector<http_method>::const_iterator it2 = it->methods.begin(); it2 != it-> methods.end(); ++it2)
-			std::cout << *it2 << " ";
-		std::cout << std::endl;
+	// 	// METHODS
+	// 	std::cout << "methods: ";
+	// 	for (std::vector<http_method>::const_iterator it2 = it->methods.begin(); it2 != it-> methods.end(); ++it2)
+	// 		std::cout << *it2 << " ";
+	// 	std::cout << std::endl;
 
-		// LOCATION BLOCKS
-		for (std::vector<LocationBlock>::const_iterator it2 = it->locationBlocks.begin(); it2 != it->locationBlocks.end(); ++it2)
-		{
-			std::cout << "--LOCATION--" << std::endl;
-			std::cout << "  path: " << it2->path << std::endl;
-			std::cout << "  alias: " << it2->alias << std::endl;
-			std::cout << "  root: " << it2->root << std::endl;
-			std::cout << "  clientMaxBodySize: " << it2->clientMaxBodySize.value << " " << it2->clientMaxBodySize.unit << std::endl;
-			std::cout << "  body size: " << it2->bodySize << std::endl;
-			std::cout << "  autoindex: " << (it2->autoindex ? "on" : "off") << std::endl;
-			std::cout << "  pathInfo: " << (it2->pathInfo ? "on" : "off") << std::endl;
+	// 	// LOCATION BLOCKS
+	// 	for (std::vector<LocationBlock>::const_iterator it2 = it->locationBlocks.begin(); it2 != it->locationBlocks.end(); ++it2)
+	// 	{
+	// 		std::cout << "--LOCATION--" << std::endl;
+	// 		std::cout << "  path: " << it2->path << std::endl;
+	// 		std::cout << "  alias: " << it2->alias << std::endl;
+	// 		std::cout << "  root: " << it2->root << std::endl;
+	// 		std::cout << "  clientMaxBodySize: " << it2->clientMaxBodySize.value << " " << it2->clientMaxBodySize.unit << std::endl;
+	// 		std::cout << "  body size: " << it2->bodySize << std::endl;
+	// 		std::cout << "  autoindex: " << (it2->autoindex ? "on" : "off") << std::endl;
+	// 		std::cout << "  pathInfo: " << (it2->pathInfo ? "on" : "off") << std::endl;
 
-			std::cout << "  indexes: ";
-			for (std::vector<std::string>::const_iterator it3 = it2->indexes.begin(); it3 != it2->indexes.end(); ++it3)
-				std::cout << *it3 << " ";
-			std::cout << std::endl;
+	// 		std::cout << "  indexes: ";
+	// 		for (std::vector<std::string>::const_iterator it3 = it2->indexes.begin(); it3 != it2->indexes.end(); ++it3)
+	// 			std::cout << *it3 << " ";
+	// 		std::cout << std::endl;
 			
-			std::cout << "  errorPages: ";
-			for (std::map<std::string, std::string>::const_iterator it3 = it2->errorPages.begin(); it3 != it2->errorPages.end(); ++it3)
-				std::cout << it3->first << ":" << it3->second << " ";
-			std::cout << std::endl;
+	// 		std::cout << "  errorPages: ";
+	// 		for (std::map<std::string, std::string>::const_iterator it3 = it2->errorPages.begin(); it3 != it2->errorPages.end(); ++it3)
+	// 			std::cout << it3->first << ":" << it3->second << " ";
+	// 		std::cout << std::endl;
 			
-			std::cout << "  uploadLocation: " << it2->uploadLocation << std::endl;
+	// 		std::cout << "  uploadLocation: " << it2->uploadLocation << std::endl;
 
-			std::cout << "  redirects: ";
-			for (std::map<int, std::string>::const_iterator it3 = it2->redirects.begin(); it3 != it2->redirects.end(); ++it3)
-				std::cout << it3->first << " " << it3->second << " ";
-			std::cout << std::endl;
+	// 		std::cout << "  redirects: ";
+	// 		for (std::map<int, std::string>::const_iterator it3 = it2->redirects.begin(); it3 != it2->redirects.end(); ++it3)
+	// 			std::cout << it3->first << " " << it3->second << " ";
+	// 		std::cout << std::endl;
 
-			std::cout << "  redirection: " << (it2->redirection ? "on" : "off") << std::endl;
+	// 		std::cout << "  redirection: " << (it2->redirection ? "on" : "off") << std::endl;
 
-			std::cout << "  cgiParams: ";
-			for (std::map<std::string, std::string>::const_iterator it3 = it2->cgiParams.begin(); it3 != it2->cgiParams.end(); ++it3)
-				std::cout << it3->first << " " << it3->second << " ";
-			std::cout << std::endl;
+	// 		std::cout << "  cgiParams: ";
+	// 		for (std::map<std::string, std::string>::const_iterator it3 = it2->cgiParams.begin(); it3 != it2->cgiParams.end(); ++it3)
+	// 			std::cout << it3->first << " " << it3->second << " ";
+	// 		std::cout << std::endl;
 
-			std::cout << "  methods (" << it2->methods.size() << "): ";
-			for (std::vector<http_method>::const_iterator it3 = it2->methods.begin(); it3 != it2-> methods.end(); ++it3)
-				std::cout << *it3 << " ";
-			std::cout << std::endl;
-		}
-		std::cout << "\033[0;33;42m------------------\033[0m" << std::endl;
-	}
+	// 		std::cout << "  methods (" << it2->methods.size() << "): ";
+	// 		for (std::vector<http_method>::const_iterator it3 = it2->methods.begin(); it3 != it2-> methods.end(); ++it3)
+	// 			std::cout << *it3 << " ";
+	// 		std::cout << std::endl;
+	// 	}
+	// 	std::cout << "\033[0;33;42m------------------\033[0m" << std::endl;
+	// }
+	return;
 }
 

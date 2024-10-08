@@ -4,7 +4,6 @@ import cgi
 import cgitb
 import json
 
-print("Hi from test.py")
 request_method = os.environ.get('REQUEST_METHOD')
 request_query = os.environ.get('QUERY_STRING')
 html_content = """<!DOCTYPE html>
@@ -57,7 +56,7 @@ html_content = """<!DOCTYPE html>
 <h1>Leave a Comment</h1>
 
 <div class="comment-block">
-    <form action="/submit_comment" method="post">
+    <form action="/cgi-bin/cgi_post.py" method="post">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" required>
         
@@ -69,49 +68,13 @@ html_content = """<!DOCTYPE html>
 </div>
 """
 
-def parse_query_string(query_string):
-    pairs = query_string.split('&')
-    name = None
-    comment = None
-    for pair in pairs:
-        key, value = pair.split('=')
-        if key == 'name':
-            name = value
-        elif key == 'comment':
-            comment = value
-            
-    return name, comment
-
 def printGet():
 
     print()
     print(html_content)
     print("</body></html>")
 
-def printPost():
-    name, comment = parse_query_string(request_query)
-    print()
-    print(html_content)
-    print("<h2>Comment Submitted:</h2>")
-    print("""
-    <div style="border: 1px solid #ccc; border-radius: 4px; padding: 15px; margin-top: 20px; background-color: #f9f9f9;">
-        <strong>Name:</strong> {}
-        <p><strong>Comment:</strong></p>
-        <p>{}</p>
-        <form action="/delete_comment" method="post" style="display:inline;">
-            <input type="hidden" name="name" value="{name}">
-            <input type="hidden" name="comment" value="{comment}">
-        </form>
-    </div>
-    """.format(name, comment, name=name, comment=comment))
-    print("</body></html>")
-    
-if request_method == '0':
-    printGet()
-elif request_method == '1':
-    printPost()
-else:
-    print("<html><body><h1>Method Not Supported</h1></body></html>")
+printGet()
 print("Content-Type: text/html")
 # to test for infinite loop
 # while True:
