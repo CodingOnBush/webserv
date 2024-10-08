@@ -66,15 +66,11 @@ html_content = """<!DOCTYPE html>
         <input type="submit" value="Submit Comment">
     </form>
 </div>
+</body>
+</html>
 """
 
-def printGet():
-
-    print()
-    print(html_content)
-    print("</body></html>")
-
-printGet()
+print(html_content)
 print("Content-Type: text/html")
 # to test for infinite loop
 # while True:
