@@ -1,7 +1,7 @@
 #include "../include/Webserv.hpp"
 #include "Webserv.hpp"
 
-std::vector<struct pollfd> pollFdsList;
+
 
 std::map<int, Connection> connections;
 
@@ -17,25 +17,20 @@ static void	closeFd(int fd)
 		close(fd);
 }
 
-static void addNewClientAndConnection(int fd, bool isListener, bool isActive)
-{
-	struct pollfd newPollFd;
+// static void addNewClientAndConnection(std::vector<pollfd> &pfds, int fd, bool isListener, bool isActive, int events)
+// {
+// 	pfds.push_back((pollfd){fd, events, 0});
 
-	memset(&newPollFd, 0, sizeof(newPollFd));
-	newPollFd.fd = fd;
-	newPollFd.events = POLLIN | POLLOUT;
-	pollFdsList.push_back(newPollFd);
+// 	Connection conn;
 
-	Connection conn;
-
-	conn.fd = fd;
-	conn.isListener = isListener;
-	conn.startTime = std::time(0);
-	conn.req = Request();
-	conn.res = Response();
-	conn.isActive = isActive;
-	connections.insert(std::pair<int, Connection>(fd, conn));
-}
+// 	conn.fd = fd;
+// 	conn.isListener = isListener;
+// 	conn.startTime = std::time(0);
+// 	conn.req = Request();
+// 	conn.res = Response();
+// 	conn.isActive = isActive;
+// 	connections.insert(std::pair<int, Connection>(fd, conn));
+// }
 
 static int createServerSocket(int port)
 {
@@ -58,12 +53,12 @@ static int createServerSocket(int port)
 	return (serverSocket);
 }
 
-static void initiateWebServer(Configuration &config)
+static void initiateWebServer(std::vector<pollfd> &pfds, Configuration &config)
 {
 	std::vector<ServerBlock> servers = config.getServerBlocks();
 	std::set<Hostport> hostPorts;
 
-	listenFds.clear();
+	// listenFds.clear();
 	for (std::vector<ServerBlock>::iterator it = servers.begin(); it != servers.end(); it++)
 	{
 		int serverSocket;
@@ -78,10 +73,17 @@ static void initiateWebServer(Configuration &config)
 		hostPorts.insert(it->hostPort);
 	}
 	for (std::set<int>::iterator it = listenFds.begin(); it != listenFds.end(); it++)
-		addNewClientAndConnection(*it, true, false);
+	{
+		pollfd pfd;
+
+		pfd.fd = *it;
+		pfd.events = POLLIN;
+		pfd.revents = 0;
+		pfds.push_back(pfd);
+	}
 }
 
-static void acceptConnection(int fd)
+static void acceptConnection(std::vector<pollfd> &pfds, int fd)
 {
 	int clientFd = accept(fd, NULL, NULL);
 	int opt = 1;
@@ -98,24 +100,52 @@ static void acceptConnection(int fd)
 		perror("fcntl");
 		return;
 	}
-	if (setsockopt(clientFd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) < 0)
+	if (setsockopt(clientFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 	{
 		closeFd(clientFd);
-		perror("setsockopt");
+		perror("setsockopt SO_REUSEADDR");
 		return;
 	}
-	addNewClientAndConnection(clientFd, false, true);
+
+	if (setsockopt(clientFd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) < 0)
+	{
+		closeFd(clientFd);
+		perror("setsockopt SO_REUSEPORT");
+		return;
+	}
+
+	if (pfds.capacity() == pfds.size()) {
+		pfds.reserve(pfds.size() + 10); // Increase capacity by a fixed number or a percentage.
+	}
+
+	// addNewClientAndConnection(pfds, clientFd, false, true, POLLIN | POLLOUT);
+	pollfd newPfd;
+
+	newPfd.fd = clientFd;
+	newPfd.events = POLLIN | POLLOUT;
+	newPfd.revents = 0;
+	pfds.push_back(newPfd);
+
+	Connection conn;
+
+	conn.fd = clientFd;
+	conn.isListener = false;
+	conn.startTime = std::time(0);
+	conn.req = Request();
+	conn.res = Response();
+	conn.isActive = true;
+	connections.insert(std::pair<int, Connection>(clientFd, conn));
 	std::cout << "New client connected on fd: " << clientFd << std::endl;
 }
 
-static std::vector<struct pollfd>::iterator	closeConnection(std::vector<struct pollfd>::iterator &it)
-{
-	std::cout << "Closing connection on fd: " << it->fd << std::endl;
-	closeFd(it->fd);
-	if (it != pollFdsList.end())
-		return (pollFdsList.erase(it));
-	return (it);
-}
+// static std::vector<pollfd>::iterator	closeConnection(std::vector<pollfd>::iterator &it)
+// {
+// 	std::cout << "Closing connection on fd: " << it->fd << std::endl;
+// 	closeFd(it->fd);
+// 	if (it != pollFdsList.end())
+// 		return (pollFdsList.erase(it));
+// 	return (it);
+// }
 
 static int receiveRequest(int fd)
 {
@@ -166,10 +196,10 @@ static void handleSIGINT(int sig)
 	running = false;
 }
 
-static void printPollFds()
+static void printPollFds(std::vector<pollfd> &pollFdsList)
 {
 	std::cout << "POLLFDS :" << std::endl;
-	for (std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
+	for (std::vector<pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
 	{
 		std::cout
 			<< "{fd: " << it->fd << ", events: "
@@ -182,7 +212,7 @@ static void printPollFds()
 	std::cout << std::endl;
 }
 
-static void printPfd(std::vector<struct pollfd>::iterator it)
+static void printPfd(std::vector<pollfd>::iterator it)
 {
 	std::cout
 		<< "PFD: {fd: " << it->fd << ", events: "
@@ -210,13 +240,18 @@ static void printConnections()
 void runWebServer(Configuration &config)
 {
 	std::string wait[] = {"⠋", "⠙", "⠸", "⠴", "⠦", "⠇"};
-	int timeout = 1000;
+	int timeout = 500;
 	int n = 0;
-	std::vector<int> toClose;
+	// std::vector<int> toClose;
+	std::vector<pollfd>	pollFdsList;
 
-	memset(&listenFds, 0, sizeof(listenFds));
-	initiateWebServer(config);
-	printPollFds();
+	// struct pollfd	pfd[MAX_CLIENTS];
+
+	// init pollFdsList
+	pollFdsList.reserve(300);
+
+	initiateWebServer(pollFdsList, config);
+	// printPollFds(pollFdsList);
 	signal(SIGINT, handleSIGINT);
 	while (running)
 	{
@@ -234,8 +269,9 @@ void runWebServer(Configuration &config)
 			continue;
 		}
 
+
 		int j = 0;
-		for (std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end() && j < nfds;)
+		for (std::vector<pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end();)
 		{
 			if (it->revents == 0)
 			{
@@ -247,19 +283,17 @@ void runWebServer(Configuration &config)
 			{
 				if (listenFds.find(it->fd) != listenFds.end())
 				{
-					acceptConnection(it->fd);
+					acceptConnection(pollFdsList, it->fd);
 					std::cout << "NEW CONNECTION FD : " << it->fd << std::endl;
+					// break;
 				}
 				else
 				{
 					std::cout << "RECEIVING REQUEST ON FD : " << it->fd << std::endl;
 					if (receiveRequest(it->fd) == FAILURE)
 					{
-						// toClose.push_back(it->fd);
-						// closeConnection(it);
 						closeFd(it->fd);
-						it->fd = -1;
-						++it;
+						it = pollFdsList.erase(it);
 						continue;
 					}
 				}
@@ -271,15 +305,8 @@ void runWebServer(Configuration &config)
 			}
 			++it;
 		}
-		for(std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end();)
-		{
-			if (it->fd == -1)
-				it = pollFdsList.erase(it);
-			else
-				++it;
-		}
 	}
-	for (std::vector<struct pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
+	for (std::vector<pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
 		closeFd(it->fd);
 	std::cout << "Server stopped" << std::endl;
 }
