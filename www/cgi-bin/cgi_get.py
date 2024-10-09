@@ -69,7 +69,6 @@ html_content = """<!DOCTYPE html>
 </body>
 </html>
 """
-
 print(html_content)
 print("Content-Type: text/html")
 # to test for infinite loop

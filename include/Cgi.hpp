@@ -6,6 +6,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <ctime>
+#include <sys/select.h>
+#include <signal.h>
 
 #define CGITIMEOUT 2
 

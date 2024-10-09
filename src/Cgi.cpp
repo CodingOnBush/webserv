@@ -54,8 +54,6 @@ void handleCGI(Configuration &config, LocationBlock &location, Request &req, Res
     std::string cgiPathWithArgs = location.root + req.getUri();
     std::stringstream cgiOutput;
     struct stat st;
-
-    std::cout << "cgiPathWithArgs: " << cgiPathWithArgs << std::endl;
     if ((stat(cgiPathWithArgs.c_str(), &st) != 0))
     {
         std::cerr << "file does not exist" << std::endl;
@@ -92,7 +90,6 @@ void handleCGI(Configuration &config, LocationBlock &location, Request &req, Res
     {
         close(pipefd[0]);
         dup2(pipefd[1], STDOUT_FILENO);
-        // dup2(pipefd[1], STDERR_FILENO);
         close(pipefd[1]);
         char *args[] = {strdup(cgiPathWithArgs.c_str()), NULL};
         execve(cgiPathWithArgs.c_str(), args, env);
@@ -103,22 +100,56 @@ void handleCGI(Configuration &config, LocationBlock &location, Request &req, Res
         close(pipefd[1]);
         char buffer[128];
         ssize_t bytesRead;
+        fd_set readfds;
+        struct timeval timeout;
+        int status;
 
-        while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0)
+        timeout.tv_sec = CGITIMEOUT;
+        timeout.tv_usec = 0;
+
+        while (true)
         {
-            buffer[bytesRead] = '\0';
-            cgiOutput << buffer;
+            FD_ZERO(&readfds);
+            FD_SET(pipefd[0], &readfds);
+
+            int ret = select(pipefd[0] + 1, &readfds, NULL, NULL, &timeout);
+            if (ret == -1)
+            {
+                std::cerr << "select failed" << std::endl;
+                res.setStatusCode(500);
+                close(pipefd[0]);
+                kill(pid, SIGKILL);
+                waitpid(pid, &status, 0);
+                freeEnv(env);
+                return;
+            }
+            else if (ret == 0)
+            {
+                std::cerr << "CGI process timed out" << std::endl;
+                res.setStatusCode(504);
+                close(pipefd[0]);
+                kill(pid, SIGKILL);
+                waitpid(pid, &status, 0);
+                freeEnv(env);
+                return;
+            }
+            else
+            {
+                if (FD_ISSET(pipefd[0], &readfds))
+                {
+                    bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1);
+                    if (bytesRead <= 0)
+                        break;
+                    buffer[bytesRead] = '\0';
+                    cgiOutput << buffer;
+                }
+            }
         }
         close(pipefd[0]);
-        int status;
         waitpid(pid, &status, 0);
-        if (WIFEXITED(status))
-        {
-            std::cout << "child exited with status: " << WEXITSTATUS(status) << std::endl;
-        }
         if (cgiOutput.str().empty())
         {
-            std::cout << "empty output" << std::endl;
+            std::cerr << "empty output" << std::endl;
             res.setStatusCode(500);
             return;
         }
@@ -128,15 +159,12 @@ void handleCGI(Configuration &config, LocationBlock &location, Request &req, Res
             res.setStatusCode(500);
             return;
         }
-        //add check here to verify that the file (cgiOutput) is finite (no infinite loops in py script)
         else
         {
             std::string output = cgiOutput.str();
             size_t pos = output.find("Content-Type: text/html");
             if (pos != std::string::npos)
-            {
                 output.erase(pos, std::string("Content-Type: text/html").length());
-            }
             cgiOutput.str(output);
             res.setBody(cgiOutput.str());
             res.setMimeType("html");
