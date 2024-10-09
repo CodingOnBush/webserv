@@ -1,625 +1,591 @@
-==1796641== Memcheck, a memory error detector
-==1796641== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==1796641== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
-==1796641== Command: ./webserv file.conf
-==1796641== Parent PID: 1702774
-==1796641== 
-==1796641== Invalid read of size 2
-==1796641==    at 0x43340A: runWebServer(Configuration&) (Webserv.cpp:261)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21086 is 6 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== Invalid read of size 2
-==1796641==    at 0x4331AF: runWebServer(Configuration&) (Webserv.cpp:240)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e2108e is 14 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== Invalid read of size 2
-==1796641==    at 0x433203: runWebServer(Configuration&) (Webserv.cpp:246)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e2109e is 30 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== Invalid read of size 4
-==1796641==    at 0x41AA9A: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
-==1796641==    by 0x438B4B: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::_M_lower_bound(std::_Rb_tree_node<std::pair<int const, Connection> >*, std::_Rb_tree_node_base*, int const&) (stl_tree.h:1953)
-==1796641==    by 0x43A4FD: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::find(int const&) (stl_tree.h:2533)
-==1796641==    by 0x43483C: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::find(int const&) (stl_map.h:1218)
-==1796641==    by 0x43323E: runWebServer(Configuration&) (Webserv.cpp:248)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== Invalid read of size 4
-==1796641==    at 0x41AA94: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
-==1796641==    by 0x43A54C: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::find(int const&) (stl_tree.h:2535)
-==1796641==    by 0x43483C: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::find(int const&) (stl_map.h:1218)
-==1796641==    by 0x43323E: runWebServer(Configuration&) (Webserv.cpp:248)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== Invalid read of size 4
-==1796641==    at 0x41AA9A: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
-==1796641==    by 0x438B4B: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::_M_lower_bound(std::_Rb_tree_node<std::pair<int const, Connection> >*, std::_Rb_tree_node_base*, int const&) (stl_tree.h:1953)
-==1796641==    by 0x43974D: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::lower_bound(int const&) (stl_tree.h:1272)
-==1796641==    by 0x43958C: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::lower_bound(int const&) (stl_map.h:1307)
-==1796641==    by 0x4348A6: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::operator[](int const&) (stl_map.h:507)
-==1796641==    by 0x4332EA: runWebServer(Configuration&) (Webserv.cpp:248)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== Invalid read of size 4
-==1796641==    at 0x41AA94: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
-==1796641==    by 0x43490D: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::operator[](int const&) (stl_map.h:509)
-==1796641==    by 0x4332EA: runWebServer(Configuration&) (Webserv.cpp:248)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== Invalid read of size 4
-==1796641==    at 0x433371: runWebServer(Configuration&) (Webserv.cpp:254)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== Invalid read of size 4
-==1796641==    at 0x41AA94: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
-==1796641==    by 0x43490D: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::operator[](int const&) (stl_map.h:509)
-==1796641==    by 0x433445: runWebServer(Configuration&) (Webserv.cpp:263)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== Invalid read of size 4
-==1796641==    at 0x4334A3: runWebServer(Configuration&) (Webserv.cpp:264)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== 
-==1796641== FILE DESCRIPTORS: 11 open (3 std) at exit.
-==1796641== Open AF_INET socket 6: 0.0.0.0:8082 <-> unbound
-==1796641==    at 0x4CCEB3B: socket (syscall-template.S:120)
-==1796641==    by 0x4342BB: createServerSocket(int) (Webserv.cpp:28)
-==1796641==    by 0x4338F2: initiateWebServer(Configuration&) (Webserv.cpp:60)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== Open AF_INET socket 5: 0.0.0.0:8081 <-> unbound
-==1796641==    at 0x4CCEB3B: socket (syscall-template.S:120)
-==1796641==    by 0x4342BB: createServerSocket(int) (Webserv.cpp:28)
-==1796641==    by 0x4338F2: initiateWebServer(Configuration&) (Webserv.cpp:60)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== Open AF_INET socket 4: 0.0.0.0:8080 <-> unbound
-==1796641==    at 0x4CCEB3B: socket (syscall-template.S:120)
-==1796641==    by 0x4342BB: createServerSocket(int) (Webserv.cpp:28)
-==1796641==    by 0x4338F2: initiateWebServer(Configuration&) (Webserv.cpp:60)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== Open file descriptor 103: /usr/share/code/v8_context_snapshot.bin
-==1796641==    <inherited from parent>
-==1796641== 
-==1796641== Open AF_UNIX socket 39: <unknown>
-==1796641==    <inherited from parent>
-==1796641== 
-==1796641== Open file descriptor 38: /home/momrane/.config/Code/logs/20241008T132839/ptyhost.log
-==1796641==    <inherited from parent>
-==1796641== 
-==1796641== Open file descriptor 37: /usr/share/code/resources/app/node_modules.asar
-==1796641==    <inherited from parent>
-==1796641== 
-==1796641== Open file descriptor 3: /home/momrane/webserv/outfile
-==1796641==    <inherited from parent>
-==1796641== 
-==1796641== 
-==1796641== HEAP SUMMARY:
-==1796641==     in use at exit: 0 bytes in 0 blocks
-==1796641==   total heap usage: 79,947 allocs, 79,947 frees, 58,960,157 bytes allocated
-==1796641== 
-==1796641== All heap blocks were freed -- no leaks are possible
-==1796641== 
-==1796641== ERROR SUMMARY: 20 errors from 10 contexts (suppressed: 0 from 0)
-==1796641== 
-==1796641== 1 errors in context 1 of 10:
-==1796641== Invalid read of size 4
-==1796641==    at 0x4334A3: runWebServer(Configuration&) (Webserv.cpp:264)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== 
-==1796641== 1 errors in context 2 of 10:
-==1796641== Invalid read of size 4
-==1796641==    at 0x41AA94: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
-==1796641==    by 0x43490D: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::operator[](int const&) (stl_map.h:509)
-==1796641==    by 0x433445: runWebServer(Configuration&) (Webserv.cpp:263)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== 
-==1796641== 1 errors in context 3 of 10:
-==1796641== Invalid read of size 4
-==1796641==    at 0x433371: runWebServer(Configuration&) (Webserv.cpp:254)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== 
-==1796641== 1 errors in context 4 of 10:
-==1796641== Invalid read of size 4
-==1796641==    at 0x41AA94: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
-==1796641==    by 0x43490D: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::operator[](int const&) (stl_map.h:509)
-==1796641==    by 0x4332EA: runWebServer(Configuration&) (Webserv.cpp:248)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== 
-==1796641== 1 errors in context 5 of 10:
-==1796641== Invalid read of size 4
-==1796641==    at 0x41AA94: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
-==1796641==    by 0x43A54C: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::find(int const&) (stl_tree.h:2535)
-==1796641==    by 0x43483C: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::find(int const&) (stl_map.h:1218)
-==1796641==    by 0x43323E: runWebServer(Configuration&) (Webserv.cpp:248)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== 
-==1796641== 1 errors in context 6 of 10:
-==1796641== Invalid read of size 2
-==1796641==    at 0x433203: runWebServer(Configuration&) (Webserv.cpp:246)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e2109e is 30 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== 
-==1796641== 2 errors in context 7 of 10:
-==1796641== Invalid read of size 2
-==1796641==    at 0x43340A: runWebServer(Configuration&) (Webserv.cpp:261)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21086 is 6 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== 
-==1796641== 3 errors in context 8 of 10:
-==1796641== Invalid read of size 4
-==1796641==    at 0x41AA9A: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
-==1796641==    by 0x438B4B: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::_M_lower_bound(std::_Rb_tree_node<std::pair<int const, Connection> >*, std::_Rb_tree_node_base*, int const&) (stl_tree.h:1953)
-==1796641==    by 0x43A4FD: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::find(int const&) (stl_tree.h:2533)
-==1796641==    by 0x43483C: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::find(int const&) (stl_map.h:1218)
-==1796641==    by 0x43323E: runWebServer(Configuration&) (Webserv.cpp:248)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== 
-==1796641== 3 errors in context 9 of 10:
-==1796641== Invalid read of size 2
-==1796641==    at 0x4331AF: runWebServer(Configuration&) (Webserv.cpp:240)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e2108e is 14 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== 
-==1796641== 6 errors in context 10 of 10:
-==1796641== Invalid read of size 4
-==1796641==    at 0x41AA9A: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
-==1796641==    by 0x438B4B: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::_M_lower_bound(std::_Rb_tree_node<std::pair<int const, Connection> >*, std::_Rb_tree_node_base*, int const&) (stl_tree.h:1953)
-==1796641==    by 0x43974D: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::lower_bound(int const&) (stl_tree.h:1272)
-==1796641==    by 0x43958C: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::lower_bound(int const&) (stl_map.h:1307)
-==1796641==    by 0x4348A6: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::operator[](int const&) (stl_map.h:507)
-==1796641==    by 0x4332EA: runWebServer(Configuration&) (Webserv.cpp:248)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
-==1796641==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x4381CC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
-==1796641==    by 0x4381A4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
-==1796641==    by 0x437D67: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
-==1796641==    by 0x437A84: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433C85: acceptConnection(int) (Webserv.cpp:107)
-==1796641==    by 0x433344: runWebServer(Configuration&) (Webserv.cpp:250)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641==  Block was alloc'd at
-==1796641==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1796641==    by 0x437EDF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
-==1796641==    by 0x437E70: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
-==1796641==    by 0x437C4F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
-==1796641==    by 0x43780B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
-==1796641==    by 0x4376FC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
-==1796641==    by 0x43442D: addNewClientAndConnection(int, bool) (Webserv.cpp:21)
-==1796641==    by 0x433AA4: initiateWebServer(Configuration&) (Webserv.cpp:67)
-==1796641==    by 0x432D73: runWebServer(Configuration&) (Webserv.cpp:220)
-==1796641==    by 0x42648C: main (main.cpp:13)
-==1796641== 
-==1796641== ERROR SUMMARY: 20 errors from 10 contexts (suppressed: 0 from 0)
+==2943740== Memcheck, a memory error detector
+==2943740== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==2943740== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==2943740== Command: ./webserv file.conf
+==2943740== Parent PID: 2893379
+==2943740== 
+==2943740== Invalid read of size 4
+==2943740==    at 0x433467: runWebServer(Configuration&) (Webserv.cpp:251)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21080 is 0 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== Invalid read of size 2
+==2943740==    at 0x4335E8: runWebServer(Configuration&) (Webserv.cpp:267)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21086 is 6 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== Invalid read of size 2
+==2943740==    at 0x4332EB: runWebServer(Configuration&) (Webserv.cpp:240)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e2108e is 14 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== Invalid read of size 2
+==2943740==    at 0x43333F: runWebServer(Configuration&) (Webserv.cpp:246)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e2109e is 30 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== Invalid read of size 4
+==2943740==    at 0x41AA0A: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
+==2943740==    by 0x4399CB: std::_Rb_tree<int, int, std::_Identity<int>, std::less<int>, std::allocator<int> >::_M_lower_bound(std::_Rb_tree_node<int>*, std::_Rb_tree_node_base*, int const&) (stl_tree.h:1953)
+==2943740==    by 0x4398FD: std::_Rb_tree<int, int, std::_Identity<int>, std::less<int>, std::allocator<int> >::find(int const&) (stl_tree.h:2533)
+==2943740==    by 0x434E5C: std::set<int, std::less<int>, std::allocator<int> >::find(int const&) (stl_set.h:795)
+==2943740==    by 0x43337A: runWebServer(Configuration&) (Webserv.cpp:248)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== Invalid read of size 4
+==2943740==    at 0x4334DF: runWebServer(Configuration&) (Webserv.cpp:255)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== Invalid read of size 4
+==2943740==    at 0x43352D: runWebServer(Configuration&) (Webserv.cpp:256)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== Invalid read of size 4
+==2943740==    at 0x41AA0A: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
+==2943740==    by 0x4392BB: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::_M_lower_bound(std::_Rb_tree_node<std::pair<int const, Connection> >*, std::_Rb_tree_node_base*, int const&) (stl_tree.h:1953)
+==2943740==    by 0x43925D: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::lower_bound(int const&) (stl_tree.h:1272)
+==2943740==    by 0x43910C: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::lower_bound(int const&) (stl_map.h:1307)
+==2943740==    by 0x434ED6: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::operator[](int const&) (stl_map.h:507)
+==2943740==    by 0x433623: runWebServer(Configuration&) (Webserv.cpp:269)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== Invalid read of size 4
+==2943740==    at 0x41AA04: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
+==2943740==    by 0x434F3D: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::operator[](int const&) (stl_map.h:509)
+==2943740==    by 0x433623: runWebServer(Configuration&) (Webserv.cpp:269)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== Invalid read of size 4
+==2943740==    at 0x433681: runWebServer(Configuration&) (Webserv.cpp:270)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== 
+==2943740== FILE DESCRIPTORS: 7 open (3 std) at exit.
+==2943740== Open file descriptor 103: /usr/share/code/v8_context_snapshot.bin
+==2943740==    <inherited from parent>
+==2943740== 
+==2943740== Open file descriptor 39: /home/momrane/.config/Code/logs/20241009T141544/ptyhost.log
+==2943740==    <inherited from parent>
+==2943740== 
+==2943740== Open file descriptor 38: /usr/share/code/resources/app/node_modules.asar
+==2943740==    <inherited from parent>
+==2943740== 
+==2943740== Open file descriptor 3: /home/momrane/webserv/outfile
+==2943740==    <inherited from parent>
+==2943740== 
+==2943740== 
+==2943740== HEAP SUMMARY:
+==2943740==     in use at exit: 0 bytes in 0 blocks
+==2943740==   total heap usage: 79,737 allocs, 79,737 frees, 64,070,679 bytes allocated
+==2943740== 
+==2943740== All heap blocks were freed -- no leaks are possible
+==2943740== 
+==2943740== ERROR SUMMARY: 16 errors from 10 contexts (suppressed: 0 from 0)
+==2943740== 
+==2943740== 1 errors in context 1 of 10:
+==2943740== Invalid read of size 4
+==2943740==    at 0x433681: runWebServer(Configuration&) (Webserv.cpp:270)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== 
+==2943740== 1 errors in context 2 of 10:
+==2943740== Invalid read of size 4
+==2943740==    at 0x41AA04: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
+==2943740==    by 0x434F3D: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::operator[](int const&) (stl_map.h:509)
+==2943740==    by 0x433623: runWebServer(Configuration&) (Webserv.cpp:269)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== 
+==2943740== 1 errors in context 3 of 10:
+==2943740== Invalid read of size 4
+==2943740==    at 0x43352D: runWebServer(Configuration&) (Webserv.cpp:256)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== 
+==2943740== 1 errors in context 4 of 10:
+==2943740== Invalid read of size 4
+==2943740==    at 0x4334DF: runWebServer(Configuration&) (Webserv.cpp:255)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== 
+==2943740== 1 errors in context 5 of 10:
+==2943740== Invalid read of size 2
+==2943740==    at 0x43333F: runWebServer(Configuration&) (Webserv.cpp:246)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e2109e is 30 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== 
+==2943740== 1 errors in context 6 of 10:
+==2943740== Invalid read of size 4
+==2943740==    at 0x433467: runWebServer(Configuration&) (Webserv.cpp:251)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21080 is 0 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== 
+==2943740== 2 errors in context 7 of 10:
+==2943740== Invalid read of size 2
+==2943740==    at 0x4335E8: runWebServer(Configuration&) (Webserv.cpp:267)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21086 is 6 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== 
+==2943740== 2 errors in context 8 of 10:
+==2943740== Invalid read of size 4
+==2943740==    at 0x41AA0A: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
+==2943740==    by 0x4399CB: std::_Rb_tree<int, int, std::_Identity<int>, std::less<int>, std::allocator<int> >::_M_lower_bound(std::_Rb_tree_node<int>*, std::_Rb_tree_node_base*, int const&) (stl_tree.h:1953)
+==2943740==    by 0x4398FD: std::_Rb_tree<int, int, std::_Identity<int>, std::less<int>, std::allocator<int> >::find(int const&) (stl_tree.h:2533)
+==2943740==    by 0x434E5C: std::set<int, std::less<int>, std::allocator<int> >::find(int const&) (stl_set.h:795)
+==2943740==    by 0x43337A: runWebServer(Configuration&) (Webserv.cpp:248)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== 
+==2943740== 3 errors in context 9 of 10:
+==2943740== Invalid read of size 4
+==2943740==    at 0x41AA0A: std::less<int>::operator()(int const&, int const&) const (stl_function.h:408)
+==2943740==    by 0x4392BB: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::_M_lower_bound(std::_Rb_tree_node<std::pair<int const, Connection> >*, std::_Rb_tree_node_base*, int const&) (stl_tree.h:1953)
+==2943740==    by 0x43925D: std::_Rb_tree<int, std::pair<int const, Connection>, std::_Select1st<std::pair<int const, Connection> >, std::less<int>, std::allocator<std::pair<int const, Connection> > >::lower_bound(int const&) (stl_tree.h:1272)
+==2943740==    by 0x43910C: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::lower_bound(int const&) (stl_map.h:1307)
+==2943740==    by 0x434ED6: std::map<int, Connection, std::less<int>, std::allocator<std::pair<int const, Connection> > >::operator[](int const&) (stl_map.h:507)
+==2943740==    by 0x433623: runWebServer(Configuration&) (Webserv.cpp:269)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e21098 is 24 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== 
+==2943740== 3 errors in context 10 of 10:
+==2943740== Invalid read of size 2
+==2943740==    at 0x4332EB: runWebServer(Configuration&) (Webserv.cpp:240)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Address 0x4e2108e is 14 bytes inside a block of size 32 free'd
+==2943740==    at 0x484B8AF: operator delete(void*) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437EEC: std::__new_allocator<pollfd>::deallocate(pollfd*, unsigned long) (new_allocator.h:158)
+==2943740==    by 0x437EC4: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::deallocate(std::allocator<pollfd>&, pollfd*, unsigned long) (alloc_traits.h:141)
+==2943740==    by 0x437A87: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_deallocate(pollfd*, unsigned long) (stl_vector.h:387)
+==2943740==    by 0x4377A4: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:513)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x434220: acceptConnection(int) (Webserv.cpp:107)
+==2943740==    by 0x43341A: runWebServer(Configuration&) (Webserv.cpp:250)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740==  Block was alloc'd at
+==2943740==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==2943740==    by 0x437BFF: std::__new_allocator<pollfd>::allocate(unsigned long, void const*) (new_allocator.h:137)
+==2943740==    by 0x437B90: __gnu_cxx::__alloc_traits<std::allocator<pollfd>, pollfd>::allocate(std::allocator<pollfd>&, unsigned long) (alloc_traits.h:133)
+==2943740==    by 0x43796F: std::_Vector_base<pollfd, std::allocator<pollfd> >::_M_allocate(unsigned long) (stl_vector.h:378)
+==2943740==    by 0x43752B: std::vector<pollfd, std::allocator<pollfd> >::_M_realloc_insert(__gnu_cxx::__normal_iterator<pollfd*, std::vector<pollfd, std::allocator<pollfd> > >, pollfd const&) (vector.tcc:453)
+==2943740==    by 0x4371BC: std::vector<pollfd, std::allocator<pollfd> >::push_back(pollfd const&) (stl_vector.h:1287)
+==2943740==    by 0x43496F: addNewClientAndConnection(int, bool, bool) (Webserv.cpp:27)
+==2943740==    by 0x433E6D: initiateWebServer(Configuration&) (Webserv.cpp:81)
+==2943740==    by 0x432E9C: runWebServer(Configuration&) (Webserv.cpp:218)
+==2943740==    by 0x4263FC: main (main.cpp:13)
+==2943740== 
+==2943740== ERROR SUMMARY: 16 errors from 10 contexts (suppressed: 0 from 0)

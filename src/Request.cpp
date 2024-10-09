@@ -301,3 +301,15 @@ void printRequest(Request &req)
     std::cout << std::endl;
     std::cout << std::string(21, '*') << std::endl;
 }
+
+bool    Request::isKeepAlive()
+{
+    std::map<std::string, std::string>::iterator it = headers.find("Connection");
+    if (it != headers.end())
+    {
+        std::cout << "is Keep Alive : " << it->second << std::endl;
+        if (it->second == "keep-alive")
+            return true;
+    }
+    return false;
+}

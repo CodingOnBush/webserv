@@ -66,6 +66,7 @@ public:
 	int 								getRequestState();
 	int 								getParsingState();
 	void								clearRequest();
+	bool								isKeepAlive();
 	void								parseRequest(std::stringstream &stream);
 	std::string							getHost() const;
 	int 								getPort() const;

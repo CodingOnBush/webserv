@@ -42,10 +42,12 @@ typedef std::vector<struct pollfd> PollFds;
 
 struct Connection
 {
+	int				fd;
 	bool			isListener;
 	std::time_t		startTime;
 	Request			req;
 	Response		res;
+	bool			isActive;
 };
 
 extern int  uploadNb;
