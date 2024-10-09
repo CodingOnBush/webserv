@@ -38,11 +38,11 @@ struct LocationBlock {
 	bool								autoindexDone;
 	bool								pathInfo;
 	std::vector<std::string>			indexes;
+	std::vector<std::string>			cgiExtensions;
 	std::map<std::string, std::string>	errorPages;
 	std::string							uploadLocation;
 	std::map<int, std::string>			redirects;
 	bool                               	redirection;
-	std::vector<std::string>			cgiExtensions;
 	std::map<std::string, std::string>	cgiParams;
 	std::vector<http_method>			methods;
 };

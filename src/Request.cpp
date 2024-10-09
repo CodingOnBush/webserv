@@ -85,7 +85,6 @@ void Request::setVersion(const std::string &str)
     if (str.find("HTTP/") == 0)
     {
         this->version = str;
-        // this->version.erase(0, 5);
     }
     else
     {
@@ -246,11 +245,6 @@ int Request::getParsingState()
 void Request::parseRequest(std::stringstream &stream)
 {
     std::string line;
-    // if (parsingState == BODY)
-    // {
-    //     parseBody(stream);
-    //     return;
-    // }
     if (parsingState == REQUEST_LINE)
     {
         std::getline(stream, line);
@@ -283,33 +277,4 @@ void Request::clearRequest(void)
     this->state = 0;
     this->body.clear();
     this->parsingState = REQUEST_LINE;
-}
-void printRequest(Request &req)
-{
-    std::cout << std::string(21, '*') << std::endl;
-    std::cout << "Method: " << req.getMethod() << std::endl;
-    std::cout << "URI: " << req.getUri() << std::endl;
-    std::cout << "Version: " << req.getVersion() << std::endl;
-    std::cout << "Headers: " << std::endl;
-    std::map<std::string, std::string> headers = req.getHeaders();
-    for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it)
-    {
-        std::cout << it->first << ":" << it->second << std::endl;
-    }
-    std::cout << "Body: " << std::endl;
-    std::cout << req.getBody() << std::endl;
-    std::cout << std::endl;
-    std::cout << std::string(21, '*') << std::endl;
-}
-
-bool    Request::isKeepAlive()
-{
-    std::map<std::string, std::string>::iterator it = headers.find("Connection");
-    if (it != headers.end())
-    {
-        std::cout << "is Keep Alive : " << it->second << std::endl;
-        if (it->second == "keep-alive")
-            return true;
-    }
-    return false;
 }

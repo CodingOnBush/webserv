@@ -4,10 +4,6 @@ import cgi
 import cgitb
 import json
 
-# while True:
-    # pass
-
-print("Hi from test.py")
 request_method = os.environ.get('REQUEST_METHOD')
 request_query = os.environ.get('QUERY_STRING')
 html_content = """<!DOCTYPE html>
@@ -15,8 +11,8 @@ html_content = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comment Form</title>
-    <style>
+    <title>POST Success</title>
+        <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -43,9 +39,6 @@ html_content = """<!DOCTYPE html>
             border-radius: 4px;
             cursor: pointer;
         }
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
         .comment-block {
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -55,21 +48,6 @@ html_content = """<!DOCTYPE html>
         }
     </style>
 </head>
-<body>
-
-<h1>Leave a Comment</h1>
-
-<div class="comment-block">
-    <form action="/submit_comment" method="post">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-        
-        <label for="comment">Comment:</label>
-        <textarea id="comment" name="comment" required></textarea>
-        
-        <input type="submit" value="Submit Comment">
-    </form>
-</div>
 """
 
 def parse_query_string(query_string):
@@ -85,17 +63,10 @@ def parse_query_string(query_string):
             
     return name, comment
 
-def printGet():
-
-    print()
-    print(html_content)
-    print("</body></html>")
-
 def printPost():
     name, comment = parse_query_string(request_query)
-    print()
     print(html_content)
-    print("<h2>Comment Submitted:</h2>")
+    print("<body><h1>Comment successfully submitted!</h1>")
     print("""
     <div style="border: 1px solid #ccc; border-radius: 4px; padding: 15px; margin-top: 20px; background-color: #f9f9f9;">
         <strong>Name:</strong> {}
@@ -109,12 +80,7 @@ def printPost():
     """.format(name, comment, name=name, comment=comment))
     print("</body></html>")
     
-if request_method == '0':
-    printGet()
-elif request_method == '1':
-    printPost()
-else:
-    print("<html><body><h1>Method Not Supported</h1></body></html>")
+printPost()
 print("Content-Type: text/html")
 # to test for infinite loop
 # while True:

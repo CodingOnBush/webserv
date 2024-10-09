@@ -152,9 +152,8 @@ bool isInIndex(std::string fileName, LocationBlock location)
 	return false;
 }
 
-bool hasDefaultFile(const std::string &directoryPath, std::string fileName, LocationBlock location)
+bool hasDefaultFile(const std::string &directoryPath, LocationBlock location)
 {
-	(void)fileName;
 	DIR *directoryPtr = opendir(directoryPath.c_str());
 	struct dirent *dir;
 	if (directoryPtr == NULL)
@@ -182,15 +181,15 @@ bool hasDefaultFile(const std::string &directoryPath, std::string fileName, Loca
 	return false;
 }
 
-std::string getFilePath(std::string path, std::string uri, std::string fileName)
+std::string getFilePath(std::string path, std::string fileName)
 {
 	std::string filePath;
 	if (path[path.size() - 1] != '/')
 		path += "/";
-	if (uri != "/")
+	// if (uri != "/")
 		filePath = path + fileName;
-	else
-		filePath = path + "index.html";
+	// else
+	// 	filePath = path + "index.html";
 	return filePath;
 }
 

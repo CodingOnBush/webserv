@@ -17,10 +17,9 @@ void Response::setBody(std::string const &body)
 	this->body = body;
 }
 
-// change this to setErrorBody ?
 void Response::setErrorBody(LocationBlock location)
 {
-	if (location.errorPages.empty())
+	if (location.errorPages.empty() || location.errorPages.find(intToString(this->statusCode)) == location.errorPages.end())
 	{
 		body = getDefaultErrorBody(this->statusCode);
 	}
@@ -65,7 +64,10 @@ void Response::createResponseStr(LocationBlock location)
 	std::stringstream ss;
 	setStatusLine();
 	if (this->statusCode >= 400)
+	{
 		setErrorBody(location);
+		setMimeType("html");
+	}
 	setHeaders(location);
 	ss << statusLine << headers << body << LF;
 	response = ss.str();
@@ -122,7 +124,6 @@ void Response::setMimeType(std::string const &fileName)
 void Response::setHeaders(LocationBlock location)
 {
 	std::stringstream ss;
-	// add text/html as a default mime type (for default errors) ?
 	ss << "Content-Type: " << mimeType << CRLF
 	   << "Content-Length: " << body.size() << CRLF;
 	if (location.redirection)
@@ -136,7 +137,6 @@ void Response::setHeaders(LocationBlock location)
 void Response::getBody(std::string uri, LocationBlock location)
 {
 	std::string path = setPath(location, uri);
-	// std::cout << "Path: " << path << std::endl;
 	if (isDirectory(path))
 	{
 		DIR *directoryPtr = opendir(path.c_str());
@@ -166,11 +166,11 @@ void Response::getBody(std::string uri, LocationBlock location)
 				std::string fileName = dir->d_name;
 				if (fileName == "." || fileName == "..")
 					continue;
-				if (hasDefaultFile(path, fileName, location))
+				if (hasDefaultFile(path, location))
 				{
 					if (!isInIndex(fileName, location))
 						continue;
-					std::ifstream file(getFilePath(path, uri, fileName).c_str());
+					std::ifstream file(getFilePath(path, fileName).c_str());
 					if (file.is_open())
 					{
 						std::stringstream body;
@@ -201,7 +201,7 @@ void Response::getBody(std::string uri, LocationBlock location)
 			}
 		}
 		if (this->statusCode == 0)
-			this->statusCode = 404;
+			this->statusCode = 403;
 		closedir(directoryPtr);
 	}
 	else if (isFile(path))
@@ -227,17 +227,17 @@ void Response::getBody(std::string uri, LocationBlock location)
 
 std::string parseFileName(std::string body, std::string keyword)
 {
-    size_t pos = body.find(keyword);
-    if (pos == std::string::npos)
+	size_t pos = body.find(keyword);
+	if (pos == std::string::npos)
 	{
-		std::cerr << "Error: Could not find keyword " << keyword << " in body." << std::endl;
-        return "";
+		std::cerr << "Could not find keyword " << keyword << " in body" << std::endl;
+		return "";
 	}
-    pos += keyword.length();
+	pos += keyword.length();
 	size_t endPos = body.find("\r\n", pos);
 	if (endPos == std::string::npos)
 	{
-		std::cerr << "Error: Could not find end of line in body." << std::endl;
+		std::cerr << "Could not find end of line in body" << std::endl;
 		return "";
 	}
 	std::string fileName = body.substr(pos, endPos - 1 - pos);
@@ -246,40 +246,14 @@ std::string parseFileName(std::string body, std::string keyword)
 	return fileName;
 }
 
-// int countSlashes(std::string path)
-// {
-// 	int count = 0;
-// 	for (size_t i = 0; i < path.size(); i++)
-// 	{
-// 		if (path[i] == '/')
-// 			count++;
-// 	}
-// 	if (path[path.size() - 1] == '/')
-// 		count--;
-// 	return count;
-// }
-
-// void changeDirBack(std::string path)
-// {
-// 	int slashes = countSlashes(path);
-// 	for (int i = 0; i < slashes; i++)
-// 	{
-// 		if (chdir("../") == -1)
-// 		{
-// 			std::cerr << "Error: Could not change directory back." << std::endl;
-// 			return;
-// 		}
-// 	}
-// }
-
 void Response::handleUploadFiles(Configuration &config, LocationBlock &location, Request &req)
 {
 	(void)config;
-	//on va verifier s'il existe bien une upload location dans le location block si non erreur (trouver quel numero d'erreur)
+	// on va verifier s'il existe bien une upload location dans le location block si non erreur (trouver quel numero d'erreur)
 	std::string body = req.getBody();
 	if (location.uploadLocation.empty())
 	{
-		this->statusCode = 405; //check si bon code
+		this->statusCode = 405; // check si bon code
 		return;
 	}
 	DIR *dir = opendir(location.uploadLocation.c_str());
@@ -336,9 +310,9 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 			return;
 		}
 		std::ofstream file(fileName.c_str());
-		if (!file.is_open()) 
+		if (!file.is_open())
 		{
-			//remplacer par throw exception? 
+			// remplacer par throw exception?
 			std::cerr << "Error: Could not open file " << fileName << " for writing." << std::endl;
 			this->statusCode = 500;
 			return;
@@ -351,37 +325,32 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 	}
 	closedir(dir);
 }
-
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
-	std::string uri = req.getUri();
-	// std::cout << "URI WE WANNA SEEE: \n" << uri << std::endl;
-	if (location.cgiParams.empty())
+	if (needsCGI(location, req))
 	{
-		getBody(req.getUri(), location);
+		handleCGI(config, location, req, *this);
 		return;
 	}
-	handleCGI(config, location, req, *this);
-	// handle cgi
+	getBody(req.getUri(), location);
+	return;
 }
 
 void Response::handlePostRequest(Configuration &config, LocationBlock location)
 {
-	if (location.cgiParams.empty())
+	if (needsCGI(location, req))
 	{
-		handleUploadFiles(config, location, req);
-		// body = "<div style=\"display: flex; justify-content: center; align-items: center; height: 100vh; color: green; font-weight: bold;\">Upload was successful!</div>";
-		body = "<html><head><title>Upload Successful</title></head><body><div style=\"display: flex; justify-content: center; align-items: center; height: 100vh; color: green; font-weight: bold;\"><h1>Upload was successful!</h1></div></body></html>";
-		setMimeType("html");
+		handleCGI(config, location, req, *this);
 		return;
 	}
-	handleCGI(config, location, req, *this);
+	handleUploadFiles(config, location, req);
+	body = uploadSuccess;
+	setMimeType("html");
 	return;
 }
 
-void Response::handleDeleteRequest(Configuration &config, LocationBlock location)
+void Response::handleDeleteRequest(LocationBlock location)
 {
-	(void)config;
 	std::string uri = req.getUri();
 	std::string filePath = location.root + uri;
 	struct stat fileStat;
@@ -396,10 +365,9 @@ void Response::handleDeleteRequest(Configuration &config, LocationBlock location
 		if (remove(filePath.c_str()) != 0)
 		{
 			this->statusCode = 500;
-			setMimeType("html");
 			return;
 		}
-		body = "<html><head><title>File successfully deleted!</title></head><body><div><h1>Delete operation was successful!</h1></div></body></html>";
+		body = deleteSuccess;
 		setMimeType("html");
 		this->statusCode = 200;
 		return;
@@ -411,7 +379,6 @@ void Response::methodCheck(LocationBlock location)
 	if (req.getMethod() == UNKNOWN)
 	{
 		this->statusCode = 405;
-		setMimeType("html");
 		return;
 	}
 	if (location.methods.empty() || std::find(location.methods.begin(), location.methods.end(), req.getMethod()) == location.methods.end())
@@ -433,13 +400,12 @@ void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 	}
 }
 
-std::string Response::handleRedirection(Configuration &config, LocationBlock &location)
+std::string Response::handleRedirection(LocationBlock &location)
 {
-	(void)config;
 	std::stringstream ss;
 	body = "";
 	setMimeType("html");
-	statusCode = 307;
+	this->statusCode = 307;
 	setStatusLine();
 	setHeaders(location);
 	createResponseStr(location);
@@ -449,7 +415,6 @@ std::string Response::handleRedirection(Configuration &config, LocationBlock &lo
 std::string Response::getResponse(Configuration &config)
 {
 	LocationBlock location;
-
 	initLocationBlock(location);
 	if (serverBlockExists(config, this->req))
 	{
@@ -457,7 +422,7 @@ std::string Response::getResponse(Configuration &config)
 		methodCheck(location);
 		bodySizeCheck(config, location);
 		if (location.redirection == true)
-			return (handleRedirection(config, location));
+			return (handleRedirection(location));
 		if (this->statusCode == 0)
 		{
 			switch (req.getMethod())
@@ -469,97 +434,13 @@ std::string Response::getResponse(Configuration &config)
 				handlePostRequest(config, location);
 				break;
 			case DELETE:
-				handleDeleteRequest(config, location);
+				handleDeleteRequest(location);
 				break;
 			}
 		}
 	}
 	createResponseStr(location);
 	return response;
-}
-
-// void Response::handleRoot(std::string configPath, std::string requestUri)
-// {
-// 	DIR *directoryPtr = opendir(configPath.c_str());
-// 	if (directoryPtr == NULL)
-// 	{
-// 		if (errno == ENOENT)
-// 		{
-// 			this->statusCode = 404;
-// 			return;
-// 		}
-// 		else if (errno == EACCES)
-// 		{
-// 			this->statusCode = 403;
-// 			return;
-// 		}
-// 		else
-// 		{
-// 			this->statusCode = 500;
-// 			return;
-// 		}
-// 	}
-// 	else
-// 	{
-// 		struct dirent *dir;
-// 		while ((dir = readdir(directoryPtr)) != NULL)
-// 		{
-// 			std::string fileName = dir->d_name;
-// 			// std::cout << "fileName: " << fileName << std::endl;
-// 			if (fileName == "." || fileName == "..")
-// 				continue;
-// 			std::string filePath = configPath + "/" + fileName;
-// 			if (requestUri == "/")
-// 			{
-// 				filePath = configPath + "/" + "index.html";
-// 			}
-// 			if (requestUri == "/" || requestUri == "/" + fileName)
-// 			{
-// 				std::ifstream file(filePath.c_str());
-// 				std::stringstream body;
-// 				if (file.is_open())
-// 				{
-// 					std::string line;
-// 					while (std::getline(file, line))
-// 					{
-// 						body << line << std::endl;
-// 					}
-// 					file.close();
-// 					this->body = body.str();
-// 					if (requestUri == "/")
-// 					{
-// 						this->setMimeType("index.html");
-// 					}
-// 					else
-// 					{
-// 						this->setMimeType(fileName);
-// 					}
-// 					this->statusCode = 200;
-// 					break;
-// 				}
-// 				else
-// 				{
-// 					this->statusCode = 403;
-// 					break;
-// 				}
-// 			}
-// 		}
-// 		if (this->statusCode == 0)
-// 		{
-// 			this->statusCode = 404;
-// 		}
-// 		closedir(directoryPtr);
-// 	}
-// };
-
-void Response::clearResponse(void)
-{
-	this->statusCode = 0;
-	this->headers.clear();
-	this->body.clear();
-	this->response.clear();
-	this->mimeType.clear();
-	this->fdToClose = false;
 }
 
 LocationBlock Response::getLocationFromServer(Configuration &config, Request &req)
@@ -581,4 +462,14 @@ LocationBlock Response::getLocationFromServer(Configuration &config, Request &re
 	else
 		location = getMatchingLocationBlock(serverBlock, "/");
 	return location;
+}
+
+void Response::clearResponse(void)
+{
+	this->statusCode = 0;
+	this->headers.clear();
+	this->body.clear();
+	this->response.clear();
+	this->mimeType.clear();
+	this->fdToClose = false;
 }
