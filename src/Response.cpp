@@ -227,13 +227,13 @@ void Response::getBody(std::string uri, LocationBlock location)
 
 std::string parseFileName(std::string body, std::string keyword)
 {
-    size_t pos = body.find(keyword);
-    if (pos == std::string::npos)
+	size_t pos = body.find(keyword);
+	if (pos == std::string::npos)
 	{
 		std::cerr << "Error: Could not find keyword " << keyword << " in body." << std::endl;
-        return "";
+		return "";
 	}
-    pos += keyword.length();
+	pos += keyword.length();
 	size_t endPos = body.find("\r\n", pos);
 	if (endPos == std::string::npos)
 	{
@@ -275,11 +275,11 @@ std::string parseFileName(std::string body, std::string keyword)
 void Response::handleUploadFiles(Configuration &config, LocationBlock &location, Request &req)
 {
 	(void)config;
-	//on va verifier s'il existe bien une upload location dans le location block si non erreur (trouver quel numero d'erreur)
+	// on va verifier s'il existe bien une upload location dans le location block si non erreur (trouver quel numero d'erreur)
 	std::string body = req.getBody();
 	if (location.uploadLocation.empty())
 	{
-		this->statusCode = 405; //check si bon code
+		this->statusCode = 405; // check si bon code
 		return;
 	}
 	DIR *dir = opendir(location.uploadLocation.c_str());
@@ -336,9 +336,9 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 			return;
 		}
 		std::ofstream file(fileName.c_str());
-		if (!file.is_open()) 
+		if (!file.is_open())
 		{
-			//remplacer par throw exception? 
+			// remplacer par throw exception?
 			std::cerr << "Error: Could not open file " << fileName << " for writing." << std::endl;
 			this->statusCode = 500;
 			return;
@@ -351,31 +351,28 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 	}
 	closedir(dir);
 }
-//check for cgi params should be changed
 void Response::handleGetRequest(Configuration &config, LocationBlock location)
 {
-	std::string uri = req.getUri();
-	std::string fullPath = location.root + uri;
-	if (fullPath.substr(fullPath.length() - 3) == ".py")
-		handleCGI(config, location, req, *this);
-	else
+	if (needsCGI(location, req))
 	{
-		getBody(req.getUri(), location);
+		handleCGI(config, location, req, *this);
 		return;
 	}
+	getBody(req.getUri(), location);
+	return;
 }
-// check for cgi params should be added
+
 void Response::handlePostRequest(Configuration &config, LocationBlock location)
 {
-	// if (location.cgiParams.empty())
-	// {
-	// 	handleUploadFiles(config, location, req);
-	// 	// body = "<div style=\"display: flex; justify-content: center; align-items: center; height: 100vh; color: green; font-weight: bold;\">Upload was successful!</div>";
-	// 	body = "<html><head><title>Upload Successful</title></head><body><div style=\"display: flex; justify-content: center; align-items: center; height: 100vh; color: green; font-weight: bold;\"><h1>Upload was successful!</h1></div></body></html>";
-	// 	setMimeType("html");
-	// 	return;
-	// }
-	handleCGI(config, location, req, *this);
+	if (needsCGI(location, req))
+	{
+		handleCGI(config, location, req, *this);
+		return;
+	}
+	handleUploadFiles(config, location, req);
+	// body = "<div style=\"display: flex; justify-content: center; align-items: center; height: 100vh; color: green; font-weight: bold;\">Upload was successful!</div>";
+	body = "<html><head><title>Upload Successful</title></head><body><div style=\"display: flex; justify-content: center; align-items: center; height: 100vh; color: green; font-weight: bold;\"><h1>Upload was successful!</h1></div></body></html>";
+	setMimeType("html");
 	return;
 }
 

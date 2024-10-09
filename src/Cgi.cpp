@@ -1,5 +1,21 @@
 #include "Cgi.hpp"
 
+bool needsCGI(LocationBlock location, Request &req)
+{
+	std::string uri = req.getUri();
+	if (!location.cgiExtensions.empty())
+	{
+		for (std::vector<std::string>::iterator it = location.cgiExtensions.begin(); it != location.cgiExtensions.end(); it++)
+		{
+			if (uri.size() >= 3 && uri.substr(uri.size() - 3) == *it && !isDirectory(location.root + uri))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void freeEnv(char **env)
 {
     for (int i = 0; env[i] != NULL; i++)
