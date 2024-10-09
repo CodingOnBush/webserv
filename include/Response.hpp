@@ -32,7 +32,7 @@ class Response
 		void 			setErrorBody(LocationBlock location);
 		std::string		getBodyFromFile(std::string path);
 		void 			getBody(std::string uri, LocationBlock location);
-		std::string 	handleRedirection(Configuration &config, LocationBlock &location);
+		std::string 	handleRedirection(LocationBlock &location);
 	public:
 		bool	fdToClose;// maybe to move to private
 
@@ -46,7 +46,7 @@ class Response
 		void 		handleUploadFiles(Configuration &config, LocationBlock &location, Request &req);
 		void 		handleGetRequest(Configuration &config, LocationBlock location);
 		void 		handlePostRequest(Configuration &config, LocationBlock location);
-		void 		handleDeleteRequest(Configuration &config, LocationBlock location);
+		void 		handleDeleteRequest(LocationBlock location);
 		void 		setHeaders(LocationBlock location);
 		void 		setMimeType(std::string const &fileName);
 		void 		setStatusCode(int code);

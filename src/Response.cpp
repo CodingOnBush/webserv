@@ -17,7 +17,6 @@ void Response::setBody(std::string const &body)
 	this->body = body;
 }
 
-// change this to setErrorBody ?
 void Response::setErrorBody(LocationBlock location)
 {
 	if (location.errorPages.empty())
@@ -229,14 +228,14 @@ std::string parseFileName(std::string body, std::string keyword)
 	size_t pos = body.find(keyword);
 	if (pos == std::string::npos)
 	{
-		std::cerr << "Error: Could not find keyword " << keyword << " in body." << std::endl;
+		std::cerr << "Could not find keyword " << keyword << " in body" << std::endl;
 		return "";
 	}
 	pos += keyword.length();
 	size_t endPos = body.find("\r\n", pos);
 	if (endPos == std::string::npos)
 	{
-		std::cerr << "Error: Could not find end of line in body." << std::endl;
+		std::cerr << "Could not find end of line in body" << std::endl;
 		return "";
 	}
 	std::string fileName = body.substr(pos, endPos - 1 - pos);
@@ -244,32 +243,6 @@ std::string parseFileName(std::string body, std::string keyword)
 		fileName.erase(fileName.size() - 1);
 	return fileName;
 }
-
-// int countSlashes(std::string path)
-// {
-// 	int count = 0;
-// 	for (size_t i = 0; i < path.size(); i++)
-// 	{
-// 		if (path[i] == '/')
-// 			count++;
-// 	}
-// 	if (path[path.size() - 1] == '/')
-// 		count--;
-// 	return count;
-// }
-
-// void changeDirBack(std::string path)
-// {
-// 	int slashes = countSlashes(path);
-// 	for (int i = 0; i < slashes; i++)
-// 	{
-// 		if (chdir("../") == -1)
-// 		{
-// 			std::cerr << "Error: Could not change directory back." << std::endl;
-// 			return;
-// 		}
-// 	}
-// }
 
 void Response::handleUploadFiles(Configuration &config, LocationBlock &location, Request &req)
 {
@@ -374,9 +347,8 @@ void Response::handlePostRequest(Configuration &config, LocationBlock location)
 	return;
 }
 
-void Response::handleDeleteRequest(Configuration &config, LocationBlock location)
+void Response::handleDeleteRequest(LocationBlock location)
 {
-	(void)config;
 	std::string uri = req.getUri();
 	std::string filePath = location.root + uri;
 	struct stat fileStat;
@@ -428,9 +400,8 @@ void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 	}
 }
 
-std::string Response::handleRedirection(Configuration &config, LocationBlock &location)
+std::string Response::handleRedirection(LocationBlock &location)
 {
-	(void)config;
 	std::stringstream ss;
 	body = "";
 	setMimeType("html");
@@ -444,7 +415,6 @@ std::string Response::handleRedirection(Configuration &config, LocationBlock &lo
 std::string Response::getResponse(Configuration &config)
 {
 	LocationBlock location;
-
 	initLocationBlock(location);
 	if (serverBlockExists(config, this->req))
 	{
@@ -452,7 +422,7 @@ std::string Response::getResponse(Configuration &config)
 		methodCheck(location);
 		bodySizeCheck(config, location);
 		if (location.redirection == true)
-			return (handleRedirection(config, location));
+			return (handleRedirection(location));
 		if (this->statusCode == 0)
 		{
 			switch (req.getMethod())
@@ -464,7 +434,7 @@ std::string Response::getResponse(Configuration &config)
 				handlePostRequest(config, location);
 				break;
 			case DELETE:
-				handleDeleteRequest(config, location);
+				handleDeleteRequest(location);
 				break;
 			}
 		}
