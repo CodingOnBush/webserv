@@ -136,7 +136,6 @@ void Response::setHeaders(LocationBlock location)
 void Response::getBody(std::string uri, LocationBlock location)
 {
 	std::string path = setPath(location, uri);
-	// std::cout << "Path: " << path << std::endl;
 	if (isDirectory(path))
 	{
 		DIR *directoryPtr = opendir(path.c_str());
@@ -201,7 +200,7 @@ void Response::getBody(std::string uri, LocationBlock location)
 			}
 		}
 		if (this->statusCode == 0)
-			this->statusCode = 404;
+			this->statusCode = 403;
 		closedir(directoryPtr);
 	}
 	else if (isFile(path))

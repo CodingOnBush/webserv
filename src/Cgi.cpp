@@ -7,7 +7,8 @@ bool needsCGI(LocationBlock location, Request &req)
 	{
 		for (std::vector<std::string>::iterator it = location.cgiExtensions.begin(); it != location.cgiExtensions.end(); it++)
 		{
-			if (uri.size() >= 3 && uri.substr(uri.size() - 3) == *it && !isDirectory(location.root + uri))
+            size_t extentionSize = (*it).size();
+			if (uri.size() >= extentionSize && uri.substr(uri.size() - extentionSize) == *it && !isDirectory(location.root + uri))
 			{
 				return true;
 			}
