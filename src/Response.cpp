@@ -64,7 +64,10 @@ void Response::createResponseStr(LocationBlock location)
 	std::stringstream ss;
 	setStatusLine();
 	if (this->statusCode >= 400)
+	{
 		setErrorBody(location);
+		setMimeType("html");
+	}
 	setHeaders(location);
 	ss << statusLine << headers << body << LF;
 	response = ss.str();
@@ -121,7 +124,6 @@ void Response::setMimeType(std::string const &fileName)
 void Response::setHeaders(LocationBlock location)
 {
 	std::stringstream ss;
-	// add text/html as a default mime type (for default errors) ?
 	ss << "Content-Type: " << mimeType << CRLF
 	   << "Content-Length: " << body.size() << CRLF;
 	if (location.redirection)
@@ -363,7 +365,6 @@ void Response::handleDeleteRequest(LocationBlock location)
 		if (remove(filePath.c_str()) != 0)
 		{
 			this->statusCode = 500;
-			setMimeType("html");
 			return;
 		}
 		body = deleteSuccess;
@@ -378,7 +379,6 @@ void Response::methodCheck(LocationBlock location)
 	if (req.getMethod() == UNKNOWN)
 	{
 		this->statusCode = 405;
-		setMimeType("html");
 		return;
 	}
 	if (location.methods.empty() || std::find(location.methods.begin(), location.methods.end(), req.getMethod()) == location.methods.end())
@@ -405,7 +405,7 @@ std::string Response::handleRedirection(LocationBlock &location)
 	std::stringstream ss;
 	body = "";
 	setMimeType("html");
-	statusCode = 307;
+	this->statusCode = 307;
 	setStatusLine();
 	setHeaders(location);
 	createResponseStr(location);
