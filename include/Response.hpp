@@ -4,7 +4,7 @@
 #include "Configuration.hpp"
 #include "Request.hpp"
 #include <dirent.h>
-#include <unistd.h> 
+#include <unistd.h>
 #include <sys/stat.h>
 #include <string.h>
 #include "DefaultErrors.hpp"
@@ -16,46 +16,46 @@ class Request;
 
 class Response
 {
-	private:
-		Request		req;
-		std::string	statusLine;
-		int 		statusCode;
-		std::string	headers;
-		std::string	body;
-		std::string	response;
-		std::string	mimeType;
-		
-		LocationBlock	getLocationFromServer(Configuration &config, Request &req);
-		// void 			handleRoot(std::string configPath, std::string requestUri);
-		void 			bodySizeCheck(Configuration &config, LocationBlock &location);
-		void 			methodCheck(LocationBlock location);
-		void 			setErrorBody(LocationBlock location);
-		std::string		getBodyFromFile(std::string path);
-		void 			getBody(std::string uri, LocationBlock location);
-		std::string 	handleRedirection(LocationBlock &location);
-	public:
-		bool	fdToClose;// maybe to move to private
+private:
+	Request req;
+	std::string statusLine;
+	int statusCode;
+	std::string headers;
+	std::string body;
+	std::string response;
+	std::string mimeType;
 
-		Response();
-		Response(Request &req);
-		~Response();
-		
-		std::string	getResponse(Configuration &config);
-		void 		setStatusLine();
-		void 		createResponseStr(LocationBlock location);
-		void 		handleUploadFiles(Configuration &config, LocationBlock &location, Request &req);
-		void 		handleGetRequest(Configuration &config, LocationBlock location);
-		void 		handlePostRequest(Configuration &config, LocationBlock location);
-		void 		handleDeleteRequest(LocationBlock location);
-		void 		setHeaders(LocationBlock location);
-		void 		setMimeType(std::string const &fileName);
-		void 		setStatusCode(int code);
-		void 		setBody(std::string const &body);
+	LocationBlock getLocationFromServer(Configuration &config, Request &req);
+	void bodySizeCheck(Configuration &config, LocationBlock &location);
+	void methodCheck(LocationBlock location);
+	void setErrorBody(LocationBlock location);
+	std::string getBodyFromFile(std::string path);
+	void getBody(std::string uri, LocationBlock location);
+	std::string handleRedirection(LocationBlock &location);
+
+public:
+	bool fdToClose; // maybe to move to private - do we need this?
+
+	Response();
+	Response(Request &req);
+	~Response();
+
+	std::string getResponse(Configuration &config);
+	void setStatusLine();
+	void createResponseStr(LocationBlock location);
+	void handleUploadFiles(Configuration &config, LocationBlock &location, Request &req);
+	void handleGetRequest(Configuration &config, LocationBlock location);
+	void handlePostRequest(Configuration &config, LocationBlock location);
+	void handleDeleteRequest(LocationBlock location);
+	void setHeaders(LocationBlock location);
+	void setMimeType(std::string const &fileName);
+	void setStatusCode(int code);
+	void setBody(std::string const &body);
 };
 
 std::string intToString(int value);
-bool isDirectory( const std::string & path );
-bool isFile( const std::string & path );
+bool isDirectory(const std::string &path);
+bool isFile(const std::string &path);
 int serverBlocksCount(Configuration &config, std::string host, int port);
 ServerBlock getDefaultServerBlock(Configuration &config, std::string host, int port);
 bool matchExists(Configuration &config, std::string host, int port);
@@ -65,10 +65,10 @@ LocationBlock getMatchingLocationBlock(ServerBlock ServerBlock, std::string uri)
 bool serverBlockExists(Configuration &config, Request &req);
 std::string getDefaultErrorBody(int statusCode);
 bool isInIndex(std::string fileName, LocationBlock location);
-std::string getFilePath(std::string path, std::string uri, std::string fileName);
-bool hasDefaultFile(const std::string& directoryPath, std::string fileName, LocationBlock location);
+std::string getFilePath(std::string path, std::string fileName);
+bool hasDefaultFile(const std::string &directoryPath, LocationBlock location);
 std::string setPath(LocationBlock location, std::string uri);
-std::string generateDirectoryListingHTML(const std::string& directoryPath, const std::string &rootPath);
+std::string generateDirectoryListingHTML(const std::string &directoryPath, const std::string &rootPath);
 std::string setFileCopyName(std::string givenName);
 std::string setDefaultFileName(std::string uploadDirPath);
 int checkIfFileExists(const std::string &dirPath, int uploadNb, std::string fileName);

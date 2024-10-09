@@ -166,11 +166,11 @@ void Response::getBody(std::string uri, LocationBlock location)
 				std::string fileName = dir->d_name;
 				if (fileName == "." || fileName == "..")
 					continue;
-				if (hasDefaultFile(path, fileName, location))
+				if (hasDefaultFile(path, location))
 				{
 					if (!isInIndex(fileName, location))
 						continue;
-					std::ifstream file(getFilePath(path, uri, fileName).c_str());
+					std::ifstream file(getFilePath(path, fileName).c_str());
 					if (file.is_open())
 					{
 						std::stringstream body;
