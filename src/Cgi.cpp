@@ -2,19 +2,19 @@
 
 bool needsCGI(LocationBlock location, Request &req)
 {
-	std::string uri = req.getUri();
-	if (!location.cgiExtensions.empty())
-	{
-		for (std::vector<std::string>::iterator it = location.cgiExtensions.begin(); it != location.cgiExtensions.end(); it++)
-		{
+    std::string uri = req.getUri();
+    if (!location.cgiExtensions.empty())
+    {
+        for (std::vector<std::string>::iterator it = location.cgiExtensions.begin(); it != location.cgiExtensions.end(); it++)
+        {
             size_t extentionSize = (*it).size();
-			if (uri.size() >= extentionSize && uri.substr(uri.size() - extentionSize) == *it && !isDirectory(location.root + uri))
-			{
-				return true;
-			}
-		}
-	}
-	return false;
+            if (uri.size() >= extentionSize && uri.substr(uri.size() - extentionSize) == *it && !isDirectory(location.root + uri))
+            {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void freeEnv(char **env)
@@ -25,25 +25,28 @@ void freeEnv(char **env)
     }
     delete[] env;
 }
+std::string createEnvVar(const std::string &key, const std::string &value)
+{
+    std::stringstream ss;
+    ss << key << "=" << value;
+    return ss.str();
+}
+
 char **createEnv(Request &req, LocationBlock &location)
 {
-    char **env = new char *[6];
-    std::stringstream ss;
-    ss << "CONTENT_LENGTH=" << req.getBody().size();
-    env[0] = strdup(ss.str().c_str());
-    ss.str("");
-    ss << "CONTENT_TYPE=" << req.getHeaders()["Content-Type"];
-    env[1] = strdup(ss.str().c_str());
-    ss.str("");
-    ss << "UPLOAD_LOCATION=" << location.uploadLocation;
-    env[2] = strdup(ss.str().c_str());
-    ss.str("");
-    ss << "REQUEST_METHOD=" << req.getMethod();
-    env[3] = strdup(ss.str().c_str());
-    ss.str("");
-    ss << "QUERY_STRING=" << req.getBody() << CRLF;
-    env[4] = strdup(ss.str().c_str());
-    env[5] = NULL;
+    std::vector<std::string> envVars;
+    envVars.push_back(createEnvVar("CONTENT_LENGTH", intToString(req.getBody().size())));
+    envVars.push_back(createEnvVar("CONTENT_TYPE", req.getHeaders()["Content-Type"]));
+    envVars.push_back(createEnvVar("UPLOAD_LOCATION", location.uploadLocation));
+    envVars.push_back(createEnvVar("REQUEST_METHOD", intToString(req.getMethod())));
+    envVars.push_back(createEnvVar("QUERY_STRING", req.getBody() + CRLF));
+
+    char **env = new char *[envVars.size() + 1];
+    for (size_t i = 0; i < envVars.size(); ++i)
+    {
+        env[i] = strdup(envVars[i].c_str());
+    }
+    env[envVars.size()] = NULL;
     return env;
 }
 
@@ -173,4 +176,3 @@ void handleCGI(Configuration &config, LocationBlock &location, Request &req, Res
     }
     freeEnv(env);
 }
-
