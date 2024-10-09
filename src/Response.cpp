@@ -19,7 +19,7 @@ void Response::setBody(std::string const &body)
 
 void Response::setErrorBody(LocationBlock location)
 {
-	if (location.errorPages.empty())
+	if (location.errorPages.empty() || location.errorPages.find(intToString(this->statusCode)) == location.errorPages.end())
 	{
 		body = getDefaultErrorBody(this->statusCode);
 	}
