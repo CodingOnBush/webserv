@@ -9,6 +9,7 @@
 #include <string.h>
 #include "DefaultErrors.hpp"
 #include "Cgi.hpp"
+#include "DefaultPages.hpp"
 
 class Configuration;
 class Request;

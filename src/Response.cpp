@@ -370,8 +370,7 @@ void Response::handlePostRequest(Configuration &config, LocationBlock location)
 		return;
 	}
 	handleUploadFiles(config, location, req);
-	// body = "<div style=\"display: flex; justify-content: center; align-items: center; height: 100vh; color: green; font-weight: bold;\">Upload was successful!</div>";
-	body = "<html><head><title>Upload Successful</title></head><body><div style=\"display: flex; justify-content: center; align-items: center; height: 100vh; color: green; font-weight: bold;\"><h1>Upload was successful!</h1></div></body></html>";
+	body = uploadSuccess;
 	setMimeType("html");
 	return;
 }
@@ -396,7 +395,7 @@ void Response::handleDeleteRequest(Configuration &config, LocationBlock location
 			setMimeType("html");
 			return;
 		}
-		body = "<html><head><title>File successfully deleted!</title></head><body><div><h1>Delete operation was successful!</h1></div></body></html>";
+		body = deleteSuccess;
 		setMimeType("html");
 		this->statusCode = 200;
 		return;
