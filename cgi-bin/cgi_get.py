@@ -56,7 +56,7 @@ html_content = """<!DOCTYPE html>
 <h1>Leave a Comment</h1>
 
 <div class="comment-block">
-    <form action="/cgi-bin/cgi_post.py" method="post">
+    <form action="/cgi_post.py" method="post">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" required>
         
