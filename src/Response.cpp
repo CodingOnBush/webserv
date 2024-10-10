@@ -249,7 +249,6 @@ std::string parseFileName(std::string body, std::string keyword)
 void Response::handleUploadFiles(Configuration &config, LocationBlock &location, Request &req)
 {
 	(void)config;
-	// on va verifier s'il existe bien une upload location dans le location block si non erreur (trouver quel numero d'erreur)
 	std::string body = req.getBody();
 	if (location.uploadLocation.empty())
 	{
@@ -279,12 +278,8 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 	{
 		std::string fileName = "";
 		std::string contentType = getContentType(req.getHeaders()["Content-Type"]);
-		// std::cout << "contentType: " << contentType << std::endl;
 		if (contentType == "multipart/form-data")
-		{
 			fileName = parseFileName(body, "filename=\"");
-			// std::cout << "fileName: " << fileName << std::endl;
-		}
 		if (fileName != "")
 		{
 			if (fileName[0] == '/')
@@ -296,17 +291,20 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 			if (fileName == "error")
 			{
 				this->statusCode = 500;
+				closedir(dir);
 				return;
 			}
 		}
 		if (checkIfFileExists(location.uploadLocation, uploadNb, fileName) == 0)
 		{
-			std::string fileCopy = setFileCopyName(fileName);
-			fileName = fileCopy;
+			this->statusCode = 409;
+			closedir(dir);
+			return;
 		}
 		if (chdir(location.uploadLocation.c_str()) == -1)
 		{
 			this->statusCode = 500;
+			closedir(dir);
 			return;
 		}
 		std::ofstream file(fileName.c_str());
@@ -315,6 +313,7 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 			// remplacer par throw exception?
 			std::cerr << "Error: Could not open file " << fileName << " for writing." << std::endl;
 			this->statusCode = 500;
+			closedir(dir);
 			return;
 		}
 		std::string fileContent = getFileContent(req.getBody(), req);
