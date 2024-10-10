@@ -28,7 +28,7 @@
 #define MAX_CLIENTS 42
 #define MAX_EVENTS 1024
 #define BUFFER_SIZE 1024
-#define TIMEOUT 500
+#define TIMEOUT 300// 5 minutes
 
 #define GREEN "\033[32m"
 #define BLUE "\033[34m"

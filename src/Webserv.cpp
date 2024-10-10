@@ -300,6 +300,16 @@ void runWebServer(Configuration &config)
 				if (connections[it->fd].req.getParsingState() == PARSING_DONE)
 					sendResponse(it->fd, config);
 			}
+			if (listenFds.find(it->fd) == listenFds.end())
+			{
+				if (std::time(0) - connections[it->fd].startTime >= TIMEOUT)
+				{
+					std::cout << "TIMEOUT ON FD : " << it->fd << std::endl;
+					closeFd(it->fd);
+					it = pollFdsList.erase(it);
+					continue;
+				}
+			}
 			++it;
 		}
 	}
