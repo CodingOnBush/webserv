@@ -1,8 +1,6 @@
 #include "Webserv.hpp"
 #include "Response.hpp"
 
-int uploadNb = 0;
-
 std::string intToString(int value)
 {
 	std::stringstream ss;
@@ -272,7 +270,7 @@ std::string setPath(LocationBlock location, std::string uri)
 	return path;
 }
 
-int checkIfFileExists(const std::string &dirPath, int uploadNb, std::string targetFileName) 
+int checkIfFileExists(const std::string &dirPath, std::string targetFileName) 
 {
     DIR *dir = opendir(dirPath.c_str());
     if (dir == NULL) 
@@ -280,12 +278,6 @@ int checkIfFileExists(const std::string &dirPath, int uploadNb, std::string targ
         std::cerr << "Error: Could not open directory " << dirPath << std::endl;
         return -1;
     }
-	if (targetFileName == "")
-	{
-		std::ostringstream oss;
-		oss << "default_" << uploadNb;
-		targetFileName = oss.str();
-	}
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) 
 	{
@@ -299,48 +291,6 @@ int checkIfFileExists(const std::string &dirPath, int uploadNb, std::string targ
     return 1; //false
 }
 
-std::string setFileCopyName(std::string givenName)
-{
-	std::string fileName;
-	size_t pos = givenName.find_last_of(".");
-	if (pos != std::string::npos)
-	{
-		std::string name = givenName.substr(0, pos);
-		std::string extension = givenName.substr(pos);
-		fileName = name + "_cpy" + extension;
-	}
-	else
-		fileName = givenName + "_cpy";
-	return fileName;
-}
-
-std::string setDefaultFileName(std::string uploadDirPath)
-{
-	std::string fileName;
-	DIR *dir = opendir(uploadDirPath.c_str());
-	if (dir == NULL)
-		return "error";
-	dirent *entry;
-	int nbDefaultFiles = 0;
-	if (uploadNb == 0)
-	{
-		while ((entry = readdir(dir)) != NULL)
-		{
-			if (std::string(entry->d_name).find("default_") != std::string::npos)
-				nbDefaultFiles++;
-		}
-		uploadNb = nbDefaultFiles + 1;
-	}
-	std::ostringstream oss;
-	oss << "default_" << uploadNb;
-	fileName = oss.str();
-	if (checkIfFileExists(uploadDirPath, uploadNb, "") == 0)
-		fileName = setFileCopyName(fileName);
-	uploadNb++;
-	closedir(dir);
-	return fileName;
-}
-
 static std::string getContentBetweenBoundaries(std::string body, size_t firstBoundaryPos, size_t secondBoundaryPos)
 {
 	size_t contentStartPos = firstBoundaryPos + 2; // +2 to skip \r\n
@@ -348,23 +298,6 @@ static std::string getContentBetweenBoundaries(std::string body, size_t firstBou
 	std::string content = body.substr(contentStartPos, contentEndPos - contentStartPos);
 	return content;
 }
-
-// static std::string getContentBetweenBoundaries(std::string body, std::string boundary)
-// {
-// 	size_t firstBoundaryPos = body.find(boundary);
-//     if (firstBoundaryPos == std::string::npos)
-//         return "";
-//     size_t secondBoundaryPos = body.find(boundary, firstBoundaryPos + boundary.length());
-//     if (secondBoundaryPos == std::string::npos)
-//         return "";
-// 	size_t lastBoundaryPos = body.find(boundary, secondBoundaryPos + boundary.length());
-// 	if (lastBoundaryPos == std::string::npos)
-// 		return "";
-//     size_t contentStartPos = secondBoundaryPos + boundary.length() + 2; // +2 to skip \r\n
-//     size_t contentEndPos = lastBoundaryPos - 2; // -2 to skip \r\n
-//     std::string content = body.substr(contentStartPos, contentEndPos - contentStartPos);
-//     return content;
-// }
 
 std::string getContentType(const std::string &contentType)
 {
@@ -411,7 +344,7 @@ std::string getFileContent(std::string body, Request &req)
 	if (contentType != "multipart/form-data")
 		return body;
 
-	std::string boundary = body.substr(0, body.find("\r\n"));
+	std::string boundary = body.substr(0, body.find(CRLF));
 	if (boundary.empty())
 		return "";
 	std::string fileBody = getFileBody(body, boundary);
@@ -420,12 +353,10 @@ std::string getFileContent(std::string body, Request &req)
 	size_t contentStartPos = fileBody.find("\r\n\r\n") + 4;
 	if (contentStartPos == std::string::npos)
 		return "";
-	size_t contentEndPos = fileBody.find("\r\n") - 2;
+	size_t contentEndPos = fileBody.find(CRLF) - 2;
 	std::string fileContent = fileBody.substr(contentStartPos, contentEndPos - contentStartPos);
 	if (fileBody.empty())
 		return "";
-	// std::cout << "fileContent: " << fileContent << std::endl;
-
 	return fileContent;
 }
 

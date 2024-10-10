@@ -1,9 +1,9 @@
 #include "Response.hpp"
 #include "Webserv.hpp"
 
-Response::Response() : statusCode(0), fdToClose(false) {};
+Response::Response() : statusCode(0) {};
 
-Response::Response(Request &req) : req(req), statusCode(0), fdToClose(false) {};
+Response::Response(Request &req) : req(req), statusCode(0) {};
 
 Response::~Response() {};
 
@@ -234,14 +234,14 @@ std::string parseFileName(std::string body, std::string keyword)
 		return "";
 	}
 	pos += keyword.length();
-	size_t endPos = body.find("\r\n", pos);
+	size_t endPos = body.find(CRLF, pos);
 	if (endPos == std::string::npos)
 	{
 		std::cerr << "Could not find end of line in body" << std::endl;
 		return "";
 	}
 	std::string fileName = body.substr(pos, endPos - 1 - pos);
-	if (!fileName.empty() && fileName[fileName.size() - 1] == '\r')
+	if (!fileName.empty() && fileName[fileName.size() - 1] == CR)
 		fileName.erase(fileName.size() - 1);
 	return fileName;
 }
@@ -279,22 +279,18 @@ void Response::handleUploadFiles(LocationBlock &location, Request &req)
 		std::string contentType = getContentType(req.getHeaders()["Content-Type"]);
 		if (contentType == "multipart/form-data")
 			fileName = parseFileName(body, "filename=\"");
-		if (fileName != "")
+		if (!fileName.empty())
 		{
 			if (fileName[0] == '/')
 				fileName = fileName.substr(1);
 		}
-		if (fileName == "")
+		else
 		{
-			fileName = setDefaultFileName(location.uploadLocation);
-			if (fileName == "error")
-			{
-				this->statusCode = 500;
-				closedir(dir);
-				return;
-			}
+			this->statusCode = 400;
+			closedir(dir);
+			return;
 		}
-		if (checkIfFileExists(location.uploadLocation, uploadNb, fileName) == 0)
+		if (checkIfFileExists(location.uploadLocation, fileName) == 0)
 		{
 			this->statusCode = 409;
 			closedir(dir);
@@ -302,15 +298,24 @@ void Response::handleUploadFiles(LocationBlock &location, Request &req)
 		}
 		if (chdir(location.uploadLocation.c_str()) == -1)
 		{
-			this->statusCode = 500;
+			this->statusCode = 403;
 			closedir(dir);
+			return;
+		}
+		struct stat st;
+		if (stat(fileName.c_str(), &st) != 0)
+		{
+			this->statusCode = 403;
+			closedir(dir);
+			changeDirBack(location.uploadLocation);
 			return;
 		}
 		std::ofstream file(fileName.c_str());
 		if (!file.is_open())
 		{
-			this->statusCode = 500;
+			this->statusCode = 403;
 			closedir(dir);
+			changeDirBack(location.uploadLocation);
 			return;
 		}
 		std::string fileContent = getFileContent(req.getBody(), req);
@@ -412,7 +417,23 @@ std::string Response::handleRedirection(LocationBlock &location)
 	createResponseStr(location);
 	return response;
 }
-
+void printRequest(Request &req)
+{
+	std::cerr << std::string(21, '*') << std::endl;
+	std::cerr << "Method: " << req.getMethod() << std::endl;
+	std::cerr << "URI: " << req.getUri() << std::endl;
+	std::cerr << "Version: " << req.getVersion() << std::endl;
+	std::cerr << "Headers: " << std::endl;
+	std::map<std::string, std::string> headers = req.getHeaders();
+	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it)
+	{
+		std::cerr << it->first << ":" << it->second << std::endl;
+	}
+	std::cerr << "Body: " << std::endl;
+	std::cerr << req.getBody() << std::endl;
+	std::cerr << std::endl;
+	std::cerr << std::string(21, '*') << std::endl;
+}
 std::string Response::getResponse(Configuration &config)
 {
 	LocationBlock location;
@@ -472,5 +493,4 @@ void Response::clearResponse(void)
 	this->body.clear();
 	this->response.clear();
 	this->mimeType.clear();
-	this->fdToClose = false;
 }

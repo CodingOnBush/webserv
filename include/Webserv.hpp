@@ -1,5 +1,4 @@
-#ifndef WEBSERV_HPP
-#define WEBSERV_HPP
+#pragma once
 
 #include "Request.hpp"
 #include "Response.hpp"
@@ -50,8 +49,4 @@ struct Connection
 	bool			isActive;
 };
 
-extern int  uploadNb;
-
 void    runWebServer(Configuration &config);
-
-#endif // WEBSERV_HPP

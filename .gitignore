@@ -5,3 +5,4 @@ bin/
 webserv
 *.hpp.gch
 out
+outfile

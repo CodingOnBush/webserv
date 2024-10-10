@@ -34,8 +34,6 @@ private:
 	std::string handleRedirection(LocationBlock &location);
 
 public:
-	bool fdToClose; // maybe to move to private - do we need this?
-
 	Response();
 	Response(Request &req);
 	~Response();
@@ -72,8 +70,7 @@ bool hasDefaultFile(const std::string &directoryPath, LocationBlock location);
 std::string setPath(LocationBlock location, std::string uri);
 std::string generateDirectoryListingHTML(const std::string &directoryPath, const std::string &rootPath);
 std::string setFileCopyName(std::string givenName);
-std::string setDefaultFileName(std::string uploadDirPath);
-int checkIfFileExists(const std::string &dirPath, int uploadNb, std::string fileName);
+int checkIfFileExists(const std::string &dirPath, std::string fileName);
 std::string getContentType(const std::string &contentType);
 std::string getFileBody(std::string body, std::string &boundary);
 std::string getFileContent(std::string body, Request &req);

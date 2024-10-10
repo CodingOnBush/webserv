@@ -178,9 +178,7 @@ static int receiveRequest(int fd)
 static void sendResponse(int fd, Configuration &config)
 {
 	std::string str;
-
 	connections[fd].res = Response(connections[fd].req);
-	// printRequest(connections[fd].req);
 	str = connections[fd].res.getResponse(config);
 	send(fd, str.c_str(), str.size(), 0);
 	std::cout << "Response sent" << std::endl;
@@ -242,16 +240,9 @@ void runWebServer(Configuration &config)
 	std::string wait[] = {"⠋", "⠙", "⠸", "⠴", "⠦", "⠇"};
 	int timeout = 500;
 	int n = 0;
-	// std::vector<int> toClose;
 	std::vector<pollfd>	pollFdsList;
-
-	// struct pollfd	pfd[MAX_CLIENTS];
-
-	// init pollFdsList
 	pollFdsList.reserve(300);
-
 	initiateWebServer(pollFdsList, config);
-	// printPollFds(pollFdsList);
 	signal(SIGINT, handleSIGINT);
 	while (running)
 	{
@@ -260,12 +251,11 @@ void runWebServer(Configuration &config)
 			break;
 		if (nfds == 0)
 		{
-			std::cout << GREEN << "Server running " << wait[n++] << SET << "\r" << std::flush;
+			std::cout << GREEN << "Server running " << wait[n++] << SET << CR << std::flush;
 			if (n == 6)
 				n = 0;
 			continue;
 		}
-
 
 		int j = 0;
 		for (std::vector<pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end();)
@@ -281,12 +271,9 @@ void runWebServer(Configuration &config)
 				if (listenFds.find(it->fd) != listenFds.end())
 				{
 					acceptConnection(pollFdsList, it->fd);
-					std::cout << "NEW CONNECTION FD : " << it->fd << std::endl;
-					// break;
 				}
 				else
 				{
-					std::cout << "RECEIVING REQUEST ON FD : " << it->fd << std::endl;
 					if (receiveRequest(it->fd) == FAILURE)
 					{
 						closeFd(it->fd);
@@ -304,7 +291,6 @@ void runWebServer(Configuration &config)
 			{
 				if (std::time(0) - connections[it->fd].startTime >= TIMEOUT)
 				{
-					std::cout << "TIMEOUT ON FD : " << it->fd << std::endl;
 					closeFd(it->fd);
 					it = pollFdsList.erase(it);
 					continue;

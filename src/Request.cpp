@@ -189,7 +189,6 @@ void Request::parseBody(std::stringstream &stream)
     this->body += new_body;
     if ((int)this->body.size() == len)
     {
-        // std::cout << "COUCOUCOUCOUCCOU" << std::endl;
         setParsingState(PARSING_DONE);
     }
 }
