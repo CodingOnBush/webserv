@@ -10,6 +10,14 @@ std::string intToString(int value)
 	return ss.str();
 }
 
+int stringToInt(const std::string &str)
+{
+	std::stringstream ss(str);
+	int value;
+	ss >> value;
+	return value;
+}
+
 bool isDirectory(const std::string &path)
 {
 	struct stat s;

@@ -46,7 +46,7 @@ public:
 	void handleUploadFiles(Configuration &config, LocationBlock &location, Request &req);
 	void handleGetRequest(Configuration &config, LocationBlock location);
 	void handlePostRequest(Configuration &config, LocationBlock location);
-	void handleDeleteRequest(LocationBlock location);
+	void handleDeleteRequest(Configuration &config, LocationBlock location);
 	void setHeaders(LocationBlock location);
 	void setMimeType(std::string const &fileName);
 	void setStatusCode(int code);
@@ -55,6 +55,7 @@ public:
 };
 
 std::string intToString(int value);
+int stringToInt(const std::string &str);
 bool isDirectory(const std::string &path);
 bool isFile(const std::string &path);
 int serverBlocksCount(Configuration &config, std::string host, int port);

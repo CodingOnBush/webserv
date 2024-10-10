@@ -349,8 +349,13 @@ void Response::handlePostRequest(Configuration &config, LocationBlock location)
 	return;
 }
 
-void Response::handleDeleteRequest(LocationBlock location)
+void Response::handleDeleteRequest(Configuration &config, LocationBlock location)
 {
+	if (needsCGI(location, req))
+	{
+		handleCGI(config, location, req, *this);
+		return;
+	}
 	std::string uri = req.getUri();
 	std::string filePath = location.root + uri;
 	struct stat fileStat;
@@ -392,8 +397,8 @@ void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 	int maxBodySize = config.getBodySize(location.clientMaxBodySize);
 	if (maxBodySize == 0)
 		return;
-	// compare with content length header!!!
-	if ((int)req.getBody().size() > maxBodySize)
+	std::string contentLength = req.getHeaders()["Content-Length"];
+	if (stringToInt(contentLength) > maxBodySize)
 	{
 		if (this->statusCode == 0)
 			this->statusCode = 413;
@@ -434,7 +439,7 @@ std::string Response::getResponse(Configuration &config)
 				handlePostRequest(config, location);
 				break;
 			case DELETE:
-				handleDeleteRequest(location);
+				handleDeleteRequest(config, location);
 				break;
 			}
 		}
