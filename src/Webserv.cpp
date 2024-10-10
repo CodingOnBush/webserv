@@ -257,10 +257,7 @@ void runWebServer(Configuration &config)
 	{
 		int nfds = poll(pollFdsList.data(), pollFdsList.size(), timeout);
 		if ((nfds < 0 && errno != EINTR) || running == false)
-		{
-			std::cout << "COUCOUCOU" << std::endl;
 			break;
-		}
 		if (nfds == 0)
 		{
 			std::cout << GREEN << "Server running " << wait[n++] << SET << "\r" << std::flush;

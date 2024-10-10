@@ -1,22 +1,32 @@
-==1212367== Memcheck, a memory error detector
-==1212367== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==1212367== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
-==1212367== Command: ./webserv file.conf
-==1212367== Parent PID: 1206836
-==1212367== 
-==1212367== Warning: invalid file descriptor 1728063839 in syscall close()
-==1212367== Warning: invalid file descriptor 1728063839 in syscall close()
-==1212367== 
-==1212367== FILE DESCRIPTORS: 1 open (0 std) at exit.
-==1212367== Open file descriptor 3: /home/vvaudain/webserv/out
-==1212367==    <inherited from parent>
-==1212367== 
-==1212367== 
-==1212367== HEAP SUMMARY:
-==1212367==     in use at exit: 0 bytes in 0 blocks
-==1212367==   total heap usage: 2,067 allocs, 2,067 frees, 8,170,765 bytes allocated
-==1212367== 
-==1212367== All heap blocks were freed -- no leaks are possible
-==1212367== 
-==1212367== For lists of detected and suppressed errors, rerun with: -s
-==1212367== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==1269715== Memcheck, a memory error detector
+==1269715== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==1269715== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==1269715== Command: ./webserv file.conf
+==1269715== Parent PID: 1263225
+==1269715== 
+==1269715== 
+==1269715== FILE DESCRIPTORS: 8 open (3 std) at exit.
+==1269715== Open file descriptor 103: /usr/share/code/v8_context_snapshot.bin
+==1269715==    <inherited from parent>
+==1269715== 
+==1269715== Open file descriptor 40: /dev/ptmx
+==1269715==    <inherited from parent>
+==1269715== 
+==1269715== Open file descriptor 39: /home/vvaudain/.config/Code/logs/20241010T115018/ptyhost.log
+==1269715==    <inherited from parent>
+==1269715== 
+==1269715== Open file descriptor 38: /usr/share/code/resources/app/node_modules.asar
+==1269715==    <inherited from parent>
+==1269715== 
+==1269715== Open file descriptor 3: /home/vvaudain/webserv/out
+==1269715==    <inherited from parent>
+==1269715== 
+==1269715== 
+==1269715== HEAP SUMMARY:
+==1269715==     in use at exit: 0 bytes in 0 blocks
+==1269715==   total heap usage: 2,044 allocs, 2,044 frees, 543,944 bytes allocated
+==1269715== 
+==1269715== All heap blocks were freed -- no leaks are possible
+==1269715== 
+==1269715== For lists of detected and suppressed errors, rerun with: -s
+==1269715== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
