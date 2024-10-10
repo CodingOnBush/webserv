@@ -50,9 +50,8 @@ char **createEnv(Request &req, LocationBlock &location)
     return env;
 }
 
-void handleCGI(Configuration &config, LocationBlock &location, Request &req, Response &res)
+void handleCGI(LocationBlock &location, Request &req, Response &res)
 {
-    config.printConfig();
     char **env = createEnv(req, location);
     std::string cgiPathWithArgs = location.root + req.getUri();
     std::stringstream cgiOutput;

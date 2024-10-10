@@ -246,13 +246,12 @@ std::string parseFileName(std::string body, std::string keyword)
 	return fileName;
 }
 
-void Response::handleUploadFiles(Configuration &config, LocationBlock &location, Request &req)
+void Response::handleUploadFiles(LocationBlock &location, Request &req)
 {
-	(void)config;
 	std::string body = req.getBody();
 	if (location.uploadLocation.empty())
 	{
-		this->statusCode = 405; // check si bon code
+		this->statusCode = 404;
 		return;
 	}
 	DIR *dir = opendir(location.uploadLocation.c_str());
@@ -310,8 +309,6 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 		std::ofstream file(fileName.c_str());
 		if (!file.is_open())
 		{
-			// remplacer par throw exception?
-			std::cerr << "Error: Could not open file " << fileName << " for writing." << std::endl;
 			this->statusCode = 500;
 			closedir(dir);
 			return;
@@ -324,35 +321,35 @@ void Response::handleUploadFiles(Configuration &config, LocationBlock &location,
 	}
 	closedir(dir);
 }
-void Response::handleGetRequest(Configuration &config, LocationBlock location)
+void Response::handleGetRequest(LocationBlock location)
 {
 	if (needsCGI(location, req))
 	{
-		handleCGI(config, location, req, *this);
+		handleCGI(location, req, *this);
 		return;
 	}
 	getBody(req.getUri(), location);
 	return;
 }
 
-void Response::handlePostRequest(Configuration &config, LocationBlock location)
+void Response::handlePostRequest(LocationBlock location)
 {
 	if (needsCGI(location, req))
 	{
-		handleCGI(config, location, req, *this);
+		handleCGI(location, req, *this);
 		return;
 	}
-	handleUploadFiles(config, location, req);
+	handleUploadFiles(location, req);
 	body = uploadSuccess;
 	setMimeType("html");
 	return;
 }
 
-void Response::handleDeleteRequest(Configuration &config, LocationBlock location)
+void Response::handleDeleteRequest(LocationBlock location)
 {
 	if (needsCGI(location, req))
 	{
-		handleCGI(config, location, req, *this);
+		handleCGI(location, req, *this);
 		return;
 	}
 	std::string uri = req.getUri();
@@ -432,13 +429,13 @@ std::string Response::getResponse(Configuration &config)
 			switch (req.getMethod())
 			{
 			case GET:
-				handleGetRequest(config, location);
+				handleGetRequest(location);
 				break;
 			case POST:
-				handlePostRequest(config, location);
+				handlePostRequest(location);
 				break;
 			case DELETE:
-				handleDeleteRequest(config, location);
+				handleDeleteRequest(location);
 				break;
 			}
 		}
