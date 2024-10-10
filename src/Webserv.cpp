@@ -180,8 +180,8 @@ static void sendResponse(int fd, Configuration &config)
 	std::string str;
 	connections[fd].res = Response(connections[fd].req);
 	str = connections[fd].res.getResponse(config);
+	//add check if 0 or -1 returned from send
 	send(fd, str.c_str(), str.size(), 0);
-	std::cout << "Response sent" << std::endl;
 	connections[fd].req.clearRequest();
 	connections[fd].startTime = std::time(0);
 	connections[fd].res.clearResponse();
@@ -285,6 +285,7 @@ void runWebServer(Configuration &config)
 			if (it->revents & POLLOUT)
 			{
 				if (connections[it->fd].req.getParsingState() == PARSING_DONE)
+					//check if send response failed and remove client if so
 					sendResponse(it->fd, config);
 			}
 			if (listenFds.find(it->fd) == listenFds.end())

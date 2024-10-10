@@ -302,14 +302,6 @@ void Response::handleUploadFiles(LocationBlock &location, Request &req)
 			closedir(dir);
 			return;
 		}
-		struct stat st;
-		if (stat(fileName.c_str(), &st) != 0)
-		{
-			this->statusCode = 403;
-			closedir(dir);
-			changeDirBack(location.uploadLocation);
-			return;
-		}
 		std::ofstream file(fileName.c_str());
 		if (!file.is_open())
 		{
