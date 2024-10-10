@@ -2,17 +2,22 @@
 import os
 import cgi
 import cgitb
-import json
+import urllib.parse
+
+# Enable CGI error reporting
+cgitb.enable()
 
 request_method = os.environ.get('REQUEST_METHOD')
 request_query = os.environ.get('QUERY_STRING')
+
+# HTML content starts here
 html_content = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POST Success</title>
-        <style>
+    <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -39,6 +44,20 @@ html_content = """<!DOCTYPE html>
             border-radius: 4px;
             cursor: pointer;
         }
+        h1 {
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
         .comment-block {
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -51,37 +70,25 @@ html_content = """<!DOCTYPE html>
 """
 
 def parse_query_string(query_string):
-    pairs = query_string.split('&')
-    name = None
-    comment = None
-    for pair in pairs:
-        key, value = pair.split('=')
-        if key == 'name':
-            name = value
-        elif key == 'comment':
-            comment = value
-            
+    # Decode the query string and extract name and comment
+    parsed = urllib.parse.parse_qs(query_string)
+    name = parsed.get('name', [None])[0]
+    comment = parsed.get('comment', [None])[0]
     return name, comment
 
 def printPost():
     name, comment = parse_query_string(request_query)
     print(html_content)
     print("<body><h1>Comment successfully submitted!</h1>")
-    print("""
-    <div style="border: 1px solid #ccc; border-radius: 4px; padding: 15px; margin-top: 20px; background-color: #f9f9f9;">
-        <strong>Name:</strong> {}
-        <p><strong>Comment:</strong></p>
-        <p>{}</p>
-        <form action="/delete_comment" method="post" style="display:inline;">
-            <input type="hidden" name="name" value="{name}">
-            <input type="hidden" name="comment" value="{comment}">
-        </form>
+    print(f"""
+    <div class="comment-block">
+        <strong>Name:</strong> {name}<br><br>
+        <strong>Comment:</strong><br>
+        <p>{comment}</p>
     </div>
-    """.format(name, comment, name=name, comment=comment))
+    """)
     print("</body></html>")
-    
+
+print("Content-Type: text/html")  # Set the content type
+print()  # Blank line to end headers
 printPost()
-print("Content-Type: text/html")
-# to test for infinite loop
-# while True:
-#     print("hello")

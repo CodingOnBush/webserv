@@ -113,7 +113,7 @@ void handleCGI(LocationBlock &location, Request &req, Response &res)
         {
             FD_ZERO(&readfds);
             FD_SET(pipefd[0], &readfds);
-
+            //select can be used only once, change thiiiis
             int ret = select(pipefd[0] + 1, &readfds, NULL, NULL, &timeout);
             if (ret == -1)
             {
