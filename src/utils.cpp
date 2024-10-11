@@ -110,7 +110,6 @@ bool locationBlockExists(ServerBlock serverBlock, std::string uri) {
         }
     }
 
-    // If no match is found, remove the last part after the last '/' and check again
     std::size_t pos = uri.find_last_of('/');
     if (pos != std::string::npos && pos != 0) {
         return locationBlockExists(serverBlock, uri.substr(0, pos));
@@ -129,12 +128,11 @@ LocationBlock getMatchingLocationBlock(ServerBlock serverBlock, std::string uri)
         }
     }
 
-    // If no match is found, remove the last part after the last '/' and check again
     std::size_t pos = uri.find_last_of('/');
     if (pos != std::string::npos && pos != 0) {
         return getMatchingLocationBlock(serverBlock, uri.substr(0, pos));
     }
-	return *location;// TODO : maybe replace with throw and catch it in the main without stopping the server
+	return *location;
 }
 
 std::string getDefaultErrorBody(int statusCode)
@@ -192,10 +190,7 @@ std::string getFilePath(std::string path, std::string fileName)
 	std::string filePath;
 	if (path[path.size() - 1] != '/')
 		path += "/";
-	// if (uri != "/")
-		filePath = path + fileName;
-	// else
-	// 	filePath = path + "index.html";
+	filePath = path + fileName;
 	return filePath;
 }
 
@@ -284,11 +279,11 @@ int checkIfFileExists(const std::string &dirPath, std::string targetFileName)
         if (entry->d_name == targetFileName) 
 		{
             closedir(dir);
-            return 0; //true
+            return 0;
         }
     }
     closedir(dir);
-    return 1; //false
+    return 1;
 }
 
 static std::string getContentBetweenBoundaries(std::string body, size_t firstBoundaryPos, size_t secondBoundaryPos)

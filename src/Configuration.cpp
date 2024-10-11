@@ -1,10 +1,6 @@
 #include "../include/Configuration.hpp"
 #include "Configuration.hpp"
 
-// TODO :
-// add default location block even if we have some location blocks
-// need a function to comapre location blocks and if we don't have a default one, add it
-
 static void printSplit(std::vector<std::string> split)
 {
 	std::cout << "split size : " << split.size() << std::endl;
@@ -16,31 +12,31 @@ static void printSplit(std::vector<std::string> split)
 
 static bool isValidHost(std::string const &host)
 {
-	// size_t	dot = 0;
+	size_t	dot = 0;
 
 	if (host.empty())
 		return false;
-	// if (host == "localhost")
-	// 	return true;
-	// for (size_t i = 0; i < host.size(); i++)
-	// {
-	// 	if (host.at(i) == '.')
-	// 		dot++;
-	// }
-	// if (dot != 3 || host.find_first_of("0123456789.") == std::string::npos)
-	// 	return false;
-	// if (host.find_first_not_of("0123456789.") != std::string::npos)
-	// 	return false;
-	// if (host.find_first_of(".") == 0 || host.find_last_of(".") == host.size() - 1)
-	// 	return false;
-	// for (size_t i = 0; i < host.size(); i++)
-	// {
-	// 	if (host.at(i) == '.')
-	// 	{
-	// 		if (host.at(i + 1) == '.')
-	// 			return false;
-	// 	}
-	// }
+	if (host == "localhost")
+		return true;
+	for (size_t i = 0; i < host.size(); i++)
+	{
+		if (host.at(i) == '.')
+			dot++;
+	}
+	if (dot != 3 || host.find_first_of("0123456789.") == std::string::npos)
+		return false;
+	if (host.find_first_not_of("0123456789.") != std::string::npos)
+		return false;
+	if (host.find_first_of(".") == 0 || host.find_last_of(".") == host.size() - 1)
+		return false;
+	for (size_t i = 0; i < host.size(); i++)
+	{
+		if (host.at(i) == '.')
+		{
+			if (host.at(i + 1) == '.')
+				return false;
+		}
+	}
 	return true;
 }
 
@@ -618,15 +614,6 @@ int Configuration::getBodySize(BodySize const &bodySize)
 	else if (bodySize.unit == "G")
 		weight *= 1024 * 1024 * 1024;
 	return weight;
-}
-
-std::vector<int> Configuration::getPorts() const
-{
-	std::vector<int> ports;
-
-	for (std::vector<ServerBlock>::const_iterator it = m_serverBlocks.begin(); it != m_serverBlocks.end(); ++it)
-		ports.push_back(it->hostPort.second);
-	return ports;
 }
 
 void Configuration::printConfig() const

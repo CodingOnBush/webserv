@@ -4,13 +4,11 @@ import cgi
 import cgitb
 import urllib.parse
 
-# Enable CGI error reporting
 cgitb.enable()
 
 request_method = os.environ.get('REQUEST_METHOD')
 request_query = os.environ.get('QUERY_STRING')
 
-# HTML content starts here
 html_content = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,7 +68,6 @@ html_content = """<!DOCTYPE html>
 """
 
 def parse_query_string(query_string):
-    # Decode the query string and extract name and comment
     parsed = urllib.parse.parse_qs(query_string)
     name = parsed.get('name', [None])[0]
     comment = parsed.get('comment', [None])[0]
@@ -89,6 +86,10 @@ def printPost():
     """)
     print("</body></html>")
 
-print("Content-Type: text/html")  # Set the content type
-print()  # Blank line to end headers
+print("Content-Type: text/html")
+print()
 printPost()
+
+# infinite loop for tests
+# while True:
+#     pass

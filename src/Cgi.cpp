@@ -121,8 +121,6 @@ void handleCGI(LocationBlock &location, Request &req, Response &res)
                 break;
         }
 
-        if (WIFEXITED(status))
-            std::cout << "child exited with status: " << WEXITSTATUS(status) << std::endl;
         ssize_t bytesRead;
         while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0)
         {

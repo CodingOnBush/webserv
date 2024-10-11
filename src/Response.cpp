@@ -411,23 +411,7 @@ std::string Response::handleRedirection(LocationBlock &location)
 	createResponseStr(location);
 	return response;
 }
-void printRequest(Request &req)
-{
-	std::cerr << std::string(21, '*') << std::endl;
-	std::cerr << "Method: " << req.getMethod() << std::endl;
-	std::cerr << "URI: " << req.getUri() << std::endl;
-	std::cerr << "Version: " << req.getVersion() << std::endl;
-	std::cerr << "Headers: " << std::endl;
-	std::map<std::string, std::string> headers = req.getHeaders();
-	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it)
-	{
-		std::cerr << it->first << ":" << it->second << std::endl;
-	}
-	std::cerr << "Body: " << std::endl;
-	std::cerr << req.getBody() << std::endl;
-	std::cerr << std::endl;
-	std::cerr << std::string(21, '*') << std::endl;
-}
+
 std::string Response::getResponse(Configuration &config)
 {
 	LocationBlock location;

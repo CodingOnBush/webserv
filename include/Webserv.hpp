@@ -31,6 +31,7 @@
 
 #define GREEN "\033[32m"
 #define BLUE "\033[34m"
+#define YELLOW "\033[33m"
 #define SET "\033[0m"
 
 #define FAILURE -1

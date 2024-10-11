@@ -1,36 +1,19 @@
 #include "../include/Webserv.hpp"
 #include "Webserv.hpp"
 
-
-
 std::map<int, Connection> connections;
 
 std::set<int> listenFds;
 
 bool running = true;
 
-static void	closeFd(int fd)
+static void closeFd(int fd)
 {
 	if (fd == -1)
 		return;
 	if (fcntl(fd, F_GETFD) != -1 || errno != EBADF)
 		close(fd);
 }
-
-// static void addNewClientAndConnection(std::vector<pollfd> &pfds, int fd, bool isListener, bool isActive, int events)
-// {
-// 	pfds.push_back((pollfd){fd, events, 0});
-
-// 	Connection conn;
-
-// 	conn.fd = fd;
-// 	conn.isListener = isListener;
-// 	conn.startTime = std::time(0);
-// 	conn.req = Request();
-// 	conn.res = Response();
-// 	conn.isActive = isActive;
-// 	connections.insert(std::pair<int, Connection>(fd, conn));
-// }
 
 static int createServerSocket(int port)
 {
@@ -58,7 +41,6 @@ static void initiateWebServer(std::vector<pollfd> &pfds, Configuration &config)
 	std::vector<ServerBlock> servers = config.getServerBlocks();
 	std::set<Hostport> hostPorts;
 
-	// listenFds.clear();
 	for (std::vector<ServerBlock>::iterator it = servers.begin(); it != servers.end(); it++)
 	{
 		int serverSocket;
@@ -88,7 +70,7 @@ static void acceptConnection(std::vector<pollfd> &pfds, int fd)
 	int clientFd = accept(fd, NULL, NULL);
 	int opt = 1;
 
-	std::cout << "Accepting connection on fd: " << fd << std::endl;
+	std::cout << GREEN << "Accepting connection on fd: " << fd << SET << std::endl;
 	if (clientFd < 0)
 	{
 		perror("accept");
@@ -114,11 +96,9 @@ static void acceptConnection(std::vector<pollfd> &pfds, int fd)
 		return;
 	}
 
-	if (pfds.capacity() == pfds.size()) {
-		pfds.reserve(pfds.size() + 10); // Increase capacity by a fixed number or a percentage.
-	}
+	if (pfds.capacity() == pfds.size())
+		pfds.reserve(pfds.size() + 10);
 
-	// addNewClientAndConnection(pfds, clientFd, false, true, POLLIN | POLLOUT);
 	pollfd newPfd;
 
 	newPfd.fd = clientFd;
@@ -135,17 +115,8 @@ static void acceptConnection(std::vector<pollfd> &pfds, int fd)
 	conn.res = Response();
 	conn.isActive = true;
 	connections.insert(std::pair<int, Connection>(clientFd, conn));
-	std::cout << "New client connected on fd: " << clientFd << std::endl;
+	std::cout << GREEN << "New client connected on fd: " << clientFd << SET << std::endl;
 }
-
-// static std::vector<pollfd>::iterator	closeConnection(std::vector<pollfd>::iterator &it)
-// {
-// 	std::cout << "Closing connection on fd: " << it->fd << std::endl;
-// 	closeFd(it->fd);
-// 	if (it != pollFdsList.end())
-// 		return (pollFdsList.erase(it));
-// 	return (it);
-// }
 
 static int receiveRequest(int fd)
 {
@@ -158,16 +129,12 @@ static int receiveRequest(int fd)
 	bytes = recv(fd, buffer, BUFFER_SIZE, 0);
 	if (bytes < 0)
 	{
-		std::cout << "Salut" << std::endl;
 		return FAILURE;
 	}
 	buffer[bytes] = '\0';
-	// std::cout << "[" << buffer << "]" << std::endl;
-	std::cout << "request received" << std::endl;
 	if (bytes == 0)
 	{
-		std::cout << "Connection closed : " << fd << std::endl;
-		// closeConnection(fd);
+		std::cout << YELLOW << "Connection closed : " << fd << SET << std::endl;
 		return FAILURE;
 	}
 	ss.write(buffer, bytes);
@@ -175,16 +142,23 @@ static int receiveRequest(int fd)
 	return SUCCESS;
 }
 
-static void sendResponse(int fd, Configuration &config)
+static int	sendResponse(int fd, Configuration &config)
 {
 	std::string str;
+	ssize_t bytes;
+
 	connections[fd].res = Response(connections[fd].req);
 	str = connections[fd].res.getResponse(config);
-	//add check if 0 or -1 returned from send
-	send(fd, str.c_str(), str.size(), 0);
+	bytes = send(fd, str.c_str(), str.size(), 0); 
+	if (bytes <= 0)
+	{
+		closeFd(fd);
+		return FAILURE;
+	}
 	connections[fd].req.clearRequest();
 	connections[fd].startTime = std::time(0);
 	connections[fd].res.clearResponse();
+	return SUCCESS;
 }
 
 static void handleSIGINT(int sig)
@@ -194,53 +168,12 @@ static void handleSIGINT(int sig)
 	running = false;
 }
 
-static void printPollFds(std::vector<pollfd> &pollFdsList)
-{
-	std::cout << "POLLFDS :" << std::endl;
-	for (std::vector<pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
-	{
-		std::cout
-			<< "{fd: " << it->fd << ", events: "
-			<< it->events << ", revents: "
-			<< ((it->revents & POLLIN) ? "POLLIN | " : "X | ")
-			<< ((it->revents & POLLOUT) ? "POLLOUT" : "X")
-			<< "}"
-			<< std::endl;
-	}
-	std::cout << std::endl;
-}
-
-static void printPfd(std::vector<pollfd>::iterator it)
-{
-	std::cout
-		<< "PFD: {fd: " << it->fd << ", events: "
-		<< it->events << ", revents: "
-		<< ((it->revents & POLLIN) ? "POLLIN | " : "X | ")
-		<< ((it->revents & POLLOUT) ? "POLLOUT" : "X")
-		<< "}"
-		<< std::endl;
-}
-
-static void printConnections()
-{
-	std::cout << "CONNECTIONS :" << std::endl;
-	for (std::map<int, Connection>::iterator it = connections.begin(); it != connections.end(); it++)
-	{
-		std::cout
-			<< "{fd: " << it->first << ", isListener: "
-			<< it->second.isListener << ", startTime: "
-			<< it->second.startTime << "}"
-			<< std::endl;
-	}
-	std::cout << std::endl;
-}
-
 void runWebServer(Configuration &config)
 {
 	std::string wait[] = {"⠋", "⠙", "⠸", "⠴", "⠦", "⠇"};
 	int timeout = 500;
 	int n = 0;
-	std::vector<pollfd>	pollFdsList;
+	std::vector<pollfd> pollFdsList;
 	pollFdsList.reserve(300);
 	initiateWebServer(pollFdsList, config);
 	signal(SIGINT, handleSIGINT);
@@ -285,8 +218,12 @@ void runWebServer(Configuration &config)
 			if (it->revents & POLLOUT)
 			{
 				if (connections[it->fd].req.getParsingState() == PARSING_DONE)
-					//check if send response failed and remove client if so
-					sendResponse(it->fd, config);
+					if (sendResponse(it->fd, config) == FAILURE)
+					{
+						closeFd(it->fd);
+						it = pollFdsList.erase(it);
+						continue;
+					}
 			}
 			if (listenFds.find(it->fd) == listenFds.end())
 			{
@@ -302,5 +239,5 @@ void runWebServer(Configuration &config)
 	}
 	for (std::vector<pollfd>::iterator it = pollFdsList.begin(); it != pollFdsList.end(); it++)
 		closeFd(it->fd);
-	std::cout << "Server stopped" << std::endl;
+	std::cout << YELLOW << "Server stopped" << SET << std::endl;
 }
