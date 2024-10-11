@@ -9,7 +9,7 @@
 #include <sys/select.h>
 #include <signal.h>
 
-#define CGITIMEOUT 2
+// #define CGITIMEOUT 5
 
 class Response;
 

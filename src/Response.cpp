@@ -391,6 +391,8 @@ void Response::bodySizeCheck(Configuration &config, LocationBlock &location)
 	if (maxBodySize == 0)
 		return;
 	std::string contentLength = req.getHeaders()["Content-Length"];
+	if (contentLength.empty())
+		return;
 	if (stringToInt(contentLength) > maxBodySize)
 	{
 		if (this->statusCode == 0)

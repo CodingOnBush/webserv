@@ -1,5 +1,8 @@
 #include "Cgi.hpp"
 
+std::time_t cgiStart = 0;
+#define CGITIMEOUT 2
+
 bool needsCGI(LocationBlock location, Request &req)
 {
     std::string uri = req.getUri();
@@ -101,54 +104,32 @@ void handleCGI(LocationBlock &location, Request &req, Response &res)
     {
         close(pipefd[1]);
         char buffer[128];
-        ssize_t bytesRead;
-        fd_set readfds;
-        struct timeval timeout;
         int status;
+        cgiStart = std::time(0);
 
-        timeout.tv_sec = CGITIMEOUT;
-        timeout.tv_usec = 0;
-
-        while (true)
+        while (true) 
         {
-            FD_ZERO(&readfds);
-            FD_SET(pipefd[0], &readfds);
-            //select can be used only once, change thiiiis
-            int ret = select(pipefd[0] + 1, &readfds, NULL, NULL, &timeout);
-            if (ret == -1)
+            if (std::time(0) - cgiStart > CGITIMEOUT) 
             {
-                std::cerr << "select failed" << std::endl;
-                res.setStatusCode(500);
-                close(pipefd[0]);
                 kill(pid, SIGKILL);
-                waitpid(pid, &status, 0);
-                freeEnv(env);
-                return;
-            }
-            else if (ret == 0)
-            {
-                std::cerr << "CGI process timed out" << std::endl;
                 res.setStatusCode(504);
-                close(pipefd[0]);
-                kill(pid, SIGKILL);
-                waitpid(pid, &status, 0);
                 freeEnv(env);
+                close(pipefd[0]);
                 return;
             }
-            else
-            {
-                if (FD_ISSET(pipefd[0], &readfds))
-                {
-                    bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1);
-                    if (bytesRead <= 0)
-                        break;
-                    buffer[bytesRead] = '\0';
-                    cgiOutput << buffer;
-                }
-            }
+            if (waitpid(pid, &status, WNOHANG) != 0) 
+                break;
+        }
+
+        if (WIFEXITED(status))
+            std::cout << "child exited with status: " << WEXITSTATUS(status) << std::endl;
+        ssize_t bytesRead;
+        while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0)
+        {
+            buffer[bytesRead] = '\0';
+            cgiOutput << buffer;
         }
         close(pipefd[0]);
-        waitpid(pid, &status, 0);
         if (cgiOutput.str().empty())
         {
             std::cerr << "empty output" << std::endl;
