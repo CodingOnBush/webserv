@@ -3,7 +3,7 @@
 
 ## Overview
 
-This project is part of 42 school common core cursus. Webserv is a custom HTTP server inspired by [NGINX](https://github.com/nginx/nginx) and designed to handle HTTP requests and responses, including support for CGI scripts, file uploads, and multiple HTTP methods (GET, POST, DELETE). The project aims to provide a fully functional web server with configurable settings and error handling.
+This project is part of 42 school common core cursus. Webserv is a custom HTTP server inspired by [NGINX](https://github.com/nginx/nginx) and designed to handle HTTP requests and responses, including support for CGI scripts, file uploads, and most common HTTP methods. The project aims to provide a fully functional web server with configurable settings and error handling.
 
 ## Features
 
@@ -11,7 +11,7 @@ This project is part of 42 school common core cursus. Webserv is a custom HTTP s
 - **File Uploads**: Handles file uploads to specified directories.
 - **CGI Support**: Executes CGI scripts for dynamic content.
 - **Configuration**: Customizable server settings via configuration files.
-- **Error Handling**: Default error pages for various HTTP status codes. Custom error pages can be defined in Config file.
+- **Error Handling**: Default error pages for various HTTP status codes. Custom error pages can be defined as well.
 - **Multiple Ports**: Listens on multiple ports as specified in the configuration.
 
 ## Directory Structure
@@ -42,24 +42,24 @@ The server configuration is specified in `.conf` files located in the `config` d
 | CGI                  | `cgi`                  | `cgi .py .php;`           | -            | `server`, `location` | Specifies file extension(s) based on which CGI script can be executed for a given location.                                                    |
 |Uploaded files location | `upload_location` | `upload_location ./www/upload;` | `./www/upload`| `location` | Makes the route able to accept uploaded files and configures where they should be saved. |
 
-### Example Configuration
+### Example Configuration file
 
 ```conf
 server {
-    listen 8080;
-    server_name localhost;
+	listen 8080;
+	server_name localhost;
 	client_max_body_size 1k;
 
     location / {
-		allowed_methods GET|POST|DELETE;
-        root ./www;
-		autoindex on;
+	allowed_methods GET|POST|DELETE;
+	root ./www;
+	autoindex on;
     }
 
     location /upload {
-		allowed_methods POST|DELETE;
-		upload_location ./www/upload;
-	}
+	allowed_methods POST|DELETE;
+	upload_location ./www/upload;
+    }
 }
 ```
 
@@ -117,7 +117,7 @@ CGI scripts can be executed for dynamic content. The server will handle the exec
 
 ## Additional Resources
 
-For more information, refer to the [Notion page](https://www.notion.so/Webserv-e0b101573b614f959497d4856d97e59c).
+For more information, refer to the [Notion page](https://www.notion.so/Webserv-e0b101573b614f959497d4856d97e59c) we created while working on the project to gather usefull resources.
 
 ---
 
