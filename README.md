@@ -42,6 +42,114 @@ The server configuration is specified in `.conf` files located in the `config` d
 | CGI                  | `cgi`                  | `cgi .py .php;`           | -            | `server`, `location` | Specifies file extension(s) based on which CGI script can be executed for a given location.                                                    |
 |Uploaded files location | `upload_location` | `upload_location ./www/upload;` | `./www/upload`| `location` | Makes the route able to accept uploaded files and configures where they should be saved. |
 
+
+<table>
+  <tr>
+    <th style="width:20%;">Directive</th>
+    <th style="width:10%;">Syntax</th>
+    <th style="width:20%;">Example</th>
+    <th style="width:20%;">Default</th>
+    <th style="width:20%;">Context</th>
+    <th style="width:30%;">Description</th>
+  </tr>
+  <tr>
+    <td>Listen</td>
+    <td><code>listen</code></td>
+    <td><code>listen localhost:8080;</code>, <code>listen 127.0.0.1:8081;</code>, <code>listen 8082;</code></td>
+    <td><code>localhost:8080</code></td>
+    <td><code>server</code></td>
+    <td>Sets host address and port for IP on which the server will accept requests. Both address and port, or only address or only port can be specified. An address may also be a hostname.</td>
+  </tr>
+  <tr>
+    <td>Server name</td>
+    <td><code>server_name</code></td>
+    <td><code>server_name example.com;</code></td>
+    <td>-</td>
+    <td><code>server</code></td>
+    <td>Sets names of a virtual server. The first name becomes the primary server name.</td>
+  </tr>
+  <tr>
+    <td>Root</td>
+    <td><code>root</code></td>
+    <td><code>root ./www;</code></td>
+    <td><code>./www</code></td>
+    <td><code>server</code>, <code>location</code></td>
+    <td>Sets the root directory for requests.</td>
+  </tr>
+  <tr>
+    <td>Default error pages</td>
+    <td><code>error_page</code></td>
+    <td><code>error_page 404 /404.html;</code> <code>error_page 403 /403.html;</code></td>
+    <td>-</td>
+    <td><code>server</code>, <code>location</code></td>
+    <td>Defines the URI to redirect to in case of a specified error code.</td>
+  </tr>
+  <tr>
+    <td>Client body size limit</td>
+    <td><code>client_max_body_size</code></td>
+    <td><code>client_max_body_size 1k;</code></td>
+    <td><code>client_max_body_size 1m;</code></td>
+    <td><code>server</code>, <code>location</code></td>
+    <td>Sets the maximum allowed size of the client request body.</td>
+  </tr>
+  <tr>
+    <td>Allowed HTTP methods</td>
+    <td><code>allowed_methods</code></td>
+    <td><code>allowed_methods GET|POST|DELETE;</code></td>
+    <td>-</td>
+    <td><code>server</code>, <code>location</code></td>
+    <td>Defines a list of accepted HTTP methods for the route.</td>
+  </tr>
+  <tr>
+    <td>Directory listing</td>
+    <td><code>autoindex</code></td>
+    <td><code>autoindex on;</code></td>
+    <td><code>off</code></td>
+    <td><code>server</code>, <code>location</code></td>
+    <td>Turns on or off directory listing.</td>
+  </tr>
+  <tr>
+    <td>HTTP redirection</td>
+    <td><code>return</code></td>
+    <td><code>return 301 http://example.com;</code></td>
+    <td>-</td>
+    <td><code>server</code>, <code>location</code></td>
+    <td>Stops processing and redirects to a specified source, returning a specified code to the client.</td>
+  </tr>
+  <tr>
+    <td>Index file</td>
+    <td><code>index</code></td>
+    <td><code>index new_index.html;</code></td>
+    <td><code>index.html</code></td>
+    <td><code>server</code>, <code>location</code></td>
+    <td>Sets a default file to answer if the request is a directory.</td>
+  </tr>
+  <tr>
+    <td>Alias</td>
+    <td><code>alias</code></td>
+    <td><code>alias /var/www/html;</code></td>
+    <td>-</td>
+    <td><code>location</code></td>
+    <td>Defines a directory or a file from where the file should be searched (a replacement for the specified location).</td>
+  </tr>
+  <tr>
+    <td>CGI</td>
+    <td><code>cgi</code></td>
+    <td><code>cgi .py .php;</code></td>
+    <td>-</td>
+    <td><code>server</code>, <code>location</code></td>
+    <td>Specifies file extension(s) based on which CGI script can be executed for a given location.</td>
+  </tr>
+  <tr>
+    <td>Uploaded files location</td>
+    <td><code>upload_location</code></td>
+    <td><code>upload_location ./www/upload;</code></td>
+    <td><code>./www/upload</code></td>
+    <td><code>location</code></td>
+    <td>Makes the route able to accept uploaded files and configures where they should be saved.</td>
+  </tr>
+</table>
+
 ### Example Configuration file
 
 ```conf
