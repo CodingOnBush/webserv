@@ -27,30 +27,14 @@ This project is part of 42 school common core cursus. Webserv is a custom HTTP s
 
 The server configuration is specified in `.conf` files located in the `config` directory. The default configuration file is `default.conf`.
 ### Directives
-| Directive            | Syntax                 | Example(s)                              | Default      | Context          | Description                                                                                                      |
-|---|---|---|---|---|---|
-|Listen| `listen` | `listen localhost:8080;`, `listen 127.0.0.1:8081;`, `listen 8082;` | `localhost:8080` |  `server`| Sets host address and port for IP on which the server will accept requests. Both address and port, or only address or only port can be specified. An address may also be a hostname. | 
-| Server name          | `server_name`          | `server_name example.com;`           | -            | `server`         | Sets names of a virtual server.  The first name becomes the primary server name.                                                                                |
-|Root| `root` | `root ./www;` | `./www`|  `server`, `location` |Sets the root directory for requests.|
-| Default error pages           | `error_page`           | `error_page 404 /404.html; error_page 403 /403.html;`          | -            | `server`, `location` | Defines the URI to redirect to in case of a specified error code.                                                              |
-| Client body size limit    | `client_max_body_size` | `client_max_body_size 1k;`          | `client_max_body_size 1m;`          | `server`, `location` | Sets the maximum allowed size of the client request body.                                                        |
-| Allowed HTTP methods | `allowed_methods` | `allowed_methods GET\|POST\|DELETE;`     | -            | `server`, `location`       | Defines a list of accepted HTTP methods for the route.|                                                   |
-| Directory listing           | `autoindex`            | `autoindex on;`                      | `off`        | `server`, `location` | Turns on or off directory listing.                                                       |
-| HTTP redirection          | `return`               | `return 301 http://example.com;`     | -            | `server`, `location` | Stops processing and redirects to a specified source, returning a specified code to the client.                  |
-| Index file               | `index`                | `index new_index.html;`        | `index.html` | `server`, `location` | Sets a default file to answer if the request is a directory.                                     |
-| Alias                | `alias`                | `alias /var/www/html;`               | -            | `location`       | Defines a directory or a file from where the file should be searched (a replacement for the specified location).                                            |
-| CGI                  | `cgi`                  | `cgi .py .php;`           | -            | `server`, `location` | Specifies file extension(s) based on which CGI script can be executed for a given location.                                                    |
-|Uploaded files location | `upload_location` | `upload_location ./www/upload;` | `./www/upload`| `location` | Makes the route able to accept uploaded files and configures where they should be saved. |
-
-
 <table>
   <tr>
-    <th style="width:20%;">Directive</th>
-    <th style="width:10%;">Syntax</th>
-    <th style="width:20%;">Example</th>
-    <th style="width:20%;">Default</th>
-    <th style="width:20%;">Context</th>
-    <th style="width:30%;">Description</th>
+    <th>Directive</th>
+    <th >Syntax</th>
+    <th>Example(s)</th>
+    <th>Default</th>
+    <th>Context</th>
+    <th>Description</th>
   </tr>
   <tr>
     <td>Listen</td>
