@@ -1,82 +1,125 @@
 # Webserv
-This project is about writing HTTP server.
+<img width="446" alt="Screenshot 2024-04-13 222920" src="www/Screenshot 2024-09-09 105335.png">
 
-https://www.notion.so/Webserv-e0b101573b614f959497d4856d97e59c
+## Overview
 
-Todo List - Webserv 
-	
-- <s>determine the main classes or structs we’ll need throughout the project</s>
-- <s>determine how we’ll divide the work</s>	
-- <s>have a basic http request working (without a configuration file yet)</s>
-- <s>understand how configuration files work (Mostafa) and need to be parsed</s>
-- <s>understand how to listen on all clients and ports with select(), poll(0 or epoll() (Victoire)</s>
-- <s>understand how CGI works and is used (Victoire)</s>
-- <s>how to parse the http request and create response (Alisa)</s>
-- create a map / schema for all processes (all)
-- <s>add exceptions instead of returning error and exiting</s>
-- <s>correctly rename all vars and functions</s>
+This project is part of 42 school common core cursus. Webserv is a custom HTTP server inspired by [NGINX](https://github.com/nginx/nginx) and designed to handle HTTP requests and responses, including support for CGI scripts, file uploads, and multiple HTTP methods (GET, POST, DELETE). The project aims to provide a fully functional web server with configurable settings and error handling.
 
-NEW TODOS:
-- Parsing:
-	- add the first (default) location block if there's no "location /" block set in the config
-- Errors handling:
-	- Proper status code everywhere (all requests) and verify that correct error pages are returned (default or custom)
-	- <s>Setup default error pages (add a file with them)</s>
-	- Sometimes we return 500 error page and the status code 404...
-- Connecting config and request:
-	- <s>Check host, port and server_names and have server block</s>
-	- <s>Inside server block check for location path and return either corrponding location or default location</s>
+## Features
 
-- Directives:
-	- <s>Server names</s>
-	- <s>Error pages</s>
-	- <s>Limit client body size</s>
-	- <s>HTTP methods</s>
-	- HTTP redirection
-	- <s>Autoindex: turn on or off directory listing (add to the whole process)</s>
-	- <s>The index directive (specifies the index file name(s) to be served when a directory is requested. By default, Nginx looks for an index.html file in the root directory)</s>
-	- <s>Alias (Define a directory or a file from where the file should be searched (for example, if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is /tmp/www/pouic/toto/pouet))</s>
-	- CGI (see bellow)
-- CGI part:
-	- add a checkif there's a cgi pass
-	- run cgi code if there's a path // handle by nginx if there's no path
-- Creating final response string for each request:
-	- Set required headers dynamically for all requests
-	- Verify that the correct body is set
+- **HTTP Methods**: Supports GET, POST and DELETE methods. Sending other types of request will result in 405 Method Not Allowed Error.
+- **File Uploads**: Handles file uploads to specified directories.
+- **CGI Support**: Executes CGI scripts for dynamic content.
+- **Configuration**: Customizable server settings via configuration files.
+- **Error Handling**: Default error pages for various HTTP status codes. Custom error pages can be defined in Config file.
+- **Multiple Ports**: Listens on multiple ports as specified in the configuration.
 
-- Signals to handle + valgrind checks to add
+## Directory Structure
 
-- Decide which files we want to serve to demonstrate functionality of webserv:
-	- a fully static website
-	- upload files functionality
-	- GET, POST, and DELETE methods
-	- multiple ports
+- **bin/**: Compiled object files
+- **cgi-bin/**: CGI scripts
+- **config/**: Configuration files
+- **include/**: Header files
+- **src/**: Source files
+- **www/**: Web content
 
-- Redirection
-	- using a return directive in file.conf block the server
+## Configuration
 
-- be able to send a very big request (sometime with a big URI) and check that the server can handle it
+The server configuration is specified in `.conf` files located in the `config` directory. The default configuration file is `default.conf`.
+### Directives
+| Directive            | Syntax                 | Example(s)                              | Default      | Context          | Description                                                                                                      |
+|---|---|---|---|---|---|
+|Listen| `listen` | `listen localhost:8080;`, `listen 127.0.0.1:8081;`, `listen 8082;` | `localhost:8080` |  `server`| Sets host address and port for IP on which the server will accept requests. Both address and port, or only address or only port can be specified. An address may also be a hostname. | 
+| Server name          | `server_name`          | `server_name example.com;`           | -            | `server`         | Sets names of a virtual server.  The first name becomes the primary server name.                                                                                |
+|Root| `root` | `root ./www;` | `./www`|  `server`, `location` |Sets the root directory for requests.|
+| Default error pages           | `error_page`           | `error_page 404 /404.html; error_page 403 /403.html;`          | -            | `server`, `location` | Defines the URI to redirect to in case of a specified error code.                                                              |
+| Client body size limit    | `client_max_body_size` | `client_max_body_size 1k;`          | `client_max_body_size 1m;`          | `server`, `location` | Sets the maximum allowed size of the client request body.                                                        |
+| Allowed HTTP methods | `allowed_methods` | `allowed_methods GET\|POST\|DELETE;`     | -            | `server`, `location`       | Defines a list of accepted HTTP methods for the route.|                                                   |
+| Directory listing           | `autoindex`            | `autoindex on;`                      | `off`        | `server`, `location` | Turns on or off directory listing.                                                       |
+| HTTP redirection          | `return`               | `return 301 http://example.com;`     | -            | `server`, `location` | Stops processing and redirects to a specified source, returning a specified code to the client.                  |
+| Index file               | `index`                | `index new_index.html;`        | `index.html` | `server`, `location` | Sets a default file to answer if the request is a directory.                                     |
+| Alias                | `alias`                | `alias /var/www/html;`               | -            | `location`       | Defines a directory or a file from where the file should be searched (a replacement for the specified location).                                            |
+| CGI                  | `cgi`                  | `cgi .py .php;`           | -            | `server`, `location` | Specifies file extension(s) based on which CGI script can be executed for a given location.                                                    |
+|Uploaded files location | `upload_location` | `upload_location ./www/upload;` | `./www/upload`| `location` | Makes the route able to accept uploaded files and configures where they should be saved. |
 
-**Main parts of the project:**
-1. Server logic (loop)
-2. HTTP request (parsing)
-3. Configuration file (parsing)
-4. Creating response (analyze config and request)
-5. CGI
+### Example Configuration
+
+```conf
+server {
+    listen 8080;
+    server_name localhost;
+	client_max_body_size 1k;
+
+    location / {
+		allowed_methods GET|POST|DELETE;
+        root ./www;
+		autoindex on;
+    }
+
+    location /upload {
+		allowed_methods POST|DELETE;
+		upload_location ./www/upload;
+	}
+}
+```
+
+## Building the Project
+
+To build the project, use the provided Makefile. Run the following command in the project root directory:
+
+```sh
+make
+```
+
+This will compile the source files and generate the `webserv` executable.
+
+## Running the Server
+
+To run the server with the default configuration:
+
+```sh
+./webserv
+```
+
+To specify a custom configuration file:
+
+```sh
+./webserv path/to/config.conf
+```
+
+## Handling Requests
+
+### GET Request
+
+Handles static files and directory listings (if autoindex is enabled).
+
+### POST Request
+
+Handles form submissions and file uploads.
+
+### DELETE Request
+
+Deletes specified files from the server.
+
+## Error Handling
+
+Custom error pages can be specified in the configuration file. Default error pages are provided for common HTTP status codes.
+
+## CGI Support
+
+CGI scripts can be executed for dynamic content. The server will handle the execution of the script and return the output as the response.
+
+## Authors
+
+- [Alisa Tonkopiy](https://github.com/a-dylean)
+- [Mostafa Omrane](https://github.com/CodingOnBush)
+- [Victoire Vaudaine](https://github.com/vicvdn)
+
+## Additional Resources
+
+For more information, refer to the [Notion page](https://www.notion.so/Webserv-e0b101573b614f959497d4856d97e59c).
+
+---
 
 
-Error cases:
 
-- When we launch the program and try to upload twice in a row it breaks everything (error 404 everywhere)
-
-- Search for all read/recv/write/send on a socket and check that, if an error is returned, the client is removed.
-
-- Limit the client body (use: curl -X POST -H "Content-Type: plain/text" --data "BODY IS HERE write something shorter or longer than body limit").
-
-- In the configuration, try to setup the same port multiple times. It should not work.
-
-- Launch multiple servers at the same time with different configurations but with common ports. Does it work? If it does, ask why the server should work if one of the configurations isn't functional. Keep going.
-
-- You can use a script containing an infinite loop or an error; you are free to do whatever tests you want within the limits of acceptability that remain at your discretion. The group being evaluated should help you with this. METTRE UN TIMEOUT SUR LE SCRIPT POUR PAS RESTER BLOQUE
-
-- Check that when we accept connections we don't have more clients than the maximum number of clients allowed. (here we never check that NewClientFd is not > than the max number of clients)

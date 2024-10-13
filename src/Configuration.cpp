@@ -60,8 +60,8 @@ static void initServerBlock(ServerBlock &serverBlock)
 	serverBlock.hostPort.second = 8080;
 	serverBlock.serverNames.clear();
 	serverBlock.root = "./www";
-	serverBlock.clientMaxBodySize.value = "0";
-	serverBlock.clientMaxBodySize.unit = "G";
+	serverBlock.clientMaxBodySize.value = "1";
+	serverBlock.clientMaxBodySize.unit = "m";
 	serverBlock.bodySize = 0;
 	serverBlock.autoindex = false;
 	serverBlock.indexes.clear();
@@ -208,19 +208,6 @@ static void setAllowedMethods(std::vector<http_method> &methods, std::vector<std
 	}
 }
 
-static void setCgi(std::map<std::string, std::string> &cgiParams, std::vector<std::string> split)
-{
-	if (split.size() != 2)
-		throw std::runtime_error("cgi directive must have an extension and a file");
-	if (split[0] != ".py" && split[0] != ".php" && split[0] != ".pl" && split[0] != ".cgi")
-		throw std::runtime_error("cgi extension must be .py, .php, .pl or .cgi");
-	if (cgiParams.find(split[0]) == cgiParams.end())
-		cgiParams[split[0]] = split[1];
-	else
-		throw std::runtime_error("double cgi directive for the same extension : " + split[0]);
-}
-
-/* TODO : change type variable and it's not allowed to have duplicates */
 static void setReturn(std::map<int, std::string> &redirects, bool &redirection, std::vector<std::string> split)
 {
 	std::stringstream ss;
@@ -445,8 +432,6 @@ void Configuration::parseLocationDirective(std::string &line, LocationBlock &loc
 		setBooleans(key, split[0], locationBlock.autoindex, split);
 		locationBlock.autoindexDone = true;
 	}
-	else if (key == "path_info")
-		setBooleans(key, split[0], locationBlock.pathInfo, split);
 	else if (key == "index")
 		pushSplit(locationBlock.indexes, split);
 	else if (key == "error_page")
@@ -457,8 +442,6 @@ void Configuration::parseLocationDirective(std::string &line, LocationBlock &loc
 		setReturn(locationBlock.redirects, locationBlock.redirection, split);
 	else if (key == "cgi")
 		pushSplit(locationBlock.cgiExtensions, split);
-	else if (key == "cgi_param")
-		setCgi(locationBlock.cgiParams, split);
 	else if (key == "allowed_methods")
 		setAllowedMethods(locationBlock.methods, split);
 	else
@@ -518,8 +501,6 @@ void Configuration::parseServerDirective(std::string const &line, ServerBlock &s
 		setReturn(serverBlock.redirects, serverBlock.redirection, split);
 	else if (key == "cgi")
 		pushSplit(serverBlock.cgiExtensions, split);
-	else if (key == "cgi_param")
-		setCgi(serverBlock.cgiParams, split);
 	else if (key == "allowed_methods")
 		setAllowedMethods(serverBlock.methods, split);
 	else
