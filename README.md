@@ -207,17 +207,15 @@ CGI scripts can be executed for dynamic content. The server will handle the exec
 - [Mostafa Omrane](https://github.com/CodingOnBush)
 - [Victoire Vaudaine](https://github.com/vicvdn)
 
-## Resources
+## Useful resources
 
-- [Notion page](https://www.notion.so/Webserv-e0b101573b614f959497d4856d97e59c) we created while working on the project to gather usefull resources.
-- [A realy good Notion Page written by two students](https://webserv42.notion.site/Webserv-cbb6ab4136ba4b4c8cb4f98109d5fc1f)
+- [Notion page](https://www.notion.so/Webserv-e0b101573b614f959497d4856d97e59c) with summary we created while working on the project
+- [Another Notion pabe by sgah and vdescham](https://webserv42.notion.site/Webserv-cbb6ab4136ba4b4c8cb4f98109d5fc1f)
 - [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/html/)
 - [Sockets and Network Programming in C](https://www.codequoi.com/en/sockets-and-network-programming-in-c/)
+- [HTTP request and response and how web applications work](https://codesensei.medium.com/http-request-and-response-and-how-web-applications-work-76780d4cb14c)
 
 ## Additional tips
 
-To a better understanding of the project, we suggest you to install NGINX and 
-try to configure it. It will help you to understand how a web server works 
-and how to configure it.\
-When you start to read some ressources with code examples, we suggest you to
-try to implement it and really understand it by reading the man pages.
+For better understanding of the project, first of all, we recommend installing and configuring NGINX. It will help you to understand how a web server works and how to configure it.\
+As you explore resources with code examples, we encourage you to implement these examples yourself. Take the time to thoroughly understand each step by referring to the official documentation and man pages.
